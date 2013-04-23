@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link type="text/css" rel="stylesheet" href="css/theme.css"/>
+    <script type="text/javascript" src="js/d3.js"></script>
+    <script type="text/javascript" src="js/mootools-core-1.4.5.js"></script>
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/dom.js"></script>
+    <script type="text/javascript" src="js/node.js"></script>
+    <script type="text/javascript" src="js/menus.js"></script>
+    <script type="text/javascript" src="js/operation.js"></script>
+    <script type="text/javascript" src="js/gl-matrix.js"></script>
+</head>
+<body>
+<div class='chart'>
+</div>
+<div id='input' class="floating">
+    <input type="text" class="fieldinput">
+</div>
+<!--<img src="test.png" />-->
+<script type="text/javascript">
+// ui element types
+var Target = {
+    TABLE: 'table',
+    FIELD: 'field',
+    LINK: 'link',
+    DIALOG: 'dialog'
+}
+var ActionTypes = {
+    MOUSE_OVER: 'mouseover',
+    MOUSE_OUT: 'mouseout',
+    MOUSE_DOWN: 'mousedown',
+    MOUSE_UP: 'mouseup',
+    MOUSE_MOVE: 'mousemove',
+    MOUSE_CLICK: 'click',
+
+    KEY_DOWN: 'keydown',
+    KEY_UP: 'keyup'
+}
+// global mouse event
+var ControlType = {
+    SVG_DOWN_BEGIN: 'svgDownB',
+    SVG_DOWN_END: 'svgDownE',
+    SVG_UP_BEGIN: 'svgUpB',
+    SVG_UP_END: 'svgUpE',
+    SVG_MOVE: 'svgMove',
+    SVG_OVER_BEGIN: 'svgOverB',
+    SVG_OVER_END: 'svgOverE',
+    SVG_BG_OUT: 'svgBgOut',
+    SVG_BG_OVER: 'svgBgOver'
+}
+function _r(key) {
+    return key + '_r';
+}
+for (var i in ControlType) {
+    ControlType[i + '_RIGHT'] = ControlType[i] + '_r';
+}
+var ControlKeys = (function () {
+    var keys = {};
+    for (var i in ControlType) {
+        keys[ControlType[i]] = i;
+    }
+    return keys;
+})();
+
+// ==========================
+// function
+// ==========================
+function listenSvg(id) {
+    return function () {
+        uiMgr.handleEvent({'id': id});
+    }
+}
+function listenEvent(event) {
+    return function (d) {
+        uiMgr.handle({id: event, target: d});
+    }
+}
+function join() {
+    return Array.prototype.slice.call(arguments, 0).join('.');
+}
+//chrome.exe -allow-fi le-access-from-files
+// ==========================
+// Field
+// ==========================
+function Field(p) {
+    Node.call(this, p);
+}
+_extends(Field, Node)
+Field.prototype.targetType = Target.FIELD;
+Field.prototype.enter = function () {
+    var p = Table.prototype.prefer;
+    var fw = p.width;
+    var fh = p.field.height;
+    var fp = p.field.prefix;
+    var i = ListNode.prototype.getChildId(this);
+    var d = this.data;
+
+    this.view = this.parentView().append('svg:g')
+            .classed('field', true)
+            .datum(this)
+        //.on('click', this.handleEdit)
+            .on('mousedown', this.handleDown)
+            .on('mouseover', this.handleOver)
+            .attr('transform', 'translate(' + 0 + ',' + (fh * i) + ')');
+
+    this.view.append('svg:rect')
+            .attr('width', fw)
+            .attr('height', fh);
+
+    this.view.append('svg:text')
+            .classed('fieldname', true)
+            .attr('x', fp)
+            .attr('y', fh / 2)
+            .attr('dy', 6)
+            .text(d.name)
+        //.on('click', this.handleClick)
+            .datum(this);
+}
+Field.prototype.update = function (dold, dnew) {
+    var d = dnew;
+    var ui = this.view;
+    ui.select('text')
+            .text(d.name);
+}
+Field.prototype.exit = function () {
+    this.deleteView(this.view);
+}
+Field.prototype.handleClick = function (d) {
+    uiMgr.handle({id: ActionTypes.MOUSE_CLICK, 'target': Node.getNode(d), 'id': 'name'});
+}
+Field.prototype.handleDown = listenEvent(ActionTypes.MOUSE_DOWN)
+Field.prototype.handleOver = listenEvent(ActionTypes.MOUSE_OVER)
+Field.prototype.identifier = function (d) {
+    return d.type + d.name;
+}
+Field.prototype.getLinkStart = function () {
+    var p = Table.prototype.prefer;
+    return [p.width, p.field.height / 2];
+}
+Field.prototype.getLinkEnd = function () {
+    var p = Table.prototype.prefer;
+    return [0, p.field.height / 2];
+}
+Field.prototype.getViewNode = function () {
+    return this.view.node();
+}
+Field.prototype.getName = function () {
+    return this.data.name;
+}
+
+// ----------------------
+// interact with text input.
+Field.prototype.beginInput = function (id, text) {
+    text.value = this.data.name;
+    this.view.classed('edit', true);
+}
+Field.prototype.endInput = function (id, text) {
+    this.data.name = text.value;
+    this.refresh();
+    this.view.classed('edit', false);
+}
+Field.prototype.getSize = function (id) {
+    var p = Table.prototype.prefer;
+    var fw = p.width;
+    var fh = p.field.height;
+    return [0, 0, fw, fh];
+}
+Field.prototype.getNode = function () {
+    return this.view.node();
+}
+
+// ======================
+// Link
+// ======================
+function Link(p) {
+    Node.call(this, p);
+    this.id = '';
+}
+_extends(Link, Node);
+Link.prototype.targetType = Target.LINK;
+Link.prototype.identifier = function (d) {
+    return d.from.getId() + '->' + d.to.getId();
+}
+Link.prototype.cloneData = function (d) {
+    return {from: d.from.clone(), to: d.to.clone()};
+}
+/**
+ * this.data {
+ *     start(x,y),
+ *     end(x,y)
+ * }
+ */
+Link.prototype.enter = function () {
+    var d = this.data;
+
+    // root
+    this.view = this.parentView().append('svg:g')
+            .classed('link', true);
+    if (this.pointerdis) {
+        this.view.attr('pointer-events', 'none');
+    }
+
+    this.curve = this.view
+            .append('svg:path')
+            .datum(this)
+            .classed('curve', true)
+            .on('mousedown', this.handleDown);
+    this.start = this.view.append('svg:circle')
+            .classed('start', true)
+            .attr('r', 9)
+    this.end = this.view
+            .append('svg:g');
+    this.end.append('svg:path')
+            .classed('end', true)
+            .attr('d', this.endArc())
+
+    this.id = this.identifier(d);
+    this.update(d, d);
+}
+Link.prototype.handleDown = listenEvent(ActionTypes.MOUSE_DOWN);
+Link.prototype.getId = function () {
+    return this.id;
+}
+Link.prototype.update = function (oldd, d) {
+    var n1, n2;
+    if ((n1 = d.from.node()) && (n2 = d.to.node())) {
+        this.show();
+
+        var p1 = camera.transformPoint(n1.getViewNode(), n1.getLinkStart());
+        var p2 = camera.transformPoint(n2.getViewNode(), n2.getLinkEnd());
+        this.start.attr('cx', p1[0]).attr('cy', p1[1]);
+        this.end.attr('transform', 'translate(' + p2[0] + ',' + p2[1] + ')');
+
+        this.updateCurve(p1, p2);
+    } else {
+        this.hide();
+    }
+}
+Link.prototype.updateCurve = function (p1, p2) {
+    var gx = p2[0] - p1[0];
+    var gy = p2[1] - p1[1];
+    var c = Math.max(-Math.min(gx, gy), Math.max(gx, gy)) / 4;
+
+    var path = 'M' + p1[0] + ',' + p1[1]//
+    if (gx > 0) {
+        path += ' q' + c + ',0' + ' ' + gx / 2 + ',' + gy / 2
+        path += ' t' + gx / 2 + ',' + gy / 2;
+    } else {
+        path += ' q' + -c + ',0' + ' ' + (gx / 2 - c) + ',' + gy / 2
+        path += ' t' + (gx / 2 + c) + ',' + gy / 2;
+    }
+
+    this.curve.attr('d', path);
+    this.start.attr('cx', p1[0]).attr('cy', p1[1]);
+    this.end.attr('transform', 'translate(' + p2[0] + ',' + p2[1] + ')');
+}
+Link.prototype.endArc = d3.svg.arc()
+        .innerRadius(0)
+        .outerRadius(10)
+        .startAngle(-Math.PI)
+        .endAngle(0);
+Link.prototype.exit = function (d) {
+    this.view.remove();
+}
+Link.prototype.hide = function () {
+    this.view.style('visibility', 'hidden');
+}
+Link.prototype.show = function () {
+    this.view.style('visibility', 'visible');
+}
+Link.prototype.disablePointer = function () {
+    this.pointerdis = true;
+}
+/**
+ * menu adapter
+ */
+Link.prototype.getMenu = function () {
+    return [
+        {keys: 'L', command: 'link.remove'}
+    ];
+}
+Link.prototype.runMenuAction = function (action) {
+    switch (action) {
+        case 'link.remove':
+            break;
+    }
+    console.log(action);
+}
+
+// ======================
+// Table
+// ======================
+function Table(p) {
+    Node.call(this, p);
+    this.linkout = [];
+    this.linkin = [];
+}
+_extends(Table, Node);
+Table.prototype.addLinkOut = function (link) {
+    this.linkout.push(link);
+}
+Table.prototype.addLinkIn = function (link) {
+    this.linkin.push(link);
+}
+Table.prototype.addLink = function (link) {
+    this.data.refs.push({});
+}
+Table.prototype.hasLink = function (link) {
+    var id = Link.prototype.identifier(link);
+    for (var i = 0, links = this.linkout , l = links.length; i < l; i++) {
+        if (links[i].getId() == id) {
+            return true;
+        }
+    }
+    return false;
+}
+Table.prototype.rmLinkOut = function (link) {
+    var i = this.linkout.indexOf(link);
+    if (i != -1) {
+        this.linkout.splice(i, 1);
+    }
+}
+Table.prototype.rmLinkIn = function (link) {
+    var i = this.linkin.indexOf(link);
+    if (i != -1) {
+        this.linkin.splice(i, 1);
+    }
+}
+Table.prototype.targetType = Target.TABLE;
+Table.prototype.types = ['view', 'map', 'table'];
+Table.prototype.prefer = {
+    header: {
+        height: 45,
+        prefix: 8
+    },
+    field: {
+        height: 24,
+        prefix: 4
+    },
+    footer: {
+        height: 18
+    },
+    width: 150
+};
+Table.prototype.getName = function () {
+    return this.data.name;
+}
+Table.prototype.enter = function () {
+    var d = this.data;
+    var p = this.prefer.header;
+    var w = this.prefer.width;
+
+    // view
+    this.view = this.parentView().append('svg:g')
+            .attr('transform', 'translate(' + d.position.x + ',' + d.position.y + ')')
+            .classed('table', true)
+            .classed(d.type, true)
+            .on('mousedown', this.handleDown)
+            .datum(this);
+
+    // header
+    this.header = this.view
+            .append('svg:g')
+            .datum(this)
+            .on('mousedown', this.handleDown)
+            .on('mouseover', this.handleOver, true)
+    this.header.append('svg:rect')
+            .attr('width', this.prefer.width)
+            .attr('height', p.height)
+            .classed('header', true);
+    this.title = this.header.append('svg:text')
+            .attr('x', p.prefix)
+            .attr('y', p.height / 2)
+            .attr('dy', 8)
+            .classed('headername', true)
+            .text(d.name)
+            .datum(this);
+
+    // fields
+    var fieldsBg = this.view.append('svg:g')
+            .attr("transform", 'translate(0,' + p.height + ')')
+            .classed('fields', true)
+            .datum(this)
+            .on('mousedown', this.handleDown)
+            .on('mouseover', this.handleOver, true)
+
+    this.fields = new Fields(this, fieldsBg);
+    this.fields.bind(d.fields);
+
+    // footer
+    p = this.prefer.footer;
+    this.footer = this.view.append('svg:rect')
+            .attr('width', w)
+            .attr('height', p.height)
+            .attr('y', this.getHeight() - p.height)
+            .classed('footer', true);
+};
+Table.prototype.update = function (dold, dnew) {
+    var d = dnew;
+
+    this.title.text(d.name);
+
+    this.fields.bind(dnew.fields);
+
+    var p = this.footer;
+    this.footer
+            .attr('y', this.getHeight() - p.height)
+            .classed('footer', true);
+};
+Table.prototype.exit = function () {
+    this.deleteView(this.view);
+};
+Table.prototype.getHeight = function () {
+    var d = this.data;
+    var p = this.prefer;
+    return d.fields.length * p.field.height + p.header.height + p.footer.height;
+};
+Table.prototype.handleDown = listenEvent(ActionTypes.MOUSE_DOWN);
+Table.prototype.handleOver = listenEvent(ActionTypes.MOUSE_OVER);
+Table.prototype.isTable = function (t) {
+    return this.types.indexOf(t) != -1;
+};
+Table.prototype.hasField = function (f) {
+    if (!f) {
+        return false;
+    }
+    for (var i = 0, fs = this.data.fields, l = fs.length; i < l; i++) {
+        if (fs[i] === f.data) {
+            return true;
+        }
+    }
+    return false;
+};
+Table.prototype.getField = function (name) {
+    for (var i = 0, fs = this.data.fields, l = fs.length; i < l; i++) {
+        if (fs[i].name == name) {
+            return this.fields.getChild(i);
+        }
+    }
+    return null;
+};
+/**
+ * get relative start to this table
+ */
+Table.prototype.getLinkStart = function () {
+    var p = this.prefer;
+    return [p.width, p.header.height / 2];
+};
+Table.prototype.getLinkEnd = function () {
+    var p = this.prefer;
+    return [0, p.header.height / 2];
+};
+Table.prototype.getViewNode = function () {
+    return this.view.node();
+};
+
+// interact with menu
+Table.prototype.getMenu = function () {
+    return [
+        {keys: '', command: 'table.remove'},
+        {keys: 'R', command: 'table.rename'},
+        {keys: 'F', command: 'table.add.field'}
+    ];
+}
+Table.prototype.runMenuAction = function (action) {
+    switch (action) {
+        case 'table.remove':
+            break;
+        case 'table.rename':
+            break;
+        case 'table.add.field':
+            break;
+    }
+    console.log(action);
+}
+Table.prototype.getMoveFeature = function () {
+    var table = this;
+    var links = [].concat(this.linkout).concat(this.linkin);
+    return new (_extends(function () {
+        MoveAdapter.call(this, table.data.position, table.view);
+    }, MoveAdapter, {
+        startMove: function (x, y) {
+            MoveAdapter.prototype.startMove.call(this, x, y);
+            table.view.classed('focus', true);
+        },
+        moveTo: function (x, y) {
+            MoveAdapter.prototype.moveTo.call(this, x, y);
+            // update link terminate when moving the table
+            for (var i = 0, l = links.length; i < l; i++) {
+                links[i].refresh();
+            }
+        },
+        stopMove: function (x, y) {
+            table.view.classed('focus', false);
+        }
+    }))();
+}
+/**
+ * interact with global function
+ * @param f
+ * @returns {*}
+ */
+Table.prototype.getFeature = function (f) {
+    switch (f) {
+        case 'move':
+            return this.getMoveFeature();
+        default :
+            console.error('Unsupported feature found:' + f);
+            return null;
+    }
+}
+// ---------------------- for tool
+Table.prototype.export = function () {
+    var d = {};
+    var td = this.data;
+
+    d.type = td.type;
+    d.fields = this.copyField();
+    return d;
+}
+Table.prototype.copyField = function () {
+    var fs = [];
+    for (var i = 0, l = this.data.fields.length; i < l; i++) {
+        fs.push(this.data.fields[i]);
+    }
+    return fs;
+}
+
+// ==========================
+// container types
+// ==========================
+var Fields = Node.createContainer(Field, {
+    constructor: function (p, view) {
+        ListNode.call(this, p);
+        this.view = view;
+    }
+});
+
+// ==========================
+// schema layer
+// ==========================
+function TableCollection(p, view) {
+    ListNode.call(this, p);
+    this.view = view;
+}
+_extends(TableCollection, ListNode);
+/**
+ * @param table current focus table
+ */
+TableCollection.prototype.order = function (table) {
+    var tables = this.view.node().querySelectorAll('g.entity > g.table');
+//    console.log(tables);
+//    var fs = ListNode.prototype.setChildId;
+//    var fg = ListNode.prototype.getChildId;
+//    var all = this.view.selectAll('g.entity > g.table');
+//    all.sort(function (a, b) {
+//        if (a.view.classed('focus')) {
+//            return 1;
+//        }
+//        if (b.view.classed('focus')) {
+//            return -1;
+//        }
+//        return 0;
+//    });
+//
+//    console.log(all);
+//    var all = this.view.selectAll('g.entity > g');
+//    console.log(all);
+}
+TableCollection.prototype.createChild = function (d) {
+    if (Table.prototype.isTable(d.type)) {
+        return new Table(this);
+    } else {
+        return new Link(this);
+    }
+}
+TableCollection.prototype.identifier = Table.identifier;
+TableCollection.prototype.export = function () {
+    var tables = [];
+    for (var t = 0, i = 0, data = this.children, l = data.length; i < l; i++) {
+        if (this.children[i].targetType === Target.TABLE) {
+            tables[t++] = this.children[i].getData();
+        }
+    }
+    return tables;
+}
+function LinkCollection(p, view) {
+    ListNode.call(this, p);
+    this.view = view;
+}
+_extends(LinkCollection, ListNode);
+LinkCollection.prototype.createChild = function () {
+    return new Link(this);
+}
+LinkCollection.prototype.identifier = Link.identifier;
+
+// ======================
+// camera
+// ======================
+function Camera(svg) {
+    this.svg = svg;
+    this.width = svg.attr('width');
+    this.height = svg.attr('height');
+    this.x = 0;
+    this.y = 0;
+    this.scalef = 1;
+
+    // touch start
+    this.startx = 0;
+    this.starty = 0;
+
+    this.rect = svg.append('svg:rect')
+            .attr('fill', 'url(#gridPattern)')
+            .on('mouseout', this.handleOut)
+            .on('mouseover', this.handleOver)
+    this.apply();
+}
+Camera.prototype.getScale = function () {
+    return this.scalef;
+}
+Camera.prototype.touchStart = function (x, y) {
+    this.startx = x;
+    this.starty = y;
+}
+Camera.prototype.touchEnd = function (x, y) {
+    this.x -= (this.startx - x) / this.scalef;
+    this.y -= (this.starty - y) / this.scalef;
+    this.apply();
+}
+Camera.prototype.touchMove = function (x, y) {
+    var x = this.x - (this.startx - x) / this.scalef;
+    var y = this.y - (this.starty - y) / this.scalef;
+    this.apply(x, y);
+}
+Camera.prototype.setStart = function (x, y) {
+    this.x = x;
+    this.y = y;
+}
+/**
+ * 离开背景图片, 进入到各种 UI 界面
+ */
+Camera.prototype.handleOut = function () {
+    uiMgr.handleEvent({id: ControlType.SVG_BG_OUT})
+}
+/**
+ * 鼠标从一个 UI 控件上离开
+ */
+Camera.prototype.handleOver = function () {
+    uiMgr.handleEvent({id: ControlType.SVG_BG_OVER})
+}
+/**
+ * 对屏幕上指定的点缩放
+ *
+ * @param scalef
+ * @param currentx
+ * @param currenty
+ */
+Camera.prototype.scale = function (scalef, currentx, currenty) {
+    this.scalef = scalef;
+    this.apply();
+}
+Camera.prototype.apply = function (endx, endy) {
+    var portx = this.x;
+    var porty = this.y;
+    var w = this.width = window.innerWidth;
+    var h = this.height = window.innerHeight;
+    var sw = w / this.scalef;
+    var sh = h / this.scalef;
+    this.svg.attr('viewBox', portx + ' ' + porty + ' ' + sw + ' ' + sh)
+            .attr('width', w)
+            .attr('height', h);
+
+    this.rect.attr('x', portx)
+            .attr('y', porty)
+            .attr('width', sw)
+            .attr('height', sh);
+}
+Camera.prototype.transformPoint = function (g, p) {
+    var svgM = g.getTransformToElement(global.root);
+
+    var matrix = mat2d.create();
+
+    // apply child transform
+    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
+    // apply camera transform
+    mat2d.translate(matrix, matrix, vec2.clone([-this.x, -this.y]));
+    mat2d.scale(matrix, matrix, vec2.clone([this.scalef, this.scalef]));
+
+    // convert point on child to world
+    var world = vec2.clone(p);
+    vec2.transformMat2d(world, world, matrix);
+    return world;
+}
+Camera.prototype.toLocal = function (x, y) {
+    return [x, y];
+}
+Camera.prototype.transform = function (g, size) {
+    var svgM = g.getTransformToElement(global.root);
+
+    var matrix = mat2d.create();
+
+    // apply child transform
+    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
+    // apply camera transform
+    mat2d.translate(matrix, matrix, vec2.clone([-this.x, -this.y]));
+    mat2d.scale(matrix, matrix, vec2.clone([this.scalef, this.scalef]));
+
+    // convert point on child to world
+    var world = vec2.clone(size);
+    vec2.transformMat2d(world, world, matrix);
+    var x = world[0];
+    var y = world[1];
+
+    vec2.set(world, size[0] + size[2], size[1] + size[3]);
+    vec2.transformMat2d(world, world, matrix);
+
+    return [x, y, world[0] - x, world[1] - y];
+}
+// ======================
+// Menu
+// ======================
+function Menu(p, action) {
+    ListNode.call(this, p);
+    this.action = action;
+}
+_extends(Menu, ListNode);
+Menu.prototype.prefer = {
+    width: 170,
+    height: 20,
+    splitheight: 5,
+    padding: 4
+}
+/**
+ * d [{des, command}]
+ */
+Menu.prototype.enter = function () {
+    this.view = this.parentView().append('svg:g')
+            .classed('menu', true)
+            .datum(this.action)
+            .attr('transform', 'translate(' + 100 + ',' + 100 + ')')
+            .on('mousedown', this.handleDown);
+    this.rebind(this.data);
+}
+Menu.prototype.rebind = function (d) {
+    var p = this.prefer;
+    var menuy = 0;
+    for (var i = 0, l = d.length; i < l; i++) {
+        var item = d[i];
+
+        if (item.split) {
+            var cy = menuy + p.splitheight / 2;
+            this.view.append('svg:rect')
+                    .attr('width', p.width)
+                    .attr('height', p.splitheight)
+                    .attr('y', menuy)
+                    .classed('split', true);
+            this.view.append('svg:path')
+                    .attr('d', 'M' + p.padding + ',' + cy + 'L' + (p.width - p.padding) + ',' + cy);
+            menuy += p.splitheight;
+        } else {
+            item.action = this.action;
+            var g = this.view.append('svg:g')
+                    .datum(item)
+                    .attr('transform', 'translate(' + 0 + ',' + menuy + ')')
+                    .classed('item', true)
+                    .on('click', this.handleClick);
+            g.append('svg:rect')
+                    .attr('width', p.width)
+                    .attr('height', p.height)
+            g.append('svg:text')
+                    .attr('x', p.padding)
+                    .attr('y', p.height - 4)
+                    .text(item.title || i18n.string(item.command));
+            menuy += p.height;
+        }
+    }
+
+    this.view.insert('svg:rect', ':first-child')
+            .datum(this.action)
+            .attr('width', p.width)
+            .attr('height', menuy)
+            .classed('background', true)
+    this.height = menuy;
+}
+Menu.prototype.handleClick = function (d) {
+    d.action.onMenuClick(d.command);
+}
+Menu.prototype.handleDown = function (action) {
+    if (d3.event.button == 2) {
+        d3.event.stopPropagation();
+    }
+    action.onMenuDown();
+}
+Menu.prototype.update = function (old, newd) {
+    var all = this.view.selectAll('*');
+    this.view.selectAll('*').remove();
+    this.rebind(newd);
+}
+Menu.prototype.exit = function () {
+    this.view.remove();
+}
+Menu.prototype.show = function (x, y, items) {
+    this.bind(items);
+    this.showprevious(x, y);
+}
+Menu.prototype.showprevious = function (x, y) {
+    this.view.attr('transform', 'translate(' + x + ',' + y + ')');
+    this.view.style('visibility', 'visible');
+}
+Menu.prototype.hide = function () {
+    this.view.style('visibility', 'hidden');
+}
+/**
+ * menu when you click at an empty space
+ * @constructor
+ */
+function DefaltMenu() {
+}
+DefaltMenu.prototype.getMenu = function () {
+    return [
+        {keys: 'A', command: 'global.add.table'},
+        {keys: '', command: 'global.export'}
+    ];
+}
+DefaltMenu.prototype.runMenuAction = function (action) {
+    switch (action) {
+        case 'global.add.table':
+            break;
+        case 'global.export':
+            var exp = uiMgr.export();
+            console.log(JSON.encode(exp));
+            break;
+    }
+    console.log(action);
+}
+function MenuAction(layer) {
+    Action.call(this);
+
+    this.initEvent = _r(ControlType.SVG_DOWN_END);
+    this.focus = false;
+    this.target = null;
+    this.backmenu = new DefaltMenu();
+
+    this.menu = new Menu(layer, this);
+}
+_extends(MenuAction, Action);
+MenuAction.prototype.onRegister = function (manager) {
+    this.on(ControlType.SVG_DOWN_END);
+    this.on(_r(ControlType.SVG_DOWN_END));
+}
+MenuAction.prototype.onEvent = function (event) {
+    switch (event.id) {
+        case _r(ControlType.SVG_DOWN_END):
+            this.popupMenu(event);
+            break;
+        case ControlType.SVG_DOWN_END:
+            if (!this.focus) {
+                this.stopMenu();
+            }
+            break;
+    }
+}
+MenuAction.prototype.popupMenu = function (event) {
+    this.focus = false;
+
+    // if table menu
+    var target;
+    if (target = this.getParam(event, 'mousedown.link') || this.getParam(event, 'mousedown.table') || this.backmenu) {
+        // change position
+        if (target === this.target) {
+            this.menu.showprevious(d3.event.x, d3.event.y);
+            return;
+        }
+        this.target = target;
+        this.menu.show(d3.event.x, d3.event.y, target.getMenu());
+        this.active = true;
+    }
+}
+MenuAction.prototype.onMenuClick = function (command) {
+    this.target.runMenuAction(command);
+    this.stopMenu();
+}
+MenuAction.prototype.onMenuDown = function () {
+    this.focus = true;
+}
+MenuAction.prototype.stopMenu = function () {
+    this.menu.hide();
+    this.target = null;
+}
+// ======================
+// UI Manager
+// ======================
+function UIManager() {
+    // listener binding
+    this.controlListener = new DataMap();
+    for (var i in ControlType) {
+        this.controlListener.value(ControlType[i], []);
+    }
+    this.userListener = new DataMap();
+
+    // init record
+    this.eventRecord = new DataMap();
+    for (var action in ActionTypes) {
+        this.eventRecord.value(ActionTypes[action], {});
+    }
+
+    // ui drawing layers
+    this.layers = {
+        schema: Node.wrap(svg.append('svg:g').classed('entity', true)),
+        assistant: Node.wrap(svg.append('svg:g').classed('pAssistant', true)),
+        dialog: Node.wrap(svg.append('svg:g').classed('pDialog', true)),
+        message: Node.wrap(svg.append('svg:g').classed('pMessage', true))
+    };
+
+    // all tables
+    this.tables = new TableCollection(this.layers.schema, this.layers.schema.view);
+    this.links = new LinkCollection(this.layers.schema, this.layers.schema.view);
+
+    // all registered actions
+    this.actions = [];
+}
+UIManager.prototype.dispatchEvent = function (evt) {
+    var n = this.layers.schema.node();
+    n.dispatchEvent(evt);
+}
+UIManager.prototype.bindDatas = function (data) {
+    var ts = data.entities;
+    this.tables.bind(data.entities);
+
+    // map all table nodes
+    var tmap = new d3.map();
+    var tables = this.tables.getChildren();
+    for (var i = 0, l = ts.length; i < l; i++) {
+        tmap.set(ts[i].name, tables[i]);
+    }
+
+    // gen links
+    for (var i = 0, l = ts.length; i < l; i++) {
+        var refs = ts[i].refs;
+        for (var r = 0, refs = ts[i].refs, rcount = refs.length; r < rcount; r++) {
+            var target = (refs[r].end || '').split('.');
+            if (target.length == 0) {
+                continue;
+            }
+
+            // end table
+            var endt = tmap.get(target[0]);
+            if (!endt) {
+                continue;
+            }
+            var endf;
+            if (target.length == 2) {
+                endf = endt.getField(target[1]);
+                if (!endf) {
+                    continue;
+                }
+            }
+            // end point
+            var p2 = new LinkTerminal();
+            p2.table(endt);
+            p2.field(endf);
+
+            var p1 = new LinkTerminal();
+            var startt = tables[i];
+            p1.table(startt);
+            p1.field(startt.getField(refs[r].start));
+
+            var link = this.tables.appendChild({from: p1, to: p2});
+            startt.addLinkOut(link);
+            endt.addLinkIn(link);
+        }
+    }
+
+    var t1 = {
+        "type": "map",
+        "position": {"x": 400, "y": 400},
+        "name": "4th",
+        "fields": [
+            {"name": "abcde", "type": "s"},
+            {"name": "width", "type": "i"},
+            {"name": "percent", "type": "f"},
+            {"name": "price", "type": "f"}
+        ],
+        "refs": [
+        ]
+    }
+    this.tables.appendChild(t1);
+}
+UIManager.prototype.addAction = function (action) {
+    action.register(this);
+    this.actions.push(action);
+}
+UIManager.prototype.on = function (key, action) {
+    if (key in ControlKeys) {
+        var ls = this.controlListener.value(key);
+        if (ls.indexOf(action) == -1) {
+            ls.push(action);
+        }
+        return;
+    }
+    var ls = this.userListener.value(key);
+    if (!ls) {
+        this.userListener.value(key, ls = []);
+        ls.push(action);
+    } else {
+        if (ls.indexOf(action) == -1) {
+            ls.push(action);
+        }
+    }
+}
+UIManager.prototype.off = function (key, action) {
+    if (key in ControlKeys) {
+        this.controlListener.value(key).erase(action);
+        return;
+    }
+    var ls = this.userListener.value(key);
+    if (!ls) {
+        ls.erase(action);
+        if (ls.length == 0) {
+            this.userListener.del(key);
+        }
+    }
+}
+UIManager.prototype.runEvent = function (event, actions) {
+    if (!actions) {
+        return;
+    }
+    for (var i = 0, l = actions.length, a; i < l; i++) {
+        a = actions[i];
+        (a.initEvent == event.id || a.isActive()) && a.onEvent(event);
+    }
+}
+UIManager.prototype.runUserEvent = function (event, actions) {
+    if (!actions) {
+        return;
+    }
+    for (var i = 0, l = actions.length, a; i < l; i++) {
+        a = actions[i];
+        (a.initEvent == event.id || a.isActive()) && a.onUserEvent(event);
+    }
+}
+UIManager.prototype.ctrlKey = function () {
+    return d3.event.metaKey || d3.event.ctrlKey;
+}
+UIManager.prototype.loseFocus = function () {
+    d3.selectAll('.focus')
+            .classed('focus', false);
+}
+UIManager.prototype.onFocus = function (param) {
+//    this.input.close();
+//    var d = param.target.data;
+//    if (Table.prototype.isTable(d.type) != -1) {
+//        tables.order();
+//    }
+}
+/**
+ * handle event on svg root element
+ * @param p
+ */
+UIManager.prototype.handleEvent = function (p) {
+    if (d3.event.button == 2) {
+        p.id += '_r';
+    }
+    switch (p.id) {
+        case ControlType.SVG_BG_OUT:
+        case _r(ControlType.SVG_BG_OUT):
+        case ControlType.SVG_BG_OVER:
+        case _r(ControlType.SVG_BG_OVER):
+            this.eventRecord.clean(ActionTypes.MOUSE_OVER);
+            break;
+        case ControlType.SVG_DOWN_BEGIN:
+        case _r(ControlType.SVG_DOWN_BEGIN):
+            this.eventRecord.clean(ActionTypes.MOUSE_DOWN);
+            break;
+    }
+
+    p.param = this.eventRecord;
+    this.runEvent(p, this.controlListener.value(p.id));
+}
+UIManager.prototype.handleUserEvent = function (p) {
+    this.runUserEvent(p, this.userListener.value(p.id));
+}
+UIManager.prototype.handleSpecial = {
+    // if table change clean field TODO
+    'mouseover.table': function (p) {
+        var d = this.eventRecord;
+        if (p.target !== d.value('mouseover.table')) {
+            d.value('mouseover.table', p.target);
+            d.del('mouseover.field');
+        }
+    }
+}
+/**
+ * handle event generated on view elements
+ * @param param
+ */
+UIManager.prototype.handle = function (param) {
+    var t = param.target;
+    var d = this.eventRecord;
+
+    var speId = join(param.id, t.targetType);
+    var f;
+    if (f = this.handleSpecial[speId]) {
+        f.call(this, param);
+    } else {
+        d.value(speId, t);
+    }
+}
+UIManager.prototype.globalKey = function () {
+    console.log(d3.event);
+}
+UIManager.prototype.createLink = function () {
+    return new Link(this.layers.assistant);
+}
+UIManager.prototype.addLink = function (d) {
+    var fromt = d.from.table();
+    var tot = d.to.table();
+    if (fromt && !fromt.hasLink(d) && tot) {
+        d = Link.prototype.cloneData(d);
+        var link = this.tables.appendChild(d);
+        fromt.addLinkOut(link);
+        tot.addLinkIn(link);
+        fromt.addLink(link);
+
+        console.log(link.getId());
+    }
+}
+UIManager.prototype.export = function () {
+    var save = {};
+    save.entities = this.tables.export();
+    return save;
+}
+
+// ==========================
+// TextInput
+// ==========================
+function TextInput(div) {
+    this.div = div;
+    this.input = div.getElementsByTagName('input')[0];
+    var current = this;
+    var listener = function () {
+        current.submit();
+    }
+    this.input.onchange = listener;
+    this.input.onblur = listener;
+    this.input.ondblclick = listener;
+    this.input.onselect = listener;
+}
+TextInput.prototype.submit = function () {
+    var n = this.node;
+    if (n) {
+        n.endInput(this.id, this.input);
+    }
+    d3.select(this.div).style('visibility', 'hidden');
+}
+TextInput.prototype.close = function () {
+    this.submit();
+}
+TextInput.prototype.handle = function (param) {
+    this.submit();
+
+    var id = param.id;
+    var target = param.target;
+
+    this.node = target;
+    this.id = id;
+
+    var size = camera.transform(target.getNode(id), target.getSize(id));
+
+    var div = d3.select(this.div);
+    div.style('left', size[0] + 'px');
+    div.style('top', size[1] + 'px');
+    div.style('width', size[2] + 'px');
+    div.style('height', size[3] + 'px');
+
+    this.node.beginInput(this.id, this.input);
+    d3.select(this.input)
+            .style('font-size', Math.round(17 * camera.getScale()) + 'px')
+            .style('text-indent', Math.round(4 * camera.getScale()) + 'px');
+    div.style('visibility', 'visible');
+}
+// ==========================
+// DragControl
+// ==========================
+function DragAction() {
+    Action.call(this);
+    this.initEvent = ControlType.SVG_DOWN_END;
+}
+_extends(DragAction, Action);
+DragAction.prototype.onRegister = function (manager) {
+    this.on(ControlType.SVG_DOWN_END);
+    this.on(ControlType.SVG_MOVE);
+    this.on(ControlType.SVG_UP_END);
+    this.on('link.begin');
+}
+DragAction.prototype.inactive = function () {
+    this.active = false;
+    var n = this.node;
+    if (n) {
+        n.stopMove(d3.event.x, d3.event.y);
+        this.node = null;
+    }
+}
+DragAction.prototype.onEvent = function (event) {
+    switch (event.id) {
+        case ControlType.SVG_DOWN_END:
+            this.inactive();
+
+            // if user release the ctrl key, stop dragging
+            if (!UIManager.prototype.ctrlKey()) {
+                break;
+            }
+
+            var target = this.getParam(event, 'mousedown.table');
+            if (target) {
+                this.node = target.getFeature('move');
+                this.node.startMove(d3.event.x, d3.event.y);
+                this.active = true;
+                this.fireEvent('drag.begin', target);
+            } else {
+                // TODO drag camera
+            }
+            break;
+
+        case ControlType.SVG_MOVE:
+            if (!UIManager.prototype.ctrlKey()) {
+                this.inactive();
+                break;
+            }
+            this.node.moveTo(d3.event.x, d3.event.y);
+            break;
+
+        case ControlType.SVG_UP_END:
+            this.inactive();
+            break;
+    }
+}
+DragAction.prototype.onUserEvent = function (event) {
+    switch (event.id) {
+        case 'link.begin':
+            this.inactive();
+            break;
+    }
+}
+// ==========================
+// Link curve
+// ==========================
+function LinkTerminal() {
+    this.type = this.Types.NONE;
+}
+LinkTerminal.prototype.table = function () {
+    var t;
+    if (t = arguments[0]) {
+        if (this.mtable !== t) {
+            delete this.mfield;
+        }
+        this.mtable = t;
+        this.updatetype();
+    } else {
+        return this.mtable;
+    }
+}
+LinkTerminal.prototype.getId = function () {
+    var id;
+    var t;
+    if (t = this.table()) {
+        id = t.getName();
+    } else {
+        id = '';
+    }
+    if (t = this.field()) {
+        id += '.' + t.getName();
+    }
+    return id;
+}
+LinkTerminal.prototype.field = function () {
+    var t;
+    if (t = arguments[0]) {
+        this.mfield = t;
+        this.updatetype();
+    } else {
+        return this.mfield
+    }
+}
+LinkTerminal.prototype.delfield = function () {
+    delete this.mfield;
+}
+LinkTerminal.prototype.deltable = function () {
+    delete this.mtable;
+}
+LinkTerminal.prototype.node = function () {
+    return this.type != this.Types.NONE && (this.mfield || this.mtable);
+}
+LinkTerminal.prototype.updatetype = function () {
+    if (this.mfield) {
+        this.type = this.Types.FIELD;
+    } else if (this.mtable) {
+        this.type = this.Types.TABLE;
+    }
+}
+LinkTerminal.prototype.reset = function () {
+    delete this.mfield;
+    delete this.mtable;
+    this.type = this.Types.NONE;
+}
+LinkTerminal.prototype.Types = {
+    TABLE: 'table',
+    FIELD: 'field',
+    NONE: 'none'
+}
+LinkTerminal.prototype.clone = function () {
+    var t = new LinkTerminal();
+    if (this.mtable) {
+        t.mtable = this.mtable;
+    }
+    if (this.mfield) {
+        t.mfield = this.mfield;
+    }
+    t.type = this.type;
+    return t;
+}
+// ==========================
+// LinkAction
+// ==========================
+function LinkAction(manager) {
+    Action.call(this);
+
+    this.link = manager.createLink();
+    this.link.disablePointer();
+    this.data = {
+        from: new LinkTerminal(),
+        to: new LinkTerminal()
+    };
+    this.link.bind(this.data);
+}
+_extends(LinkAction, Action);
+LinkAction.prototype.onRegister = function (manager) {
+    this.initEvent = ControlType.SVG_DOWN_END;
+    this.on(ControlType.SVG_DOWN_END);
+    this.on(ControlType.SVG_MOVE);
+    this.on(ControlType.SVG_UP_END);
+}
+LinkAction.prototype.inactive = function () {
+    this.active = false;
+    this.data.from.reset();
+    this.data.to.reset();
+    this.link.hide();
+}
+LinkAction.prototype.onEvent = function (event) {
+    switch (event.id) {
+        case ControlType.SVG_DOWN_END:
+            this.inactive();
+
+            // if user release the ctrl key, stop dragging
+            if (UIManager.prototype.ctrlKey()) {
+                break;
+            }
+
+            this.start(event);
+            break;
+
+        case ControlType.SVG_MOVE:
+            if (UIManager.prototype.ctrlKey()) {
+                this.inactive();
+                break;
+            }
+
+            this.updateEnd(event);
+            break;
+
+        case ControlType.SVG_UP_END:
+            this.addLink();
+            break;
+    }
+}
+LinkAction.prototype.addLink = function () {
+    var d = this.data;
+    var endt = d.to.table();
+    if (endt) {
+        uiMgr.addLink(d);
+    }
+    this.inactive();
+}
+LinkAction.prototype.updateEnd = function (event) {
+    var d = this.data.to;
+
+    var table = this.getParam(event, 'mouseover.table');
+    if (table && table != this.data.from.table()) {
+        d.table(table);
+        var field = this.getParam(event, 'mouseover.field');
+        if (field) {
+            d.field(field);
+        } else {
+            d.delfield();
+        }
+    } else {
+        d.reset();
+    }
+
+    var n = d.node();
+    if (n) {
+        this.dragend = camera.transformPoint(n.getViewNode(), n.getLinkEnd());
+    } else {
+        this.dragend = camera.toLocal(d3.event.x, d3.event.y);
+    }
+
+    this.link.updateCurve(this.dragstart, this.dragend);
+    this.link.show();
+}
+LinkAction.prototype.start = function (event) {
+    var d = this.data.from;
+    d.reset();
+
+    var table = this.getParam(event, 'mousedown.table');
+    if (!table) {
+        return;
+    }
+
+    d.table(table);
+    var field = this.getParam(event, 'mousedown.field');
+    if (field) {
+        d.field(field);
+    }
+    d.updatetype();
+    var n = d.node();
+    this.dragstart = camera.transformPoint(n.getViewNode(), n.getLinkStart());
+
+    this.active = true;
+    this.fireEvent('link.begin', this.beginTable);
+}
+
+// ==========================
+// TableAction
+// ==========================
+function TableAction(tables) {
+    Action.call(this);
+    this.tables = tables;
+    this.initEvent = 'drag.begin';
+}
+_extends(TableAction, Action);
+TableAction.prototype.onRegister = function (manager) {
+    manager.on('drag.begin', this);
+}
+TableAction.prototype.onUserEvent = function (event) {
+    switch (event.id) {
+        case 'drag.begin':
+            // console.log(event);
+            this.tables.order(event.param);
+            break;
+    }
+}
+
+// ======================
+// global
+// ======================
+/**
+ * declear svg defs
+ * @param svg
+ */
+function initDefs(svg) {
+    // bg fill
+    var defs = svg.append('svg:defs');
+    defs.append('svg:pattern')
+            .attr('id', 'gridPattern')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', 15)
+            .attr('height', 15)
+            .attr('patternUnits', 'userSpaceOnUse')
+            .append('svg:path')
+            .attr('d', 'M 15 0 L 0 0 0 15')
+            .attr('fill', 'none')
+            .attr('stroke', '#6DA0A1')
+            .attr('stroke-width', '0.25');
+    // shadow
+    var dropshadow = defs.append('svg:filter')
+            .attr('id', 'dropshadow')
+            .attr('height', '130%');
+    dropshadow.append('svg:feGaussianBlur')
+            .attr('in', 'SourceAlpha')
+            .attr('stdDeviation', '2');
+    dropshadow.append('svg:feOffset')
+            .attr('dx', '2')
+            .attr('dy', '2')
+            .attr('result', 'offsetblur');
+    var feMerge = dropshadow.append('svg:feMerge')
+    feMerge.append('svg:feMergeNode');
+    feMerge.append('svg:feMergeNode').attr('in', 'SourceGraphic');
+}
+
+var svg = d3.selectAll('.chart')
+        .append('svg')
+        .attr('width', window.innerWidth)
+        .attr('height', window.innerHeight)
+        .attr('id', 'svg');
+initDefs(svg);
+
+var global = {
+    root: document.getElementById('svg')
+}
+
+var camera = new Camera(svg);
+
+var uiMgr = new UIManager();
+uiMgr.addAction(new TableAction(uiMgr.tables));
+uiMgr.addAction(new DragAction());
+uiMgr.addAction(new LinkAction(uiMgr));
+uiMgr.addAction(new MenuAction(uiMgr.layers.dialog));
+// uiMgr.addAction(new TextInput(document.getElementById('input')));
+
+// global listeners register
+window.addEventListener('resize', function () {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+//    camera.setStart(-100, 50);
+//    camera.scale(1.2, 0, 0);
+    camera.apply();
+});
+
+svg.on('mousedown.start', listenSvg(ControlType.SVG_DOWN_BEGIN), true);
+svg.on('mousedown.end', listenSvg(ControlType.SVG_DOWN_END));
+svg.on('mousemove', listenSvg(ControlType.SVG_MOVE), true);
+svg.on('mouseup.start', listenSvg(ControlType.SVG_UP_BEGIN), true);
+svg.on('mouseup.end', listenSvg(ControlType.SVG_UP_END));
+
+// ==========================
+// binding data
+// ==========================
+d3.json('data/data.json', function (data) {
+    uiMgr.bindDatas(data);
+    console.log(d3.selectAll('g.entity > g').selectAll('g > g').selectAll('rect'));
+    svg.on('aaaa', function () {
+
+    });
+    console.log(typeOf(false));
+});
+console.log(null === null, '-0000');
+
+// ==========================
+// disable chrome plugins
+// ==========================
+function keyListener() {
+    console.log('document.onkeydown', this, arguments);
+}
+
+var seltest = new SvgTag(document.querySelector('.chart'));
+function menuListener() {
+    return false;
+}
+var tt = setInterval(function () {
+    var check = ['onkeydown', 'onkeyup', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'ondblclick', 'onclick', 'onkeypress'];
+    seltest.on('keydown', keyListener, true, {name: 'bj'});
+    seltest.on('keydown', keyListener, false, {name: 'sh'});
+
+    seltest.off('keydown');
+    //document.onkeydown = keyListener;
+    document.oncontextmenu = menuListener;
+    clearInterval(tt);
+}, 2000)
+
+seltest.append('p');
+
+</script>
+</body>
+</html>

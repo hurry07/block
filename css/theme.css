@@ -1,0 +1,175 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    background: #404040;
+    overflow: hidden;
+}
+
+path {
+    fill: none;
+}
+
+.link .curve {
+    stroke: #FC9C9C;
+    stroke-width: 2px;
+    filter: url(#dropshadow);
+}
+
+.link .start, .link .end {
+    fill: #CBFF00;
+    stroke: #8E9A8E;
+    stroke-width: 2px;
+}
+
+.link.focus .curve {
+    stroke: #FC9C9C;
+}
+
+.link.focus .start {
+    fill: #A0FF00;
+}
+
+.focus {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.entity text {
+    font-family: Abel, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.entity text.input {
+    fill: transparent
+}
+
+.fieldinput {
+    font-family: Abel, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    height: 100%;
+    width: 100%;
+    text-indent: 4px;
+}
+
+.entity .field:nth-child(odd) {
+    fill: #B1BBC4;
+}
+
+.entity .field:nth-child(even) {
+    fill: #A7B6C7;
+}
+
+.entity .table {
+    filter: url(#dropshadow);
+}
+
+.entity g.edit rect {
+    fill: #809bc8;
+}
+
+.entity g.edit text {
+    fill: transparent;
+}
+
+.entity .fieldname {
+    fill: black;
+    text-anchor: start;
+    font-size: 17px;
+}
+
+.entity .bg {
+    fill: #959595;
+}
+
+.map .header {
+    fill: #5581A2;
+}
+
+.map .headername {
+    fill: black;
+    text-anchor: start;
+    font-size: 24px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.map .footer {
+    fill: #5581A2;
+}
+
+.view .bg {
+    fill: #959595;
+}
+
+.view .header {
+    fill: #28643F;
+}
+
+.view .headername {
+    fill: white;
+    text-anchor: start;
+    font-size: 24px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.view .fields {
+    fill: #B1BBC4;
+}
+
+.view .footer {
+    fill: #28643F;
+}
+
+.floating {
+    position: fixed;
+    z-index: 99;
+    cursor: pointer;
+    border: 0px;
+    visibility: visible;
+    overflow: hidden;
+    display: block;
+    padding: 0px;
+}
+
+.floating input {
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    outline-width: 0px;
+}
+
+.menu .background {
+    filter: url(#dropshadow);
+}
+.menu g.item {
+    fill: #EEEEEE;
+}
+.menu g.item:hover {
+    fill: #1EB5E7;
+}
+.menu g.item:hover text {
+    fill: white;
+}
+.menu .split {
+    fill: #EEEEEE;
+}
+.menu text {
+    font-family: Abel, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-anchor: start;
+    font-size: 15px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    fill: black;
+}
+.menu path {
+    stroke: #CCCCCC;
+}
