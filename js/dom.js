@@ -284,6 +284,18 @@ var block = {};
     }
 
     /**
+     * remove current node from parent
+     */
+    SvgSelect.prototype.remove = function () {
+        var node = this.tag();
+        delete  node.__node__;
+        var parent = node.parentNode;
+        if (parent) {
+            parent.removeChild(node);
+        }
+    }
+
+    /**
      * ======================
      * taken from d3js  start
      *

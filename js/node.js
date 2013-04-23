@@ -52,7 +52,6 @@ function _defineClass(super_, props) {
  * @constructor
  */
 function Node(parent) {
-    this.parentNode = parent;
     this.init = false;
 }
 // implement this method to get a id of data
@@ -86,37 +85,64 @@ Node.prototype.bind = function (data) {
     // if this is the first time bind is called
     if (!this.init) {
         if (data) {
+            this.create();
             this.init = true;
             this.setData(data);
-            this.enter();
+            this.enter(data);
+        } else {
+            this.onNullData();
         }
     } else if (data) {
-        this.init = true;
         var dold = this.getData();
-
         this.setData(data);
+
         var id = this.identifier;
-        if (id && (id(dold) != id(data))) {
+        if (id && (id(dold) == id(data))) {
             this.bindUpdate(dold, data);
         } else {
             this.update(dold, data);
         }
     } else {
-        this.unbind();
+        this.onNullData();
+    }
+}
+Node.prototype.onNullData = function () {
+    if (this.init) {
+        this.destroy();
     }
 }
 /**
- * this will return child root node
+ * root view where this node's graphic will bind to
+ * @returns {*}
  */
-Node.prototype.setup = function(parent) {
+Node.prototype.rootView = function () {
+    return this.parentNode.view();
 }
 /**
- * create customer ui
+ * init a svg tag slot for future data binding
  */
-Node.prototype.enter = function () {
+Node.prototype.create = function () {
+    this.view = this.createView();
+    this.view.node(this);
+}
+Node.prototype.createView = function () {
 }
 /**
- * data object was replaced, this.data is already equal to dnew
+ * remove current node from parent node
+ */
+Node.prototype.destroy = function () {
+    this.view.remove();
+    this.data = null;
+    this.init = false;
+}
+/**
+ * customer ui creating
+ */
+Node.prototype.enter = function (data) {
+}
+/**
+ * data object was replaced, this.data is already equal to dnew,
+ * here you can rewrite current data to old data.
  *
  * @param dold
  * @param dnew
@@ -124,31 +150,9 @@ Node.prototype.enter = function () {
 Node.prototype.update = function (dold, dnew) {
 }
 /**
- * release customer ui, or send release event if needed
+ * you can release customer ui, or you may send some release event
  */
 Node.prototype.exit = function () {
-}
-Node.prototype.unbind = function () {
-    this.exit();
-    if (this.parentNode) {
-        this.parentNode.childRemove(this);
-    }
-    this.data = null;
-    this.init = false;
-}
-Node.prototype.childRemove = function (child) {
-}
-/**
- * get parent view
- * @returns {*}
- */
-Node.prototype.parentView = function () {
-    return this.parentNode ? this.parentNode.view : null;
-}
-Node.prototype.deleteView = function (view) {
-    if (view) {
-        view.remove();
-    }
 }
 /**
  * create a empty node
@@ -185,17 +189,11 @@ Node.createContainer = function (type) {
     }
     return _extends(func, ListNode, prop);
 }
-Node.prototype.getViewNode = function () {
-
-}
-
 // ==========================================
 // ListNode node that take a [] as its data
 // ==========================================
 function ListNode(parent) {
     Node.call(this, parent);
-    this.children = [];
-    this.startid = 0;
 }
 _extends(ListNode, Node);
 /**
@@ -210,8 +208,28 @@ ListNode.prototype.createChild = function (d) {
  *
  * @param child
  */
-ListNode.prototype.unbindChild = function (child) {
-    child.unbind();
+ListNode.prototype.destroyChild = function (child) {
+    child.destroy();
+}
+/**
+ * list view will not save data within local field 'data'
+ * @param data
+ */
+ListNode.prototype.bind = function (data) {
+    // if this is the first time bind is called
+    if (!this.init) {
+        if (data) {
+            this.create();
+            this.init = true;
+            this.enter(data);
+        } else {
+            this.onNullData();
+        }
+    } else if (data) {
+        this.update(data);
+    } else {
+        this.onNullData();
+    }
 }
 /**
  * sub class should give a specific type, this is like ArrayList<T>
@@ -219,7 +237,7 @@ ListNode.prototype.unbindChild = function (child) {
  */
 //ListNode.prototype.identifier = function (d) {
 //}
-ListNode.prototype.enter = function () {
+ListNode.prototype.enter = function (data) {
     this.listEnter();
     this.data.forEach(function (d, i) {
         var child = this.createChild(d);
@@ -235,10 +253,8 @@ ListNode.prototype.listEnter = function () {
  */
 ListNode.prototype.sortView = function () {
 }
-ListNode.prototype.update = function (dold, dnew) {
+ListNode.prototype.update = function (data) {
     var id = this.identifier;
-    var data = dnew;
-
     var children = this.children;
     var m = children.length;
     var n = data.length;
@@ -288,7 +304,7 @@ ListNode.prototype.update = function (dold, dnew) {
         }
 
         for (; r < remain.length; r++) {
-            this.unbindChild(remain[i]);
+            this.destroyChild(remain[i]);
         }
     } else {
         var min = Math.min(m, n);
