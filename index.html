@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+<script type="text/javascript">
+//    window.HTMLElement =null;
+</script>
 <head>
     <title></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -297,6 +300,7 @@ function Table(p) {
     Node.call(this, p);
     this.linkout = [];
     this.linkin = [];
+    console.log('Table Instance', this instanceof Node);
 }
 _extends(Table, Node);
 Table.prototype.addLinkOut = function (link) {
@@ -1496,6 +1500,7 @@ var svg = d3.selectAll('.chart')
         .attr('width', window.innerWidth)
         .attr('height', window.innerHeight)
         .attr('id', 'svg');
+//var svg = block.tag(document.getElementById());
 initDefs(svg);
 
 var global = {
@@ -1546,23 +1551,42 @@ function keyListener() {
     console.log('document.onkeydown', this, arguments);
 }
 
-var seltest = new SvgTag(document.querySelector('.chart'));
 function menuListener() {
     return false;
 }
 var tt = setInterval(function () {
     var check = ['onkeydown', 'onkeyup', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'ondblclick', 'onclick', 'onkeypress'];
-    seltest.on('keydown', keyListener, true, {name: 'bj'});
-    seltest.on('keydown', keyListener, false, {name: 'sh'});
-
-    seltest.off('keydown');
-    //document.onkeydown = keyListener;
+    document.onkeydown = keyListener;
     document.oncontextmenu = menuListener;
     clearInterval(tt);
-}, 2000)
+}, 2000);
 
-seltest.append('p');
+block.select(document);
+block.select(document.querySelector('.chart'));
+var result = document.querySelectorAll('g');
+console.log(result);
+var result = document.querySelector('g');
+console.log(result);
 
+console.log('------------------------------');
+window.HTMLDocument = null;
+console.log(window.HTMLDocument);
+console.log(document instanceof window.HTMLDocument);
+console.log(document instanceof window.Document);
+console.log(document instanceof window.Node);
+console.log(window.Node);
+console.log(document instanceof window.HTMLElement);
+console.log(document instanceof window.Element);
+for(var i in Window) {
+    console.log(i);
+}
+console.log('------------------------------');
+console.log(svg.node() instanceof window.HTMLElement);
+console.log(svg.node() instanceof window.SVGElement);
+console.log(svg.node() instanceof window.Element);
+console.log('------------------------------');
+
+console.log(document.querySelector('.chart') instanceof window.HTMLElement);
 </script>
 </body>
 </html>
