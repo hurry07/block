@@ -36,9 +36,9 @@ var block = {};
     SvgSelect.prototype.append = function (name) {
         name = d3.ns.qualify(name);
         if (name.local) {
-            this.htmltag.appendChild(document.createElementNS(name.space, name.local));
+            return new SvgSelect(this.htmltag.appendChild(document.createElementNS(name.space, name.local)));
         } else {
-            this.htmltag.appendChild(document.createElementNS(this.htmltag.namespaceURI, name));
+            return new SvgSelect(this.htmltag.appendChild(document.createElementNS(this.htmltag.namespaceURI, name)));
         }
     }
     SvgSelect.prototype.select = function (query) {
@@ -71,6 +71,7 @@ var block = {};
         }
 
         function listener(event) {
+            block.event = event;
             for (var i = 0; i < fns.length; i++) {
                 var f = fns[i];
                 if (f.bind) {
@@ -414,11 +415,19 @@ var block = {};
         if (typeOf(dom) == 'string') {
             return new SvgSelect(document.querySelector(dom));
         }
-        console.log(typeof dom);
-        console.log(dom instanceof Node, dom instanceof HTMLDocument);
-        console.log(dom.className);
+        if (this.isHtmlTag(dom)) {
+            return new SvgSelect(dom);
+        }
+        return null;
     }
     block.selectAll = function (query) {
         return new SvgSelection(document.querySelectorAll(query));
     }
+
+    block.Node = window.Node;
+    function isHtmlTag(tag) {
+        return  tag && tag instanceof this.Node;
+    }
+
+    block.isHtmlTag = isHtmlTag;
 })();

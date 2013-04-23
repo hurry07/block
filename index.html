@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <script type="text/javascript">
-//    window.HTMLElement =null;
+    //    window.HTMLElement =null;
 </script>
 <head>
     <title></title>
@@ -77,8 +77,8 @@ function listenSvg(id) {
     }
 }
 function listenEvent(event) {
-    return function (d) {
-        uiMgr.handle({id: event, target: d});
+    return function () {
+        uiMgr.handle({id: event, target: this});
     }
 }
 function join() {
@@ -103,24 +103,19 @@ Field.prototype.enter = function () {
 
     this.view = this.parentView().append('svg:g')
             .classed('field', true)
-            .datum(this)
         //.on('click', this.handleEdit)
-            .on('mousedown', this.handleDown)
-            .on('mouseover', this.handleOver)
+            .on('mousedown', this.handleDown, this)
+            .on('mouseover', this.handleOver, this)
             .attr('transform', 'translate(' + 0 + ',' + (fh * i) + ')');
 
     this.view.append('svg:rect')
-            .attr('width', fw)
-            .attr('height', fh);
+            .attr({'width': fw, 'height': fh});
 
     this.view.append('svg:text')
             .classed('fieldname', true)
-            .attr('x', fp)
-            .attr('y', fh / 2)
-            .attr('dy', 6)
+            .attr({'x': fp, 'y': fh / 2, 'dy': 6})
             .text(d.name)
-        //.on('click', this.handleClick)
-            .datum(this);
+    //.on('click', this.handleClick)
 }
 Field.prototype.update = function (dold, dnew) {
     var d = dnew;
@@ -148,7 +143,7 @@ Field.prototype.getLinkEnd = function () {
     return [0, p.field.height / 2];
 }
 Field.prototype.getViewNode = function () {
-    return this.view.node();
+    return this.view.tag();
 }
 Field.prototype.getName = function () {
     return this.data.name;
@@ -208,9 +203,8 @@ Link.prototype.enter = function () {
 
     this.curve = this.view
             .append('svg:path')
-            .datum(this)
             .classed('curve', true)
-            .on('mousedown', this.handleDown);
+            .on('mousedown', this.handleDown, this);
     this.start = this.view.append('svg:circle')
             .classed('start', true)
             .attr('r', 9)
@@ -300,7 +294,6 @@ function Table(p) {
     Node.call(this, p);
     this.linkout = [];
     this.linkin = [];
-    console.log('Table Instance', this instanceof Node);
 }
 _extends(Table, Node);
 Table.prototype.addLinkOut = function (link) {
@@ -362,15 +355,13 @@ Table.prototype.enter = function () {
             .attr('transform', 'translate(' + d.position.x + ',' + d.position.y + ')')
             .classed('table', true)
             .classed(d.type, true)
-            .on('mousedown', this.handleDown)
-            .datum(this);
+            .on('mousedown', this.handleDown, this)
 
     // header
     this.header = this.view
             .append('svg:g')
-            .datum(this)
-            .on('mousedown', this.handleDown)
-            .on('mouseover', this.handleOver, true)
+            .on('mousedown', this.handleDown, this)
+            .on('mouseover', this.handleOver, true, this)
     this.header.append('svg:rect')
             .attr('width', this.prefer.width)
             .attr('height', p.height)
@@ -381,15 +372,13 @@ Table.prototype.enter = function () {
             .attr('dy', 8)
             .classed('headername', true)
             .text(d.name)
-            .datum(this);
 
     // fields
     var fieldsBg = this.view.append('svg:g')
             .attr("transform", 'translate(0,' + p.height + ')')
             .classed('fields', true)
-            .datum(this)
-            .on('mousedown', this.handleDown)
-            .on('mouseover', this.handleOver, true)
+            .on('mousedown', this.handleDown, this)
+            .on('mouseover', this.handleOver, true, this)
 
     this.fields = new Fields(this, fieldsBg);
     this.fields.bind(d.fields);
@@ -458,7 +447,7 @@ Table.prototype.getLinkEnd = function () {
     return [0, p.header.height / 2];
 };
 Table.prototype.getViewNode = function () {
-    return this.view.node();
+    return this.view.tag();
 };
 
 // interact with menu
@@ -555,7 +544,7 @@ _extends(TableCollection, ListNode);
  * @param table current focus table
  */
 TableCollection.prototype.order = function (table) {
-    var tables = this.view.node().querySelectorAll('g.entity > g.table');
+    var tables = this.view.select('g.entity > g.table');
 //    console.log(tables);
 //    var fs = ListNode.prototype.setChildId;
 //    var fg = ListNode.prototype.getChildId;
@@ -793,8 +782,8 @@ Menu.prototype.handleClick = function (d) {
     d.action.onMenuClick(d.command);
 }
 Menu.prototype.handleDown = function (action) {
-    if (d3.event.button == 2) {
-        d3.event.stopPropagation();
+    if (block.event.button == 2) {
+        block.event.stopPropagation();
     }
     action.onMenuDown();
 }
@@ -875,11 +864,11 @@ MenuAction.prototype.popupMenu = function (event) {
     if (target = this.getParam(event, 'mousedown.link') || this.getParam(event, 'mousedown.table') || this.backmenu) {
         // change position
         if (target === this.target) {
-            this.menu.showprevious(d3.event.x, d3.event.y);
+            this.menu.showprevious(block.event.x, block.event.y);
             return;
         }
         this.target = target;
-        this.menu.show(d3.event.x, d3.event.y, target.getMenu());
+        this.menu.show(block.event.x, block.event.y, target.getMenu());
         this.active = true;
     }
 }
@@ -1047,10 +1036,10 @@ UIManager.prototype.runUserEvent = function (event, actions) {
     }
 }
 UIManager.prototype.ctrlKey = function () {
-    return d3.event.metaKey || d3.event.ctrlKey;
+    return block.event.metaKey || block.event.ctrlKey;
 }
 UIManager.prototype.loseFocus = function () {
-    d3.selectAll('.focus')
+    block.selectAll('.focus')
             .classed('focus', false);
 }
 UIManager.prototype.onFocus = function (param) {
@@ -1065,7 +1054,7 @@ UIManager.prototype.onFocus = function (param) {
  * @param p
  */
 UIManager.prototype.handleEvent = function (p) {
-    if (d3.event.button == 2) {
+    if (block.event.button == 2) {
         p.id += '_r';
     }
     switch (p.id) {
@@ -1114,7 +1103,7 @@ UIManager.prototype.handle = function (param) {
     }
 }
 UIManager.prototype.globalKey = function () {
-    console.log(d3.event);
+    console.log(block.event);
 }
 UIManager.prototype.createLink = function () {
     return new Link(this.layers.assistant);
@@ -1158,7 +1147,7 @@ TextInput.prototype.submit = function () {
     if (n) {
         n.endInput(this.id, this.input);
     }
-    d3.select(this.div).style('visibility', 'hidden');
+    block.select(this.div).style('visibility', 'hidden');
 }
 TextInput.prototype.close = function () {
     this.submit();
@@ -1174,14 +1163,14 @@ TextInput.prototype.handle = function (param) {
 
     var size = camera.transform(target.getNode(id), target.getSize(id));
 
-    var div = d3.select(this.div);
-    div.style('left', size[0] + 'px');
-    div.style('top', size[1] + 'px');
-    div.style('width', size[2] + 'px');
-    div.style('height', size[3] + 'px');
+    var div = block.select(this.div);
+    div.style({'left': size[0] + 'px',
+        'top': size[1] + 'px',
+        'width': size[2] + 'px',
+        'height': size[3] + 'px'});
 
     this.node.beginInput(this.id, this.input);
-    d3.select(this.input)
+    block.select(this.input)
             .style('font-size', Math.round(17 * camera.getScale()) + 'px')
             .style('text-indent', Math.round(4 * camera.getScale()) + 'px');
     div.style('visibility', 'visible');
@@ -1204,7 +1193,7 @@ DragAction.prototype.inactive = function () {
     this.active = false;
     var n = this.node;
     if (n) {
-        n.stopMove(d3.event.x, d3.event.y);
+        n.stopMove(block.event.x, block.event.y);
         this.node = null;
     }
 }
@@ -1221,7 +1210,7 @@ DragAction.prototype.onEvent = function (event) {
             var target = this.getParam(event, 'mousedown.table');
             if (target) {
                 this.node = target.getFeature('move');
-                this.node.startMove(d3.event.x, d3.event.y);
+                this.node.startMove(block.event.x, block.event.y);
                 this.active = true;
                 this.fireEvent('drag.begin', target);
             } else {
@@ -1234,7 +1223,7 @@ DragAction.prototype.onEvent = function (event) {
                 this.inactive();
                 break;
             }
-            this.node.moveTo(d3.event.x, d3.event.y);
+            this.node.moveTo(block.event.x, block.event.y);
             break;
 
         case ControlType.SVG_UP_END:
@@ -1408,7 +1397,7 @@ LinkAction.prototype.updateEnd = function (event) {
     if (n) {
         this.dragend = camera.transformPoint(n.getViewNode(), n.getLinkEnd());
     } else {
-        this.dragend = camera.toLocal(d3.event.x, d3.event.y);
+        this.dragend = camera.toLocal(block.event.x, block.event.y);
     }
 
     this.link.updateCurve(this.dragstart, this.dragend);
@@ -1495,12 +1484,13 @@ function initDefs(svg) {
     feMerge.append('svg:feMergeNode').attr('in', 'SourceGraphic');
 }
 
-var svg = d3.selectAll('.chart')
+var svg = block.select('.chart')
         .append('svg')
-        .attr('width', window.innerWidth)
-        .attr('height', window.innerHeight)
-        .attr('id', 'svg');
-//var svg = block.tag(document.getElementById());
+        .attr({
+            width: window.innerHeight,
+            height: window.innerHeight,
+            id: 'svg'
+        });
 initDefs(svg);
 
 var global = {
@@ -1536,13 +1526,7 @@ svg.on('mouseup.end', listenSvg(ControlType.SVG_UP_END));
 // ==========================
 d3.json('data/data.json', function (data) {
     uiMgr.bindDatas(data);
-    console.log(d3.selectAll('g.entity > g').selectAll('g > g').selectAll('rect'));
-    svg.on('aaaa', function () {
-
-    });
-    console.log(typeOf(false));
 });
-console.log(null === null, '-0000');
 
 // ==========================
 // disable chrome plugins
@@ -1563,30 +1547,6 @@ var tt = setInterval(function () {
 
 block.select(document);
 block.select(document.querySelector('.chart'));
-var result = document.querySelectorAll('g');
-console.log(result);
-var result = document.querySelector('g');
-console.log(result);
-
-console.log('------------------------------');
-window.HTMLDocument = null;
-console.log(window.HTMLDocument);
-console.log(document instanceof window.HTMLDocument);
-console.log(document instanceof window.Document);
-console.log(document instanceof window.Node);
-console.log(window.Node);
-console.log(document instanceof window.HTMLElement);
-console.log(document instanceof window.Element);
-for(var i in Window) {
-    console.log(i);
-}
-console.log('------------------------------');
-console.log(svg.node() instanceof window.HTMLElement);
-console.log(svg.node() instanceof window.SVGElement);
-console.log(svg.node() instanceof window.Element);
-console.log('------------------------------');
-
-console.log(document.querySelector('.chart') instanceof window.HTMLElement);
 </script>
 </body>
 </html>
