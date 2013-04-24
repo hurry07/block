@@ -1,3 +1,28 @@
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function (oThis) {
+        if (typeof this !== "function") {
+            // closest thing possible to the ECMAScript 5 internal IsCallable function
+            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+        }
+
+        var aArgs = Array.prototype.slice.call(arguments, 1),
+            fToBind = this,
+            fNOP = function () {
+            },
+            fBound = function () {
+                return fToBind.apply(this instanceof fNOP && oThis
+                    ? this
+                    : oThis || window,
+                    aArgs.concat(Array.prototype.slice.call(arguments)));
+            };
+
+        fNOP.prototype = this.prototype;
+        fBound.prototype = new fNOP();
+
+        return fBound;
+    };
+}
+
 /**
  * Created with JetBrains WebStorm.
  * User: jie
@@ -15,21 +40,29 @@ function _extends(sub, super_, props) {
     sub.prototype.constructor = sub;
     return sub;
 }
-
-function _defineClass(super_, props) {
-    var c = props.constructor;
-    var sub;
-    if (c) {
-        sub = function () {
-            super_.apply(this, arguments);
-            c.apply(this, arguments);
-        }
-    } else {
-        sub = function () {
-            super_.apply(this, arguments);
-        }
+/**
+ * add default crate method
+ *
+ * @param sub
+ * @param super_
+ * @param props
+ * @returns {*}
+ * @private
+ */
+function _node(sub, super_, props) {
+    var type = _extends(sub, super_, props);
+    type.create = type.create || function () {
+        var node = new (Function.prototype.bind.apply(type, [type].concat(Array.prototype.slice.call(arguments, 0))));
+        node.create();
+        return node;
     }
-
+    return type;
+}
+function _defineClass(super_, props) {
+    props = props || {};
+    var sub = props.constructor || function () {
+        super_.apply(this, arguments);
+    };
     sub.prototype = Object.create(super_.prototype);
     if (props) {
         for (var i in props) {
@@ -53,11 +86,20 @@ function _defineClass(super_, props) {
  */
 function Node(parent) {
     this.init = false;
+    this.parentNode = parent;
 }
 // implement this method to get a id of data
 //Node.prototype.identifier = function(data) {
 //    return '';
 //}
+/**
+ * this method will be called when you supply an 'identifier'
+ * you mey overwrite this if you data is very complex.
+ * @returns {*}
+ */
+Node.prototype.getDataId = function () {
+    return this.identifier(this.getData());
+}
 Node.prototype.setData = function (data) {
     this.data = data;
 }
@@ -70,53 +112,39 @@ Node.prototype.getData = function () {
 Node.prototype.refresh = function () {
     this.bind(this.data);
 }
-/**
- * current data was replacing by data that has the same id.
- * this method will be call only as you supply an identifier.
- *
- * see also Node.prototype.identifier
- *
- * @param dnew
- * @param dold
- */
-Node.prototype.bindUpdate = function (dold, dnew) {
+Node.prototype.bindEnter = function (data) {
+    this.setData(data);
+    this.enter(data);
+    this.init = true;
+}
+Node.prototype.bindUpdate = function (data) {
+    var dold = this.getData();
+    var id = this.identifier;
+    if (id && id(data) == this.getDataId()) {
+        this.setData(data);
+        this.updateIdentity(dold, data);
+    } else {
+        this.update(dold, data);
+    }
+}
+Node.prototype.bindIdentity = function (data) {
+    var dold = this.getData();
+    this.setData(data);
+    this.updateIdentity(dold, data);
 }
 Node.prototype.bind = function (data) {
-    // if this is the first time bind is called
     if (!this.init) {
-        if (data) {
-            this.create();
-            this.init = true;
-            this.setData(data);
-            this.enter(data);
-        } else {
-            this.onNullData();
-        }
-    } else if (data) {
-        var dold = this.getData();
-        this.setData(data);
-
-        var id = this.identifier;
-        if (id && (id(dold) == id(data))) {
-            this.bindUpdate(dold, data);
-        } else {
-            this.update(dold, data);
-        }
-    } else {
-        this.onNullData();
+        this.bindEnter(data)
+        return;
     }
-}
-Node.prototype.onNullData = function () {
-    if (this.init) {
-        this.destroy();
-    }
+    this.bindUpdate(data);
 }
 /**
  * root view where this node's graphic will bind to
  * @returns {*}
  */
 Node.prototype.rootView = function () {
-    return this.parentNode.view();
+    return this.parentNode.view;
 }
 /**
  * init a svg tag slot for future data binding
@@ -144,10 +172,19 @@ Node.prototype.enter = function (data) {
  * data object was replaced, this.data is already equal to dnew,
  * here you can rewrite current data to old data.
  *
- * @param dold
- * @param dnew
+ * @param pred
+ * @param d
  */
-Node.prototype.update = function (dold, dnew) {
+Node.prototype.update = function (pred, d) {
+}
+/**
+ * current data has the same key with preivous data
+ *
+ * @param pred
+ * @param d
+ */
+Node.prototype.updateIdentity = function (pred, d) {
+    this.update(pred, d);
 }
 /**
  * you can release customer ui, or you may send some release event
@@ -173,19 +210,15 @@ Node.wrap = function (sel) {
  */
 Node.createContainer = function (type) {
     var prop = arguments[1] || {};
-    if (!prop.createChild) {
-        prop.createChild = function (d) {
-            return new type(this);
-        }
+    prop.createChild = prop.createChild || function () {
+        var child = new type(this);
+        child.create();
+        return child;
     }
-    if (!prop.identifier) {
-        var id = type.prototype.identifier;
-        if (id) {
-            prop.identifier = id;
-        }
-    }
-    var func = prop.constructor || function (p) {
+    prop.identifier && !type.prototype.identifier && (type.prototype.identifier = prop.identifier);
+    var func = prop.constructor || function (p, view) {
         ListNode.call(this, p);
+        this.view = view;
     }
     return _extends(func, ListNode, prop);
 }
@@ -194,13 +227,14 @@ Node.createContainer = function (type) {
 // ==========================================
 function ListNode(parent) {
     Node.call(this, parent);
+    this.init = true;
 }
 _extends(ListNode, Node);
 /**
  * sub class should overwrite this
  * @returns {Node}
  */
-ListNode.prototype.createChild = function (d) {
+ListNode.prototype.createChild = function () {
     return new Node(this);
 }
 /**
@@ -216,20 +250,9 @@ ListNode.prototype.destroyChild = function (child) {
  * @param data
  */
 ListNode.prototype.bind = function (data) {
-    // if this is the first time bind is called
-    if (!this.init) {
-        if (data) {
-            this.create();
-            this.init = true;
-            this.enter(data);
-        } else {
-            this.onNullData();
-        }
-    } else if (data) {
-        this.update(data);
-    } else {
-        this.onNullData();
-    }
+    this.update(data);
+}
+ListNode.prototype.createView = function () {
 }
 /**
  * sub class should give a specific type, this is like ArrayList<T>
@@ -238,144 +261,104 @@ ListNode.prototype.bind = function (data) {
 //ListNode.prototype.identifier = function (d) {
 //}
 ListNode.prototype.enter = function (data) {
-    this.listEnter();
-    this.data.forEach(function (d, i) {
-        var child = this.createChild(d);
-        this.setChildId(child, i);
-        child.bind(d);
-        this.children.push(child);
-    }, this);
-}
-ListNode.prototype.listEnter = function () {
-}
-/**
- * render order is changed
- */
-ListNode.prototype.sortView = function () {
 }
 ListNode.prototype.update = function (data) {
     var id = this.identifier;
-    var children = this.children;
+    var children = this.getChildren();
     var m = children.length;
     var n = data.length;
 
     if (id) {
-        var carr = children.slice(0, m);// copy current array
-        var cm = new d3.map();
+        var reuse = new d3.map();
 
         // map all children
         var remain = [];
-        for (var i = 0; i < m; i++) {
-            var key = id(children[i].data);
-            if (cm.has(key)) {
-                remain.push(children[i]);
-            } else {
-                cm.set(key, children[i]);
+        var node;
+        children.filter(function (child, i) {
+            if (node = child.node()) {
+                var key = node.getDataId();
+                if (reuse.has(key)) {
+                    remain.push(node);
+                } else {
+                    reuse.set(key, node);
+                }
+                return true;
             }
-        }
+            return false;
+        });
 
         var r = 0;
         var child;
-        this.children = [];
+        children = [];
+        var d;
 
         for (var i = 0; i < n; i++) {
-            var key = id(data[i]);
-            if (cm.has(key)) {
-                child = cm.get(key);
-                cm.remove(key);
+            var key = id(d = data[i]);
+
+            if (reuse.has(key)) {
+                child = reuse.get(key);
+                reuse.remove(key);
                 this.setChildId(child, i);
 
-                var oldd = child.data;
-                child.setData(d);
-                child.bindUpdate(oldd, d);
+                child.bindIdentity(data);
             } else if (r < remain.length) {
-                this.setChildId(remain[r ], i);
-
-                remain[r].bind(data[i]);
+                this.setChildId(child = remain[r], i);
+                remain[r].bindUpdate(d);
                 r++;
             } else {
-                child = this.createChild(data[i]);
+                child = this.createChild();
                 this.setChildId(remain[r ], i);
-
-                child.bind(data[i]);
+                child.bindEnter(d);
             }
-
-            this.children.push(child);
+            children.push(child);
         }
 
         for (; r < remain.length; r++) {
             this.destroyChild(remain[i]);
         }
     } else {
-        var min = Math.min(m, n);
-        for (var i = 0, size = min; i < size; i++) {
-            children[i].bind(data[i]);
-        }
-        // if there is more children than data
-        for (var i = min; i < m; i++) {
-            this.unbindChild(children[i]);
-        }
-        // if there is more data than children
-        for (var i = min; i < n; i++) {
-            var child = this.createChild(data[i]);
-            this.setChildId(child, i);
-            child.bind(data[i]);
+        var r = 0;
+        var reuse = children.nodes();
+        children = [];
+        var child;
+        for (var i = 0; i < n; i++) {
+            d = data[i];
+            if (r < reuse.length) {
+                this.setChildId(child = reuse[r], i);
+                reuse[r].bindUpdate(d);
+                r++;
+            } else {
+                child = this.createChild();
+                this.setChildId(child, i);
+                child.bindEnter(d);
+            }
             children.push(child);
         }
+        for (; r < reuse.length; r++) {
+            this.destroyChild(reuse[i]);
+        }
     }
+    this.updateEnd(children);
 }
 ListNode.prototype.exit = function () {
-    this.children.forEach(this.unbindChild, this);
-    this.children = [];
-}
-ListNode.prototype.appendChild = function (d) {
-    var child = this.createChild(d);
-    this.setChildId(child, this.children.length);
-    child.bind(d);
-    this.children.push(child);
-    return child;
+    this.getChildren().each(function (node) {
+        node.remove();
+    });
 }
 ListNode.prototype.getChildren = function () {
-    return this.children;
+    return this.view.childNodes();
 }
-ListNode.prototype.getChild = function (i) {
-    return this.children[i];
-}
-ListNode.prototype.getData = function () {
-    var d = [];
-    for (var i = 0, c = this.children, l = c.length; i < l; i++) {
-        d.push(c[i].getData());
-    }
-    this.data = d;
-    return d;
-}
-///**
-// * recycle children id
-// * TODO rewrite with binary tree
-// * @param child
-// */
-//ListNode.prototype.childAdd = function (child) {
-//    var id;
-//    for (var i = this.startid, children = this.children, l = children.length; i < l; i++) {
-//        if ((id = this.getChildId(children[i])) > i) {
-//            this.setChildId(child, id - 1);
-//            this.children.splice(i, 0, child);
-//            this.startid = i;
-//            return;
-//        }
-//    }
-//    this.setChildId(child, this.startid = l);
-//    this.children.push(child);
-//}
-ListNode.prototype.childRemove = function (child) {
-    var index = this.children.indexOf(child);
-    if (index != -1) {
-        this.children.splice(index, 1);
-    }
+ListNode.prototype.updateEnd = function (children) {
 }
 ListNode.prototype.setChildId = function (c, id) {
     c.__id__ = id;
 }
 ListNode.prototype.getChildId = function (c) {
     return c.__id__;
+}
+ListNode.prototype.bindChild = function (d) {
+    var id = this.getChildren().length;
+    var child = this.createChild();
+    this.setChildId(child, id);
+    child.bindEnter(d);
 }

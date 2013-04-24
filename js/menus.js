@@ -7,6 +7,7 @@
  */
 var i18n = new (_defineClass(DataMap, {
     constructor: function (lang) {
+        DataMap.call(this);
         this.init(lang);
     },
     init: function (lang) {

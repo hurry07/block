@@ -95,6 +95,9 @@ var block = {};
     SvgSelect.prototype.tag = function () {
         return this.htmltag;
     }
+    SvgSelect.prototype.childNodes = function () {
+        return new SvgSelection(this.htmltag.childNodes);
+    }
     /**
      * return customer object that bind whit html tag
      * @returns {*}
@@ -388,10 +391,10 @@ var block = {};
      * @constructor
      */
     function SvgSelection(result) {
-        this.nodes = [];
+        this.selnodes = [];
         if (result && result.length) {
             for (var i = 0, l = result.length; i < l; i++) {
-                this.nodes.push(new SvgSelect(result[i]));
+                this.selnodes.push(new SvgSelect(result[i]));
             }
         }
     }
@@ -402,13 +405,13 @@ var block = {};
      * @param bind
      */
     SvgSelection.prototype.each = function (fn, bind) {
-        this.nodes.each(fn, bind);
+        this.selnodes.each(fn, bind);
     }
     SvgSelection.prototype.sort = function (fn) {
-        this.nodes.sort(fn);
+        this.selnodes.sort(fn);
     }
     SvgSelection.prototype.order = function () {
-        for (var g = this.nodes, i = g.length - 2, next = g[g.length - 1], node; --i >= 0;) {
+        for (var g = this.selnodes, i = g.length - 2, next = g[g.length - 1], node; --i >= 0;) {
             if (node = g[i]) {
                 if (next && next !== node.nextSibling)
                     next.parentNode.insertBefore(node, next);
@@ -417,8 +420,21 @@ var block = {};
         }
     }
     SvgSelection.prototype.nodes = function () {
-        return this.nodes;
+        return this.selnodes;
     }
+    SvgSelection.prototype.filter = function (fn, bind) {
+        var results = [];
+        for (var value, i = 0, nodes = this.selnodes, l = nodes.length; i < l; i++) {
+            value = nodes[i];
+            if (fn.call(bind, value, i, this)) {
+                results.push(value);
+            } else {
+                value.remove();
+            }
+        }
+        this.selnodes = results;
+    }
+
     block.selection = SvgSelection;
     block.select = function (dom) {
         if (!dom) {
