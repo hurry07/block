@@ -104,7 +104,7 @@ var block = {};
      */
     SvgSelect.prototype.node = function () {
         if (arguments[0]) {
-            this.__node__ = arguments[0];
+            this.htmltag.__node__ = arguments[0];
         } else {
             return this.htmltag.__node__;
         }
@@ -433,6 +433,15 @@ var block = {};
             }
         }
         this.selnodes = results;
+    }
+
+    SvgSelection.prototype.iterator = function (fn, bind) {
+        for (var value, i = 0, nodes = this.selnodes, l = nodes.length; i < l; i++) {
+            value = nodes[i];
+            if (fn.call(bind, value, i, this) === false) {
+                break;
+            }
+        }
     }
 
     block.selection = SvgSelection;

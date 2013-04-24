@@ -60,7 +60,7 @@ function _node(sub, super_, props) {
 }
 function _defineClass(super_, props) {
     props = props || {};
-    var sub = props.constructor || function () {
+    var sub = _getOwnProperty(props, 'constructor') || function () {
         super_.apply(this, arguments);
     };
     sub.prototype = Object.create(super_.prototype);
@@ -71,6 +71,12 @@ function _defineClass(super_, props) {
     }
     sub.prototype.constructor = sub;
     return sub;
+}
+function _getOwnProperty(o, p) {
+    if (o.hasOwnProperty(p)) {
+        return o[p];
+    }
+    return undefined;
 }
 
 // ==========================================
@@ -154,6 +160,7 @@ Node.prototype.create = function () {
     this.view.node(this);
 }
 Node.prototype.createView = function () {
+    return this.view;
 }
 /**
  * remove current node from parent node
@@ -216,7 +223,7 @@ Node.createContainer = function (type) {
         return child;
     }
     prop.identifier && !type.prototype.identifier && (type.prototype.identifier = prop.identifier);
-    var func = prop.constructor || function (p, view) {
+    var func = _getOwnProperty(prop, 'constructor') || function (p, view) {
         ListNode.call(this, p);
         this.view = view;
     }
@@ -253,6 +260,7 @@ ListNode.prototype.bind = function (data) {
     this.update(data);
 }
 ListNode.prototype.createView = function () {
+    return this.view;
 }
 /**
  * sub class should give a specific type, this is like ArrayList<T>
@@ -318,14 +326,19 @@ ListNode.prototype.update = function (data) {
         }
     } else {
         var r = 0;
+        children.filter(function (tag) {
+            return tag.node() != null;
+        })
+
         var reuse = children.nodes();
         children = [];
         var child;
         for (var i = 0; i < n; i++) {
             d = data[i];
             if (r < reuse.length) {
-                this.setChildId(child = reuse[r], i);
-                reuse[r].bindUpdate(d);
+                child = reuse[r].node()
+                this.setChildId(child, i);
+                child.bindUpdate(d);
                 r++;
             } else {
                 child = this.createChild();

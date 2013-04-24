@@ -140,9 +140,6 @@ Field.prototype.update = function (dold, dnew) {
     ui.select('text')
             .text(d.name);
 }
-Field.prototype.exit = function () {
-    this.deleteView(this.view);
-}
 Field.prototype.handleClick = function (d) {
     uiMgr.handle({id: ActionTypes.MOUSE_CLICK, 'target': Node.getNode(d), 'id': 'name'});
 }
@@ -398,6 +395,7 @@ Table.prototype.enter = function (d) {
 
     this.fields = new Fields(this, fieldsBg);
     this.fields.bind(d.fields);
+    this.fields.bind(d.fields);
 
     // footer
     p = this.prefer.footer;
@@ -441,12 +439,7 @@ Table.prototype.hasField = function (f) {
     return false;
 };
 Table.prototype.getField = function (name) {
-    for (var i = 0, fs = this.data.fields, l = fs.length; i < l; i++) {
-        if (fs[i].name == name) {
-            return this.fields.getChild(i);
-        }
-    }
-    return null;
+    this.fields.getField(name);
 };
 /**
  * get relative start to this table
@@ -539,9 +532,12 @@ Table.prototype.copyField = function () {
 // container types
 // ==========================
 var Fields = Node.createContainer(Field, {
-    constructor: function (p, view) {
-        ListNode.call(this, p);
-        this.view = view;
+    getField: function (name) {
+        var f;
+        this.getChildren().iterator(function (node) {
+            console.log(node);
+        });
+        return f;
     }
 });
 
@@ -597,7 +593,7 @@ function LinkCollection(p, view) {
     ListNode.call(this, p);
     this.view = view;
 }
-_extends(LinkCollection, ListNode);
+Node.createContainer(LinkCollection, Link);
 LinkCollection.prototype.createChild = function () {
     return Link.create(this);
 }
@@ -939,9 +935,9 @@ UIManager.prototype.bindDatas = function (data) {
     // map all table nodes
     var tmap = new d3.map();
     var tables = this.tables.getChildren();
-    for (var i = 0, l = ts.length; i < l; i++) {
-        tmap.set(ts[i].name, tables[i]);
-    }
+    tables.each(function (node, i) {
+        (node = node.node()) && tmap.set(ts[i].name, node);
+    });
 
     // gen links
     for (var i = 0, l = ts.length; i < l; i++) {
@@ -974,7 +970,7 @@ UIManager.prototype.bindDatas = function (data) {
             p1.table(startt);
             p1.field(startt.getField(refs[r].start));
 
-            var link = this.tables.appendChild({from: p1, to: p2});
+            var link = this.links.appendChild({from: p1, to: p2});
             startt.addLinkOut(link);
             endt.addLinkIn(link);
         }
@@ -1545,7 +1541,7 @@ d3.json('data/data.json', function (data) {
 // disable chrome plugins
 // ==========================
 function keyListener() {
-    console.log('document.onkeydown', this, arguments);
+//    console.log('document.onkeydown', this, arguments);
 }
 
 function menuListener() {
