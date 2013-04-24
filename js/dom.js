@@ -41,6 +41,17 @@ var block = {};
             return new SvgSelect(this.htmltag.appendChild(document.createElementNS(this.htmltag.namespaceURI, name)));
         }
     }
+    SvgSelect.prototype.insert = function (name, before) {
+        name = d3.ns.qualify(name);
+        return new SvgSelect(
+            this.htmltag.insertBefore(
+                name.local
+                    ? document.createElementNS(name.space, name.local)
+                    : document.createElementNS(this.htmltag.namespaceURI, name),
+                this.htmltag.querySelector(before)
+            )
+        );
+    }
     SvgSelect.prototype.select = function (query) {
         return new SvgSelect(this.htmltag.querySelector(query));
     }
@@ -286,16 +297,31 @@ var block = {};
         }
     }
 
+    function removeTag(tag) {
+        var p;
+        if (p = tag.parentNode) {
+            p.removeChild(tag);
+        }
+    }
+
     /**
      * remove current node from parent
      */
     SvgSelect.prototype.remove = function () {
         var node = this.tag();
-        delete  node.__node__;
-        var parent = node.parentNode;
-        if (parent) {
-            parent.removeChild(node);
+        var query;
+        if (query = arguments[0]) {
+            for (var i = 0, nodes = this.tag().querySelectorAll(query), l = nodes.length; i < l; i++) {
+                removeTag(nodes[i]);
+            }
+            // if current object was not removed
+            if (node.parentNode) {
+                return;
+            }
         }
+
+        delete  node.__node__;
+        removeTag(node);
     }
 
     /**
@@ -442,6 +468,16 @@ var block = {};
                 break;
             }
         }
+    }
+    SvgSelection.prototype.remove = function () {
+        this.selnodes.each(function (node) {
+            node.remove();
+        })
+        delete this.selnodes;
+    }
+    SvgSelection.prototype.node = function (i) {
+        var n;
+        return (n = this.selnodes[i]) && n.node();
     }
 
     block.selection = SvgSelection;

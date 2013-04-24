@@ -374,4 +374,5 @@ ListNode.prototype.bindChild = function (d) {
     var child = this.createChild();
     this.setChildId(child, id);
     child.bindEnter(d);
+    return child;
 }
