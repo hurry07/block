@@ -23,23 +23,6 @@
     <input type="text" class="fieldinput">
 </div>
 <script type="text/javascript">
-function A() {
-    this.name = 'a'
-    console.log('A', this, arguments);
-}
-function B() {
-    A.call(this);
-    this.run = 'run';
-    console.log('B', this, arguments);
-}
-console.log(B.create);
-console.log(B.prototype.create);
-_node(B, A);
-B.prototype.create = function () {
-    console.log('B create called');
-}
-var b = B.create('aabb', 'c');
-
 // ui element types
 var Target = {
     TABLE: 'table',
@@ -160,9 +143,8 @@ Field.prototype.getViewNode = function () {
     return this.view.tag();
 }
 Field.prototype.getName = function () {
-    return this.data.name;
+    return this.table.getName() + '.' + this.data.name;
 }
-
 // ----------------------
 // interact with text input.
 Field.prototype.beginInput = function (id, text) {
@@ -249,6 +231,15 @@ Link.prototype.update = function (d) {
         this.hide();
     }
 }
+Link.prototype.export = function () {
+    var n1, n2, d = this.getData();
+    var data = {};
+    if ((n1 = d.from.node()) && (n2 = d.to.node())) {
+        data.start = n1.getName();
+        data.end = n2.getName();
+    }
+    return data;
+}
 Link.prototype.updateCurve = function (p1, p2) {
     var gx = p2[0] - p1[0];
     var gy = p2[1] - p1[1];
@@ -314,9 +305,6 @@ Table.prototype.addLinkOut = function (link) {
 }
 Table.prototype.addLinkIn = function (link) {
     this.linkin.push(link);
-}
-Table.prototype.addLink = function (link) {
-    this.data.refs.push({});
 }
 Table.prototype.hasLink = function (link) {
     var id = Link.prototype.identifier(link);
@@ -498,6 +486,13 @@ Table.prototype.getMoveFeature = function () {
         }
     }))();
 }
+Table.prototype.exportLinks = function () {
+    var data = [];
+    this.linkout.each(function (link) {
+        data.push(link.export());
+    })
+    return data;
+}
 /**
  * interact with global function
  * @param f
@@ -514,21 +509,11 @@ Table.prototype.getFeature = function (f) {
 }
 // ---------------------- for tool
 Table.prototype.export = function () {
-    var d = {};
     var td = this.data;
-
-    d.type = td.type;
-    d.fields = this.copyField();
-    return d;
+    td.fields = this.fields.export();// update field
+    td.refs = this.exportLinks();
+    return td;
 }
-Table.prototype.copyField = function () {
-    var fs = [];
-    for (var i = 0, l = this.data.fields.length; i < l; i++) {
-        fs.push(this.data.fields[i]);
-    }
-    return fs;
-}
-
 // ==========================
 // container types
 // ==========================
@@ -542,6 +527,19 @@ var Fields = Node.createContainer(Field, {
             }
         });
         return f;
+    },
+    export: function () {
+        var data = [];
+        this.getChildren().each(function (node) {
+            data.push(node.node().getData())
+        });
+        return data;
+    },
+    createChild: function () {
+        var child = new Field(this);
+        child.create();
+        child.table = this.parentNode;
+        return child;
     }
 });
 
@@ -554,44 +552,43 @@ function TableCollection(p, view) {
 }
 _extends(TableCollection, ListNode);
 /**
+ * sort links and tables
  * @param table current focus table
  */
 TableCollection.prototype.order = function (table) {
-    var tables = this.view.select('g.entity > g.table');
-//    console.log(tables);
-//    var fs = ListNode.prototype.setChildId;
-//    var fg = ListNode.prototype.getChildId;
-//    var all = this.view.selectAll('g.entity > g.table');
-//    all.sort(function (a, b) {
-//        if (a.view.classed('focus')) {
-//            return 1;
-//        }
-//        if (b.view.classed('focus')) {
-//            return -1;
-//        }
-//        return 0;
-//    });
-//
-//    console.log(all);
-//    var all = this.view.selectAll('g.entity > g');
-//    console.log(all);
+    var tables = this.view.selectAll('g.entity > g');
+    var nodes = tables.nodes();
+    var z = 0;
+    var t;
+    var tnode;
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        if ((t = nodes[i].node()) instanceof Table) {
+            if (t === table) {
+                nodes.push(tnode = nodes[i]);
+                nodes.splice(i, 1);
+                i--;
+                l--;
+            } else {
+                nodes[i].zindex = z++;
+            }
+        }
+    }
+    tnode && (tnode.zindex = z);
+    tables.order();
+}
+TableCollection.prototype.getChildren = function () {
+    return this.view.selectAll('g > .table');
 }
 TableCollection.prototype.createChild = function () {
-//    if (Table.prototype.isTable(d.type)) {
     return Table.create(this);
-//    } else {
-//        return Link.create(this);
-//    }
 }
 TableCollection.prototype.identifier = Table.identifier;
 TableCollection.prototype.export = function () {
-    var tables = [];
-//    for (var t = 0, i = 0, data = this.children, l = data.length; i < l; i++) {
-//        if (this.children[i].targetType === Target.TABLE) {
-//            tables[t++] = this.children[i].getData();
-//        }
-//    }
-    return tables;
+    var data = [];
+    this.getChildren().each(function (node) {
+        data.push(node.node().export());
+    });
+    return data;
 }
 function LinkCollection(p, view) {
     ListNode.call(this, p);
@@ -604,7 +601,9 @@ LinkCollection.prototype.createChild = function () {
     return Link.create(this);
 }
 LinkCollection.prototype.identifier = Link.identifier;
-
+LinkCollection.prototype.getChildren = function () {
+    return this.view.selectAll('g > .link');
+}
 // ======================
 // camera
 // ======================
@@ -1118,7 +1117,6 @@ UIManager.prototype.addLink = function (d) {
         var link = this.links.bindChild(d);
         fromt.addLinkOut(link);
         tot.addLinkIn(link);
-        fromt.addLink(link);
 
         console.log(link.getId());
     }

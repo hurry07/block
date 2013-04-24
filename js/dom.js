@@ -437,8 +437,9 @@ var block = {};
         this.selnodes.sort(fn);
     }
     SvgSelection.prototype.order = function () {
-        for (var g = this.selnodes, i = g.length - 2, next = g[g.length - 1], node; --i >= 0;) {
+        for (var g = this.selnodes, i = g.length - 1, next = g[g.length - 1].tag(), node; --i >= 0;) {
             if (node = g[i]) {
+                node = node.tag();
                 if (next && next !== node.nextSibling)
                     next.parentNode.insertBefore(node, next);
                 next = node;
