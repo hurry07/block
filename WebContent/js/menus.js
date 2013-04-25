@@ -17,6 +17,7 @@ var i18n = new (_defineClass(DataMap, {
 
             this.value('global.add.table', 'Add Table');
             this.value('global.export', 'Export');
+            this.value('global.save', 'Save');
 
             this.value('table.remove', 'Remove');
             this.value('table.rename', 'Rename');

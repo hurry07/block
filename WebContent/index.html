@@ -237,6 +237,7 @@ Link.prototype.export = function () {
     if ((n1 = d.from.node()) && (n2 = d.to.node())) {
         data.start = n1.getName();
         data.end = n2.getName();
+        data.type = 'single';
     }
     return data;
 }
@@ -486,13 +487,6 @@ Table.prototype.getMoveFeature = function () {
         }
     }))();
 }
-Table.prototype.exportLinks = function () {
-    var data = [];
-    this.linkout.each(function (link) {
-        data.push(link.export());
-    })
-    return data;
-}
 /**
  * interact with global function
  * @param f
@@ -511,7 +505,6 @@ Table.prototype.getFeature = function (f) {
 Table.prototype.export = function () {
     var td = this.data;
     td.fields = this.fields.export();// update field
-    td.refs = this.exportLinks();
     return td;
 }
 // ==========================
@@ -603,6 +596,13 @@ LinkCollection.prototype.createChild = function () {
 LinkCollection.prototype.identifier = Link.identifier;
 LinkCollection.prototype.getChildren = function () {
     return this.view.selectAll('g > .link');
+}
+LinkCollection.prototype.export = function () {
+    var data = [];
+    this.getChildren().each(function (link) {
+        data.push(link.node().export());
+    })
+    return data;
 }
 // ======================
 // camera
@@ -816,7 +816,8 @@ function DefaltMenu() {
 DefaltMenu.prototype.getMenu = function () {
     return [
         {keys: 'A', command: 'global.add.table'},
-        {keys: '', command: 'global.export'}
+        {keys: '', command: 'global.export'},
+        {keys: '', command: 'global.save'}
     ];
 }
 DefaltMenu.prototype.runMenuAction = function (action) {
@@ -824,7 +825,11 @@ DefaltMenu.prototype.runMenuAction = function (action) {
         case 'global.add.table':
             break;
         case 'global.export':
+        case 'global.save':
             var exp = uiMgr.export();
+            d3.xhr('res/data.json?save=true').post(JSON.encode(exp), function () {
+                console.log('upload success', arguments);
+            });
             console.log(JSON.encode(exp));
             break;
     }
@@ -966,20 +971,20 @@ UIManager.prototype.bindEntity = function (data) {
         }
     }
 
-    var t1 = {
-        "type": "map",
-        "position": {"x": 400, "y": 400},
-        "name": "4th",
-        "fields": [
-            {"name": "abcde", "type": "s"},
-            {"name": "width", "type": "i"},
-            {"name": "percent", "type": "f"},
-            {"name": "price", "type": "f"}
-        ],
-        "refs": [
-        ]
-    }
-    this.tables.bindChild(t1);
+//    var t1 = {
+//        "type": "map",
+//        "position": {"x": 400, "y": 400},
+//        "name": "4th",
+//        "fields": [
+//            {"name": "abcde", "type": "s"},
+//            {"name": "width", "type": "i"},
+//            {"name": "percent", "type": "f"},
+//            {"name": "price", "type": "f"}
+//        ],
+//        "refs": [
+//        ]
+//    }
+//    this.tables.bindChild(t1);
 }
 UIManager.prototype.bindDatas = function (data) {
     this.bindEntity(data.entities);
@@ -1124,8 +1129,14 @@ UIManager.prototype.addLink = function (d) {
 }
 UIManager.prototype.export = function () {
     var save = {};
-    save.entities = this.tables.export();
+    save.entities = this.exportEntity();
     return save;
+}
+UIManager.prototype.exportEntity = function () {
+    var data = {};
+    data.tables = this.tables.export();
+    data.links = this.links.export();
+    return data;
 }
 
 // ==========================
