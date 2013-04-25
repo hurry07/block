@@ -920,51 +920,49 @@ UIManager.prototype.dispatchEvent = function (evt) {
     var n = this.layers.schema.node();
     n.dispatchEvent(evt);
 }
-UIManager.prototype.bindDatas = function (data) {
-    var ts = data.entities;
-    this.tables.bind(data.entities);
+UIManager.prototype.getLinkNode = function (tables, nodeid) {
+    var parts = (nodeid || '').split('.');
+    if (parts.length == 0) {
+        return null;
+    }
+    var table = tables.get(parts[0]);
+    if (!table) {
+        return null;
+    }
+
+    var p = new LinkTerminal();
+    p.table(table);
+
+    if (parts.length == 2) {
+        var field = table.getField(parts[1]);
+        if (!field) {
+            return null;
+        } else {
+            p.field(field);
+        }
+    }
+
+    p.updatetype();
+    return p;
+}
+UIManager.prototype.bindEntity = function (data) {
+    var ts = data.tables;
+    this.tables.bind(data.tables);
 
     // map all table nodes
     var tmap = new d3.map();
-    var tables = this.tables.getChildren();
-    tables.each(function (node, i) {
+    this.tables.getChildren().each(function (node, i) {
         (node = node.node()) && tmap.set(ts[i].name, node);
     });
 
-    // gen links
-    for (var i = 0, l = ts.length; i < l; i++) {
-        var refs = ts[i].refs;
-        for (var r = 0, refs = ts[i].refs, rcount = refs.length; r < rcount; r++) {
-            var target = (refs[r].end || '').split('.');
-            if (target.length == 0) {
-                continue;
-            }
-
-            // end table
-            var endt = tmap.get(target[0]);
-            if (!endt) {
-                continue;
-            }
-            var endf;
-            if (target.length == 2) {
-                endf = endt.getField(target[1]);
-                if (!endf) {
-                    continue;
-                }
-            }
-            // end point
-            var p2 = new LinkTerminal();
-            p2.table(endt);
-            p2.field(endf);
-
-            var p1 = new LinkTerminal();
-            var startt = tables.node(i);
-            p1.table(startt);
-            p1.field(startt.getField(refs[r].start));
-
-            var link = this.links.bindChild({from: p1, to: p2});
-            startt.addLinkOut(link);
-            endt.addLinkIn(link);
+    var link;
+    for (var i = 0, ls = data.links, len = ls.length; i < len; i++) {
+        link = ls[i];
+        var p1, p2;
+        if ((p1 = this.getLinkNode(tmap, link.start)) && (p2 = this.getLinkNode(tmap, link.end))) {
+            link = this.links.bindChild({from: p1, to: p2});
+            p1.table().addLinkOut(link);
+            p2.table().addLinkIn(link);
         }
     }
 
@@ -982,6 +980,9 @@ UIManager.prototype.bindDatas = function (data) {
         ]
     }
     this.tables.bindChild(t1);
+}
+UIManager.prototype.bindDatas = function (data) {
+    this.bindEntity(data.entities);
 }
 UIManager.prototype.addAction = function (action) {
     action.register(this);

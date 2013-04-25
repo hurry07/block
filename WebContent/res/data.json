@@ -1,6 +1,6 @@
 {
-    "entities" : [
-        {
+    "entities" : {
+        "tables": [{
             "type":"map",
             "position": {"x": 100, "y": 100},
             "name":"first",
@@ -10,13 +10,8 @@
                 {"name":"percent", "type":"f"},
                 {"name":"price", "type":"f"},
                 {"name":"second", "type":"r"}
-            ],
-            "refs" : [
-                {"type":"single","start":"width", "end":"second.name"},
-                {"type":"single","start":"price", "end":"second.price"}
             ]
-        }
-        ,{
+        },{
             "type":"map",
             "position": {"x": 300, "y": 10},
             "name":"second",
@@ -25,12 +20,8 @@
                 {"name":"width", "type":"i"},
                 {"name":"percent", "type":"f"},
                 {"name":"price", "type":"f"}
-            ],
-            "refs" : [
-                {"type":"single","start":"percent", "end":"third.price"}
             ]
-        }
-        ,{
+        },{
             "type":"map",
             "position": {"x": 300, "y": 200},
             "name":"third",
@@ -39,9 +30,13 @@
                 {"name":"width", "type":"i"},
                 {"name":"percent", "type":"f"},
                 {"name":"price", "type":"f"}
-            ],
-            "refs" : [
             ]
-        }
-    ]
+        }],
+        "links": [
+            {"type":"single","start":"first", "end":"third"},
+            {"type":"single","start":"first.width", "end":"second.name"},
+            {"type":"single","start":"first.price", "end":"second.price"},
+            {"type":"single","start":"second.percent", "end":"third.price"}
+        ]
+    }
 }
