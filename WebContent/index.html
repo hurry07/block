@@ -165,6 +165,22 @@ Field.prototype.getSize = function (id) {
 Field.prototype.getNode = function () {
     return this.view.node();
 }
+/**
+ * interact with right click
+ * @returns {Array}
+ */
+Field.prototype.getMenu = function () {
+    return [
+        {keys: 'L', command: 'table.field.remove'}
+    ];
+}
+Field.prototype.runMenuAction = function (action) {
+    switch (action) {
+        case 'table.field.remove':
+            break;
+    }
+    console.log(action);
+}
 
 // ======================
 // Link
@@ -451,7 +467,7 @@ Table.prototype.getMenu = function () {
     return [
         {keys: '', command: 'table.remove'},
         {keys: 'R', command: 'table.rename'},
-        {keys: 'F', command: 'table.add.field'}
+        {keys: 'F', command: 'table.field.add'}
     ];
 }
 Table.prototype.runMenuAction = function (action) {
@@ -501,7 +517,6 @@ Table.prototype.getFeature = function (f) {
             return null;
     }
 }
-// ---------------------- for tool
 Table.prototype.export = function () {
     var td = this.data;
     td.fields = this.fields.export();// update field
@@ -862,21 +877,34 @@ MenuAction.prototype.onEvent = function (event) {
             break;
     }
 }
+/**
+ * popup right click menu
+ * @param event
+ */
 MenuAction.prototype.popupMenu = function (event) {
     this.focus = false;
 
     // if table menu
-    var target;
-    if (target = this.getParam(event, 'mousedown.link') || this.getParam(event, 'mousedown.table') || this.backmenu) {
-        // change position
-        if (target === this.target) {
-            this.menu.showprevious(block.event.x, block.event.y);
-            return;
-        }
-        this.target = target;
-        this.menu.show(block.event.x, block.event.y, target.getMenu());
-        this.active = true;
+    var target = this.checkTarget(event, 'mousedown.link', 'mousedown.field', 'mousedown.table');
+    target = target || this.backmenu;
+
+    // change position
+    if (target === this.target) {
+        this.menu.showprevious(block.event.x, block.event.y);
+        return;
     }
+    this.target = target;
+    this.menu.show(block.event.x, block.event.y, target.getMenu());
+    this.active = true;
+}
+MenuAction.prototype.checkTarget = function (event) {
+    var t;
+    for (var i = 1, l = arguments.length; i < l; i++) {
+        if (t = this.getParam(event, arguments[i])) {
+            return t;
+        }
+    }
+    return null;
 }
 MenuAction.prototype.onMenuClick = function (command) {
     this.target.runMenuAction(command);

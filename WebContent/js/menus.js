@@ -19,11 +19,12 @@ var i18n = new (_defineClass(DataMap, {
             this.value('global.export', 'Export');
             this.value('global.save', 'Save');
 
-            this.value('table.remove', 'Remove');
-            this.value('table.rename', 'Rename');
-            this.value('table.add.field', 'Add Field');
+            this.value('table.remove', 'Remove Table');
+            this.value('table.rename', 'Rename Table');
+            this.value('table.field.add', 'Add Field');
+            this.value('table.field.remove', 'Remove Field');
 
-            this.value('link.remove', 'Remove');
+            this.value('link.remove', 'Remove Link');
         }
     },
     string: function (key) {
