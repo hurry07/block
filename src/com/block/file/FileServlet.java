@@ -76,7 +76,6 @@ public class FileServlet extends HttpServlet {
             append("{\"status\":\"fail\"}", response.getWriter());
         }
     }
-
    
     private void updateFile(String file, JSONObject jsonObject) throws IOException {
         File f = createFile(file);
