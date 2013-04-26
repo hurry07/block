@@ -76,7 +76,7 @@ public class FileServlet extends HttpServlet {
             append("{\"status\":\"fail\"}", response.getWriter());
         }
     }
-   
+
     private void updateFile(String file, JSONObject jsonObject) throws IOException {
         File f = createFile(file);
         BufferedWriter bout = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f)));
@@ -134,6 +134,6 @@ public class FileServlet extends HttpServlet {
         while ((c = reader.read(buffer)) != -1) {
             writer.write(buffer, 0, c);
         }
-        System.out.println();
+        reader.close();
     }
 }
