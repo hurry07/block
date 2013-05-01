@@ -315,6 +315,7 @@ function Table(p) {
     Node.call(this, p);
     this.linkout = [];
     this.linkin = [];
+    this.type = '{';
 }
 _node(Table, Node);
 Table.prototype.addLinkOut = function (link) {
@@ -345,7 +346,11 @@ Table.prototype.rmLinkIn = function (link) {
     }
 }
 Table.prototype.targetType = Target.TABLE;
-Table.prototype.types = ['view', 'map', 'table'];
+/**
+ * table 的几种类型 {} [float|int|boolean|double|char] [{}] [{}*]
+ * @type {Array}
+ */
+Table.prototype.types = ['view', 'map', 'table', 'array'];
 Table.prototype.prefer = {
     header: {
         height: 45,
@@ -366,6 +371,9 @@ Table.prototype.getName = function () {
 Table.prototype.createView = function () {
     return this.rootView().append('svg:g');
 }
+Table.prototype.getIcon = function (t) {
+
+}
 Table.prototype.enter = function (d) {
     var p = this.prefer.header;
     var w = this.prefer.width;
@@ -374,7 +382,7 @@ Table.prototype.enter = function (d) {
     this.view.attr('transform', 'translate(' + d.position.x + ',' + d.position.y + ')')
             .classed('table', true)
             .classed(d.type, true)
-            .on('mousedown', this.handleDown, this)
+            .on('mousedown', this.handleDown, this);
 
     // header
     this.header = this.view
@@ -385,14 +393,25 @@ Table.prototype.enter = function (d) {
             .attr('width', this.prefer.width)
             .attr('height', p.height)
             .classed('header', true);
-    this.title = this.header.append('svg:text')
-            .attr('x', p.prefix)
-            .attr('y', p.height / 2)
-            .attr('dy', 8)
-            .classed('headername', true)
-            .text(d.name)
 
-    // fields
+    this.title = this.header.append('svg:text')
+            .attr({
+                x: p.prefix,
+                y: p.height / 2,
+                dy: 8
+            })
+            .classed('headername', true)
+            .text(d.name);
+    this.typetext = this.header.append('svg:text')
+            .attr({
+                x: this.prefer.width - 15,
+                y: p.height / 2,
+                dy: 13
+            })
+            .classed('type', true)
+            .text('{');
+
+// fields
     var fieldsBg = this.view.append('svg:g')
             .attr("transform", 'translate(0,' + p.height + ')')
             .classed('fields', true)
@@ -403,14 +422,15 @@ Table.prototype.enter = function (d) {
     this.fields.bind(d.fields);
     this.fields.bind(d.fields);
 
-    // footer
+// footer
     p = this.prefer.footer;
     this.footer = this.view.append('svg:rect')
             .attr('width', w)
             .attr('height', p.height)
             .attr('y', this.getHeight() - p.height)
             .classed('footer', true);
-};
+}
+;
 Table.prototype.update = function (dold, dnew) {
     var d = dnew;
 
@@ -946,6 +966,10 @@ function UIManager() {
     this.tables = new TableCollection(this.layers.schema, this.layers.schema.view);
     this.links = new LinkCollection(this.layers.schema, this.layers.schema.view);
 
+//    svg.append('path')
+//            .attr('d', 'm 9.4512443,0.05844875 c -0.121534,0.017841 -0.512253,0.075447 -0.868266,0.128016 -2.691328,0.397399 -4.442499,1.94247005 -5.07177,4.47485905 -0.159084,0.640207 -0.19233,1.024724 -0.189415,2.190713 0.0019,0.777818 0.0474,1.732412 0.101017,2.12132 0.05362,0.388909 0.206526,1.4827152 0.339802,2.4306802 0.181309,1.289612 0.243499,2.09077 0.247005,3.18198 0.0043,1.338389 -0.0127,1.501684 -0.206605,1.984268 -0.261445,0.650685 -0.854682,1.299738 -1.457564,1.594701 -0.496012,0.242676 -1.49607599,0.482933 -2.02030099,0.485361 l -0.331456,0.0015 0,1.281632 0,1.281631 0.35728,0 c 0.615297,0 1.69837899,0.268653 2.23710799,0.554904 0.598945,0.31828 1.033042,0.834113 1.267502,1.506189 0.269496,0.772509 0.211244,3.165156 -0.134887,5.540338 -0.506054,3.472587 -0.552336,4.747693 -0.225758,6.219728 0.366804,1.653349 1.39654,2.948355 2.951105,3.711338 0.461829,0.226666 1.156587,0.49186 1.543908,0.589319 0.729467,0.183552 2.2455597,0.34931 3.2069657,0.350626 l 0.552427,7.56e-4 0,-1.401079 0,-1.401078 -0.994369,-0.05407 C 8.5220473,36.710676 7.5216163,36.045698 7.0069643,34.340813 c -0.281635,-0.932969 -0.217438,-2.908483 0.180922,-5.567515 0.508605,-3.394917 0.447792,-4.95119 -0.24872,-6.364912 -0.167656,-0.340295 -0.447292,-0.78491 -0.621413,-0.988034 -0.405527,-0.473073 -1.242302,-1.031462 -1.911168,-1.275342 -0.288094,-0.105044 -0.523751,-0.215492 -0.523684,-0.245438 6.7e-5,-0.02995 0.228824,-0.121646 0.508349,-0.203777 0.641151,-0.188386 1.474002,-0.722958 1.913991,-1.228509 0.186648,-0.214461 0.474029,-0.669751 0.638624,-1.011757 0.688296,-1.430187 0.750981,-3.018652 0.254503,-6.44924 -0.371054,-2.5639332 -0.463756,-3.9727032 -0.321216,-4.8814512 0.351462,-2.240704 1.502226,-3.225865 3.9220147,-3.35761 l 0.950175,-0.05173 0,-1.356778 0,-1.35677805 -1.038563,0.01204 c -0.57121,0.0066 -1.1380007,0.02663 -1.2595347,0.04447 l 0,0 z')
+//            .attr('style', 'fill:black;');
+
     // all registered actions
     this.actions = [];
 }
@@ -988,6 +1012,7 @@ UIManager.prototype.bindEntity = function (data) {
         (node = node.node()) && tmap.set(ts[i].name, node);
     });
 
+    // create link
     var link;
     for (var i = 0, ls = data.links, len = ls.length; i < len; i++) {
         link = ls[i];
@@ -998,21 +1023,6 @@ UIManager.prototype.bindEntity = function (data) {
             p2.table().addLinkIn(link);
         }
     }
-
-//    var t1 = {
-//        "type": "map",
-//        "position": {"x": 400, "y": 400},
-//        "name": "4th",
-//        "fields": [
-//            {"name": "abcde", "type": "s"},
-//            {"name": "width", "type": "i"},
-//            {"name": "percent", "type": "f"},
-//            {"name": "price", "type": "f"}
-//        ],
-//        "refs": [
-//        ]
-//    }
-//    this.tables.bindChild(t1);
 }
 UIManager.prototype.bindDatas = function (data) {
     this.bindEntity(data.entities);
