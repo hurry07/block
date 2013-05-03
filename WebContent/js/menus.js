@@ -25,6 +25,10 @@ var i18n = new (_defineClass(DataMap, {
             this.value('table.field.remove', 'Remove Field');
 
             this.value('link.remove', 'Remove Link');
+
+            this.value('class.include', 'Include in classes');
+            this.value('class.exclude', 'Exclude from classes');
+            this.value('class.delete', 'Delete');
         }
     },
     string: function (key) {

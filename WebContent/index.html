@@ -957,6 +957,9 @@ Sprite.prototype.update = function () {
             this.scaley));
 }
 Sprite.prototype.setScale = function (sx, sy) {
+    if (arguments.length == 1) {
+        sy = sx;
+    }
     this.scalex = sx;
     this.scaley = sy;
     this.update();
@@ -974,15 +977,15 @@ Sprite.prototype.setPositon = function (x, y) {
     this.y = y;
     this.update();
 }
-function Component(contaner) {
+function Component() {
 }
 /**
  * return component name
  */
 Component.prototype.getName = function () {
 }
-Component.prototype.create = function (container) {
-    return new Component(container);
+Component.prototype.create = function () {
+    return new Component();
 }
 /**
  * return component icon
@@ -1037,6 +1040,7 @@ function UIManager() {
 //            .attr('style', 'fill:black;');
     var comp = new Component();
     var sprite = comp.createIcon(this.layers.dialog.view);
+    sprite.setScale(2);
 
     // all registered actions
     this.actions = [];
