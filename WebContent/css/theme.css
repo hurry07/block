@@ -38,15 +38,15 @@ path {
 }
 
 .entity text {
-    font-family: Abel, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
 }
 
 .entity text.input {
     fill: transparent
 }
 
-.fieldinput {
-    font-family: Abel, "Helvetica Neue", Helvetica, Arial, sans-serif;
+.textedit {
+    font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     font-size: 17px;
     height: 100%;
     width: 100%;
@@ -148,20 +148,25 @@ path {
 .menu .background {
     filter: url(#dropshadow);
 }
+
 .menu g.item {
     fill: #EEEEEE;
 }
+
 .menu g.item:hover {
     fill: #1EB5E7;
 }
+
 .menu g.item:hover text {
     fill: white;
 }
+
 .menu .split {
     fill: #EEEEEE;
 }
+
 .menu text {
-    font-family: Abel, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     text-anchor: start;
     font-size: 15px;
     -moz-user-select: -moz-none;
@@ -170,6 +175,7 @@ path {
     user-select: none;
     fill: black;
 }
+
 .entity text.type {
     font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     text-anchor: end;
@@ -180,6 +186,107 @@ path {
     user-select: none;
     fill: black;
 }
+
 .menu path {
     stroke: #CCCCCC;
+}
+
+/*
+g.comp:nth-child(odd) {
+    fill: #B1BBC4;
+}
+g.comp:nth-child(even) {
+    fill: #A7B6C7;
+}
+
+component menu styles
+*/
+.pPanel .comp .topline {
+    stroke: #CCCCCC;
+    stroke-width: 0.1px;
+}
+
+.pPanel .comp rect {
+    fill: #F2F2F2;
+}
+
+.pPanel .comp text {
+    font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
+    text-anchor: start;
+    font-size: 18px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    fill: black;
+}
+
+.pPanel .comp:hover rect {
+    fill: #1EB5E7;
+}
+
+.pPanel .comp:hover text {
+    fill: white;
+}
+
+.pPanel .expand rect {
+    fill: #D9D9D9;
+}
+
+/* expand control */
+.pPanel .comps .comp.show {
+    visibility: visible;
+}
+.pPanel .comps .comp.hide {
+    visibility: hidden;
+}
+.pPanel .comps.fold .comp.show {
+    visibility: hidden;
+}
+
+/* component title */
+.pPanel .expand text {
+    font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
+    text-anchor: start;
+    font-size: 22px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    fill: black;
+    text-anchor: middle;
+}
+
+.pPanel .expand .topline {
+    stroke: black;
+    stroke-width: 2px;
+}
+
+/* component search box */
+.pPanel .search .bg {
+    fill: #E6E6E6;
+}
+
+.pPanel .search .input {
+    fill: white;
+}
+
+.pPanel .search .input text {
+    font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
+    text-anchor: start;
+    font-size: 22px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    fill: black;
+    text-anchor: middle;
+}
+
+.pPanel .search .button {
+    fill: green;
+}
+
+.pPanel .title {
+    fill: #484848;
 }

@@ -1,9 +1,81 @@
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function (oThis) {
+        if (typeof this !== "function") {
+            // closest thing possible to the ECMAScript 5 internal IsCallable function
+            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+        }
+
+        var aArgs = Array.prototype.slice.call(arguments, 1),
+            fToBind = this,
+            fNOP = function () {
+            },
+            fBound = function () {
+                return fToBind.apply(this instanceof fNOP && oThis
+                    ? this
+                    : oThis || window,
+                    aArgs.concat(Array.prototype.slice.call(arguments)));
+            };
+
+        fNOP.prototype = this.prototype;
+        fBound.prototype = new fNOP();
+
+        return fBound;
+    };
+}
+
+function _extends(sub, super_, props) {
+    sub.prototype = Object.create(super_.prototype);
+    if (props) {
+        for (var i in props) {
+            sub.prototype[i] = props[i];
+        }
+    }
+    sub.prototype.constructor = sub;
+    return sub;
+}
+
 /**
- * Created with JetBrains WebStorm.
- * User: jie
- * Date: 13-4-13
- * Time: 上午11:15
- * To change this template use File | Settings | File Templates.
+ * add default crate method
+ *
+ * @param sub
+ * @param super_
+ * @param props
+ * @returns {*}
+ * @private
+ */
+function _node(sub, super_, props) {
+    var type = _extends(sub, super_, props);
+    type.create = type.create || function () {
+        var node = new (Function.prototype.bind.apply(type, [type].concat(Array.prototype.slice.call(arguments, 0))));
+        node.create();
+        return node;
+    }
+    return type;
+}
+function _defineClass(super_, props) {
+    props = props || {};
+    var sub = _getOwnProperty(props, 'constructor') || function () {
+        super_.apply(this, arguments);
+    };
+    sub.prototype = Object.create(super_.prototype);
+    if (props) {
+        for (var i in props) {
+            sub.prototype[i] = props[i];
+        }
+    }
+    sub.prototype.constructor = sub;
+    return sub;
+}
+function _getOwnProperty(o, p) {
+    if (o.hasOwnProperty(p)) {
+        return o[p];
+    }
+    return undefined;
+}
+
+/**
+ * used to operate some.path.name = 'value'
+ * @constructor
  */
 function DataMap() {
     this.root = arguments[0] || {};
@@ -27,10 +99,10 @@ DataMap.prototype.data = function () {
 DataMap.prototype.value = function (path, value) {
     var node = this.root;
     var isget = arguments.length == 1;
-    if(!path) {
+    if (!path) {
         console.log(path);
     }
-    if(typeOf(path) != 'string') {
+    if (typeOf(path) != 'string') {
         console.log(path);
     }
     for (var i = 0, paths = path.split('\.'), l = paths.length, e; i < l, e = paths[i]; i++) {
@@ -94,4 +166,23 @@ DataMap.prototype.has = function (path) {
         }
     }
     return false;
+}
+
+function Collection(elements) {
+    this.args = elements;
+}
+Collection.prototype.iter = function (fn) {
+    for (var i = 0, args = this.args, l = args.length; i < l; i++) {
+        var arg = args[i];
+        if (typeOf(arg) == 'array') {
+            for (var j = 0 , cl = arg.length; j < cl; j++) {
+                fn(arg[j]);
+            }
+        } else {
+            fn(arg);
+        }
+    }
+}
+function collection() {
+    return new Collection(Array.prototype.slice.call(arguments, 0));
 }

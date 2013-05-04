@@ -1,84 +1,50 @@
-if (!Function.prototype.bind) {
-    Function.prototype.bind = function (oThis) {
-        if (typeof this !== "function") {
-            // closest thing possible to the ECMAScript 5 internal IsCallable function
-            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-        }
-
-        var aArgs = Array.prototype.slice.call(arguments, 1),
-            fToBind = this,
-            fNOP = function () {
-            },
-            fBound = function () {
-                return fToBind.apply(this instanceof fNOP && oThis
-                    ? this
-                    : oThis || window,
-                    aArgs.concat(Array.prototype.slice.call(arguments)));
-            };
-
-        fNOP.prototype = this.prototype;
-        fBound.prototype = new fNOP();
-
-        return fBound;
-    };
-}
-
+// ==========================
+// render basic
+// ==========================
 /**
- * Created with JetBrains WebStorm.
- * User: jie
- * Date: 13-4-10
- * Time: 下午2:56
- * To change this template use File | Settings | File Templates.
- */
-function _extends(sub, super_, props) {
-    sub.prototype = Object.create(super_.prototype);
-    if (props) {
-        for (var i in props) {
-            sub.prototype[i] = props[i];
-        }
-    }
-    sub.prototype.constructor = sub;
-    return sub;
-}
-/**
- * add default crate method
+ * describe a drawable area
  *
- * @param sub
- * @param super_
- * @param props
- * @returns {*}
- * @private
+ * @param w
+ * @param h
+ * @param view
+ * @constructor
  */
-function _node(sub, super_, props) {
-    var type = _extends(sub, super_, props);
-    type.create = type.create || function () {
-        var node = new (Function.prototype.bind.apply(type, [type].concat(Array.prototype.slice.call(arguments, 0))));
-        node.create();
-        return node;
-    }
-    return type;
+function Sprite(w, h, view) {
+    this.width = w;
+    this.height = h;
+    this.view = view;
+    this.scalex = this.scaley = 1;
+    this.x = this.y = 0;
+    this.centerx = this.centery = 0;
 }
-function _defineClass(super_, props) {
-    props = props || {};
-    var sub = _getOwnProperty(props, 'constructor') || function () {
-        super_.apply(this, arguments);
-    };
-    sub.prototype = Object.create(super_.prototype);
-    if (props) {
-        for (var i in props) {
-            sub.prototype[i] = props[i];
-        }
-    }
-    sub.prototype.constructor = sub;
-    return sub;
+Sprite.prototype.update = function () {
+    this.view.attr('transform', sprintf('translate(%f,%f) scale(%f,%f)',
+        this.x - this.width * this.centerx * this.scalex,
+        this.y - this.height * this.centery * this.scaley,
+        this.scalex,
+        this.scaley));
 }
-function _getOwnProperty(o, p) {
-    if (o.hasOwnProperty(p)) {
-        return o[p];
+Sprite.prototype.setScale = function (sx, sy) {
+    if (arguments.length == 1) {
+        sy = sx;
     }
-    return undefined;
+    this.scalex = sx;
+    this.scaley = sy;
+    this.update();
 }
-
+Sprite.prototype.setCenter = function (cx, cy) {
+    this.centerx = cx;
+    this.centery = cy;
+    this.update();
+}
+/**
+ * {x, y}
+ */
+Sprite.prototype.setPositon = function (x, y) {
+    this.x = x;
+    this.y = y;
+    this.update();
+}
 // ==========================================
 // node is used as basic element of MVC
 // ==========================================
@@ -144,6 +110,9 @@ Node.prototype.bind = function (data) {
         return;
     }
     this.bindUpdate(data);
+}
+Node.prototype.direct = function (fn) {
+    return this.bindIdentity = this.bindUpdate = this.bindEnter = this.bind = fn;
 }
 /**
  * root view where this node's graphic will bind to
