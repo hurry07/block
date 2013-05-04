@@ -154,7 +154,7 @@ Component.prototype.match = function (text) {
                         start = end;
                     }
                     if (index > start) {
-                        id -= (1 << (index - start));
+                        //id -= (1 << (index - start));
                         this.text.append('tspan').text(content.substring(start, index));
                         start = index;
                     }
@@ -171,7 +171,7 @@ Component.prototype.match = function (text) {
         }
         if (content.length > start) {
             if (start > 0) {
-                id -= (1 << (content.length - start));
+                //id -= (1 << (content.length - start));
                 this.text.append('tspan').text(content.substring(start));
             } else {
                 id = 0;
@@ -1351,9 +1351,32 @@ MenuAction.prototype.stopMenu = function () {
 function ComponentBoard() {
 }
 _extends(ComponentBoard, ListNode);
-// ======================
+// ==========================
+// Area stands for a screen area, layout logic will interact with this interface
+// ==========================
+function Area(x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
+}
+Area.prototype.size = function (w, h) {
+    if (arguments.length == 0) {
+        return [this.width, this.height];
+    }
+    this.width = w;
+    this.height = h;
+}
+Area.prototype.position = function (x, y) {
+    if (arguments.length == 0) {
+        return [this.x , this.y];
+    }
+    this.x = x;
+    this.y = y;
+}
+// ==========================
 // UI Manager
-// ======================
+// ==========================
 function UIManager() {
     // listener binding
     this.controlListener = new DataMap();
