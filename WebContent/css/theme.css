@@ -205,10 +205,6 @@ component menu styles
     stroke-width: 0.1px;
 }
 
-.pPanel .comp rect {
-    fill: #F2F2F2;
-}
-
 .pPanel .comp text {
     font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     text-anchor: start;
@@ -220,16 +216,33 @@ component menu styles
     fill: black;
 }
 
+/* component font colors */
+.pPanel .comp rect {
+    fill: #EEF4F9;
+}
+
 .pPanel .comp:hover rect {
-    fill: #1EB5E7;
+    fill: #0067B3;
 }
 
 .pPanel .comp:hover text {
     fill: white;
 }
 
-.pPanel .expand rect {
-    fill: #D9D9D9;
+.pPanel .comp:hover tspan {
+    fill: white;
+}
+
+.pPanel .comp:hover tspan.light {
+    fill: white;
+}
+
+.pPanel .comp tspan {
+    fill: #5E6288;
+}
+
+.pPanel .comp tspan.light {
+    fill: #C02DBE;
 }
 
 /* expand control */
@@ -246,6 +259,10 @@ component menu styles
 }
 
 /* component title */
+.pPanel .expand rect {
+    fill: #D9D9D9;
+}
+
 .pPanel .expand text {
     font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     text-anchor: start;

@@ -134,7 +134,52 @@ Component.prototype.hide = function () {
     this.view.classed({'show': false, 'hide': true});
 }
 Component.prototype.match = function (text) {
-    return this.data.id.indexOf(text) != -1;
+    if (!text || text.length == 0) {
+        this.text.text(this.data.id);
+        return 0;
+    } else {
+        var id = 0;
+        this.text.childNodes().remove();
+        var start = 0;
+        var end = -1;
+        var index = 0;
+        var content = this.data.id;
+        for (var i = 0, l = text.length; i < l; i++) {
+            var c = text.charAt(i);
+            if ((index = content.indexOf(c, end)) != -1) {
+                if (index > end) {
+                    if (end > start) {
+                        id += (1 << (end - start + 1));
+                        this.text.append('tspan').classed('light', true).text(content.substring(start, end));
+                        start = end;
+                    }
+                    if (index > start) {
+                        id -= (1 << (index - start));
+                        this.text.append('tspan').text(content.substring(start, index));
+                        start = index;
+                    }
+                }
+                end = index + 1;
+            } else {
+                break;
+            }
+        }
+        if (end > start) {
+            id += (1 << (end - start + 1));
+            this.text.append('tspan').classed('light', true).text(content.substring(start, end));
+            start = end;
+        }
+        if (content.length > start) {
+            if (start > 0) {
+                id -= (1 << (content.length - start));
+                this.text.append('tspan').text(content.substring(start));
+            } else {
+                id = 0;
+                this.text.text(content);
+            }
+        }
+        return id;
+    }
 }
 Component.prototype.width = function (w) {
     console.log('width', w);
@@ -192,17 +237,29 @@ ComponentGroup.prototype.components = Node.createContainer(Component, {
         this.view.attr('transform', sprintf('translate(%f,%f)', x, y));
     },
     filter: function (key) {
-        var count = 0;
-        var height = Component.prototype.prefer.height;
-        this.getChildren().each(function (node) {
-            var n = node.node();
-            if (n.match(key)) {
-                n.position(0, height * count);
-                n.show();
-                count++;
-            } else {
-                n.hide();
+        var children = this.getChildren();
+        var nodes = children.nodes();
+        nodes.each(function (node) {
+            node._id = node.node().match(key);
+        });
+
+        for (var i = 0, l1 = nodes.length - 1; i < l1; i++) {
+            for (var j = i + 1, l2 = nodes.length; j < l2; j++) {
+                if (nodes[i]._id < nodes[j]._id) {
+                    var n = nodes[i];
+                    nodes[i] = nodes[j];
+                    nodes[j] = n;
+                }
             }
+        }
+
+        var height = Component.prototype.prefer.height;
+        var count = 0;
+        nodes.each(function (node) {
+            var n = node.node();
+            n.position(0, height * count);
+            n.show();
+            count++;
         });
         this._height = count * height;
     },
