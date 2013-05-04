@@ -132,7 +132,6 @@ path {
     z-index: 99;
     cursor: pointer;
     border: 0px;
-    visibility: visible;
     overflow: hidden;
     display: block;
     padding: 0px;
@@ -237,9 +236,11 @@ component menu styles
 .pPanel .comps .comp.show {
     visibility: visible;
 }
+
 .pPanel .comps .comp.hide {
     visibility: hidden;
 }
+
 .pPanel .comps.fold .comp.show {
     visibility: hidden;
 }
@@ -267,11 +268,11 @@ component menu styles
     fill: #E6E6E6;
 }
 
-.pPanel .search .input {
+.pPanel .search .inputbg {
     fill: white;
 }
 
-.pPanel .search .input text {
+.pPanel .search text {
     font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     text-anchor: start;
     font-size: 22px;
@@ -280,13 +281,14 @@ component menu styles
     -webkit-user-select: none;
     user-select: none;
     fill: black;
-    text-anchor: middle;
+    text-anchor: start;
 }
 
 .pPanel .search .button {
     fill: green;
 }
 
+/* this tool panel's title */
 .pPanel .title {
-    fill: #484848;
+    fill: #393939;
 }

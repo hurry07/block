@@ -133,8 +133,8 @@ Component.prototype.show = function () {
 Component.prototype.hide = function () {
     this.view.classed({'show': false, 'hide': true});
 }
-Component.prototype.match = function (input) {
-    return true;
+Component.prototype.match = function (text) {
+    return this.data.id.indexOf(text) != -1;
 }
 Component.prototype.width = function (w) {
     console.log('width', w);
@@ -216,6 +216,9 @@ ComponentGroup.prototype.components = Node.createContainer(Component, {
         this.view.classed('fold', true);
     }
 });
+ComponentGroup.prototype.filter = function (text) {
+    this.items.filter(text);
+}
 ComponentGroup.prototype.direct(function (data) {
     this.items.bind(data);
     this.items.position(0, this.prefer.title);
@@ -255,24 +258,26 @@ ComponentGroup.prototype.width = function (w) {
 function SearchBox(view) {
     var p = this.prefer;
 
-    var v = this.view = view.append('g').classed('search', true);
     var w = 200;
+    var v = this.view = view.append('g')
+            .classed('search', true);
 
-    this.searchBg = v.append('rect')
+    this.bg = v.append('rect')
             .classed('bg', true)
             .attr({width: w, height: p.height});
 
+    // input
     this.input = v.append('g')
-            .classed('input', true);
+            .classed('key', true)
+            .attr('transform', sprintf('translate(%f,%f)', p.padding, p.padding));
     this.inputBg = this.input.append('rect')
             .classed('inputbg', true)
             .attr({
                 width: w - p.height - p.padding,
-                height: p.height - 2 * p.padding,
-                x: p.padding,
-                y: p.padding
+                height: p.height - 2 * p.padding
             });
-    this.keyword = this.input.append('text')
+    this.text = this.input.append('text')
+            .attr({'x': p.indent, 'y': p.height, dy: p.dy})
             .text('aabbcc');
 
     this.button = v.append('rect')
@@ -282,15 +287,23 @@ function SearchBox(view) {
                 height: p.height - 2 * p.padding,
                 x: w - p.height + p.padding,
                 y: p.padding
+            })
+            .on('click', function () {
+                console.log('click');
             });
+}
+SearchBox.prototype.getInputSize = function () {
+    return [0, 0, 0, this.prefer.height];
 }
 SearchBox.prototype.prefer = {
     height: 28,
-    padding: 2
+    padding: 2,
+    indent: 4,
+    dy: -9
 }
 SearchBox.prototype.width = function (w) {
     var p = this.prefer;
-    this.searchBg.attr('width', w);
+    this.bg.attr('width', w);
     this.inputBg.attr('width', w - p.height - p.padding);
     this.button.attr('x', w - p.height + p.padding);
 }
@@ -300,6 +313,24 @@ SearchBox.prototype.position = function (x, y) {
 SearchBox.prototype.height = function () {
     return this.prefer.height;
 }
+function CompTitle(view) {
+    var p = this.prefer;
+    this.view = view.append('rect')
+            .classed('title', true)
+            .attr({width: 200, height: p.height});
+}
+CompTitle.prototype.width = function (w) {
+    this.view.attr('width', w);
+}
+CompTitle.prototype.height = function () {
+    return this.prefer.height;
+}
+CompTitle.prototype.position = function (x, y) {
+    this.view.attr({x: x, y: y});
+}
+CompTitle.prototype.prefer = {
+    height: 12
+}
 /**
  * @param root parent node
  * @constructor
@@ -308,14 +339,28 @@ function ClassManage(root) {
     this.view = root.append('g');
     this.root = Node.wrap(this.view);
 
+    this.title = new CompTitle(this.view);
+
     this.search = new SearchBox(this.view);
-    this.search.button.on('click', this.showSearchHistory, this);
-    this.search.inputBg
+    this.search.input.on('mousedown', this.showSearch, this);
+    this.search.button.on('click', this.showHistory, this);
+
+    this.input = new TextInput(document.getElementById('search'));
+    this.key = 'aabbcc';
 
     var items = this._default = new ComponentGroup(this, this.root, 'DEFAULT');
     items.bind(config.types);
     this.customers = [new ComponentGroup(this, this.root, 'CUSTOMER')];
     this.customers[0].bind(config.types);
+
+    this.children = collection(
+            this.title,
+            this.search,
+            this._default,
+            this.customers);
+    this.comps = collection(
+            this._default,
+            this.customers);
 
     this.layout();
     this.width(230);
@@ -324,20 +369,24 @@ _extends(ClassManage, Action);
 ClassManage.prototype.component = function (pkg) {
     return new Component(this, this.root, pkg);
 }
-ClassManage.prototype.showSearchHistory = function () {
-    console.log(this.prefer);
+ClassManage.prototype.showSearch = function () {
+    this.input.show(this);
+}
+ClassManage.prototype.showHistory = function () {
+    console.log('showHistory');
 }
 ClassManage.prototype.prefer = {
     width: 200
 }
 ClassManage.prototype.width = function (w) {
-    collection(this.search, this._default, this.customers).iter(function (e) {
+    this._width = w;
+    this.children.iter(function (e) {
         e.width(w);
     });
 }
 ClassManage.prototype.layout = function () {
     var h = 0;
-    collection(this.search, this._default, this.customers).iter(function (e) {
+    this.children.iter(function (e) {
         e.position(0, h);
         h += e.height();
     });
@@ -345,6 +394,12 @@ ClassManage.prototype.layout = function () {
 ClassManage.prototype.onRegister = function (manager) {
     this.on(ControlType.SVG_DOWN_END);
     this.on(_r(ControlType.SVG_DOWN_END));
+}
+ClassManage.prototype.filter = function (text) {
+    this.comps.iter(function (e) {
+        e.filter(text);
+    });
+    this.layout();
 }
 ClassManage.prototype.onEvent = function (event) {
     switch (event.id) {
@@ -359,8 +414,26 @@ ClassManage.prototype.onEvent = function (event) {
     }
 }
 // interact with input
-ClassManage.prototype.getNode = function () {
-    return this._search;
+ClassManage.prototype.setText = function (t) {
+    var o = this.key;
+    this.key = t;
+    if (o != t) {
+        this.search.text.text(t);
+        this.filter(t);
+    }
+}
+ClassManage.prototype.endEdit = function () {
+    this.search.input.style('visibility', 'visible');
+}
+ClassManage.prototype.startEdit = function (input) {
+    input.tag().value = this.key;
+    input.style('font-size', Math.round(22 * camera.getScale()) + 'px')
+            .style('text-indent', Math.round(4 * camera.getScale()) + 'px');
+    this.search.input.style('visibility', 'hidden');
+}
+ClassManage.prototype.getTarget = function () {
+    var node = this.search.inputBg;
+    return {node: node.tag(), size: [0, 0, node.attr('width'), node.attr('height')]};
 }
 // ==========================
 // Field
@@ -1468,49 +1541,46 @@ UIManager.prototype.exportEntity = function () {
 // TextInput
 // ==========================
 function TextInput(div) {
-    this.div = div;
-    this.input = div.getElementsByTagName('input')[0];
-    var current = this;
-    var listener = function () {
-        current.submit();
-    }
-    this.input.onchange = listener;
-    this.input.onblur = listener;
-    this.input.ondblclick = listener;
-    this.input.onselect = listener;
+    this.div = block.select(div);
+    this.input = block.select(div.getElementsByTagName('input')[0])
+            .on('change', this.submit, this)
+            .on('input', this.submit, this)
+            .on('blur', this.hide, this)
 }
 TextInput.prototype.submit = function () {
-    var n = this.node;
-    if (n) {
-        n.endInput(this.id, this.input);
+    var a = this.adapter;
+    if (a) {
+        a.setText(this.input.tag().value);
     }
-    block.select(this.div).style('visibility', 'hidden');
 }
-TextInput.prototype.close = function () {
+TextInput.prototype.hide = function () {
     this.submit();
+    var a = this.adapter;
+    if (a) {
+        a.endEdit();
+    }
+    this.div.style('visibility', 'hidden');
 }
-TextInput.prototype.handle = function (param) {
-    this.submit();
+/**
+ * @param adapter will interact with html text input tag
+ *     {getNode, getText, setText}
+ */
+TextInput.prototype.show = function (adapter) {
+    if (!adapter) {
+        return;
+    }
 
-    var id = param.id;
-    var target = param.target;
+    this.adapter = adapter;
+    var target = adapter.getTarget();
+    var size = camera.transform(target.node, target.size);
 
-    this.node = target;
-    this.id = id;
-
-    var size = camera.transform(target.getNode(id), target.getSize(id));
-
-    var div = block.select(this.div);
-    div.style({'left': size[0] + 'px',
+    adapter.startEdit(this.input);
+    this.div.style({
+        'left': size[0] + 'px',
         'top': size[1] + 'px',
         'width': size[2] + 'px',
         'height': size[3] + 'px'});
-
-    this.node.beginInput(this.id, this.input);
-    block.select(this.input)
-            .style('font-size', Math.round(17 * camera.getScale()) + 'px')
-            .style('text-indent', Math.round(4 * camera.getScale()) + 'px');
-    div.style('visibility', 'visible');
+    this.div.style('visibility', 'visible');
 }
 // ==========================
 // DragControl

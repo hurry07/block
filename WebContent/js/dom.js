@@ -138,7 +138,7 @@ var block = {};
             if (typeof name !== "string") {
                 if (n < 2) value = "";
                 for (priority in name) {
-                    this.each(__tag_style.call(this.tag(), priority, name[priority], value));
+                    __tag_style.call(this.tag(), priority, name[priority], value);
                 }
                 return this;
             }
