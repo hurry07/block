@@ -42,7 +42,6 @@ Action.prototype.register = function (manager) {
 Action.prototype.onRegister = function (manager) {
 
 }
-
 /**
  * object drag or move
  *

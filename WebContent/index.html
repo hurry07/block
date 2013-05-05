@@ -182,7 +182,6 @@ Component.prototype.match = function (text) {
     }
 }
 Component.prototype.width = function (w) {
-    console.log('width', w);
     this.bg.attr('width', w);
     this.topline.attr('d', sprintf('M0,0 l%f,0', w));
 }
@@ -419,10 +418,19 @@ function ClassManage(root) {
             this._default,
             this.customers);
 
+    this.area = new Area(0, 0, this.prefer.width, 0);
+
     this.layout();
     this.width(230);
 }
 _extends(ClassManage, Action);
+/**
+ * return an area that will be resized
+ * @returns {Area}
+ */
+ClassManage.prototype.getArea = function () {
+    return this.area;
+}
 ClassManage.prototype.component = function (pkg) {
     return new Component(this, this.root, pkg);
 }
@@ -449,6 +457,7 @@ ClassManage.prototype.layout = function () {
     });
 }
 ClassManage.prototype.onRegister = function (manager) {
+    console.log('onRegister', manager);
     this.on(ControlType.SVG_DOWN_END);
     this.on(_r(ControlType.SVG_DOWN_END));
 }
@@ -1352,29 +1361,6 @@ function ComponentBoard() {
 }
 _extends(ComponentBoard, ListNode);
 // ==========================
-// Area stands for a screen area, layout logic will interact with this interface
-// ==========================
-function Area(x, y, w, h) {
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-}
-Area.prototype.size = function (w, h) {
-    if (arguments.length == 0) {
-        return [this.width, this.height];
-    }
-    this.width = w;
-    this.height = h;
-}
-Area.prototype.position = function (x, y) {
-    if (arguments.length == 0) {
-        return [this.x , this.y];
-    }
-    this.x = x;
-    this.y = y;
-}
-// ==========================
 // UI Manager
 // ==========================
 function UIManager() {
@@ -1404,14 +1390,28 @@ function UIManager() {
     this.tables = new TableCollection(this.layers.schema, this.layers.schema.view);
     this.links = new LinkCollection(this.layers.schema, this.layers.schema.view);
 
+    // hold the whole ui layout
+    this.areas = new LinerLayout();
+    // all registered actions
+    this.actions = {};
+
+    this.init();
 //    svg.append('path')
 //            .attr('d', 'm 9.4512443,0.05844875 c -0.121534,0.017841 -0.512253,0.075447 -0.868266,0.128016 -2.691328,0.397399 -4.442499,1.94247005 -5.07177,4.47485905 -0.159084,0.640207 -0.19233,1.024724 -0.189415,2.190713 0.0019,0.777818 0.0474,1.732412 0.101017,2.12132 0.05362,0.388909 0.206526,1.4827152 0.339802,2.4306802 0.181309,1.289612 0.243499,2.09077 0.247005,3.18198 0.0043,1.338389 -0.0127,1.501684 -0.206605,1.984268 -0.261445,0.650685 -0.854682,1.299738 -1.457564,1.594701 -0.496012,0.242676 -1.49607599,0.482933 -2.02030099,0.485361 l -0.331456,0.0015 0,1.281632 0,1.281631 0.35728,0 c 0.615297,0 1.69837899,0.268653 2.23710799,0.554904 0.598945,0.31828 1.033042,0.834113 1.267502,1.506189 0.269496,0.772509 0.211244,3.165156 -0.134887,5.540338 -0.506054,3.472587 -0.552336,4.747693 -0.225758,6.219728 0.366804,1.653349 1.39654,2.948355 2.951105,3.711338 0.461829,0.226666 1.156587,0.49186 1.543908,0.589319 0.729467,0.183552 2.2455597,0.34931 3.2069657,0.350626 l 0.552427,7.56e-4 0,-1.401079 0,-1.401078 -0.994369,-0.05407 C 8.5220473,36.710676 7.5216163,36.045698 7.0069643,34.340813 c -0.281635,-0.932969 -0.217438,-2.908483 0.180922,-5.567515 0.508605,-3.394917 0.447792,-4.95119 -0.24872,-6.364912 -0.167656,-0.340295 -0.447292,-0.78491 -0.621413,-0.988034 -0.405527,-0.473073 -1.242302,-1.031462 -1.911168,-1.275342 -0.288094,-0.105044 -0.523751,-0.215492 -0.523684,-0.245438 6.7e-5,-0.02995 0.228824,-0.121646 0.508349,-0.203777 0.641151,-0.188386 1.474002,-0.722958 1.913991,-1.228509 0.186648,-0.214461 0.474029,-0.669751 0.638624,-1.011757 0.688296,-1.430187 0.750981,-3.018652 0.254503,-6.44924 -0.371054,-2.5639332 -0.463756,-3.9727032 -0.321216,-4.8814512 0.351462,-2.240704 1.502226,-3.225865 3.9220147,-3.35761 l 0.950175,-0.05173 0,-1.356778 0,-1.35677805 -1.038563,0.01204 c -0.57121,0.0066 -1.1380007,0.02663 -1.2595347,0.04447 l 0,0 z')
 //            .attr('style', 'fill:black;');
 //    var comp = Component.create(this.layers.panels);
 //    comp.bind(config.types[0]);
+}
+UIManager.prototype.init = function () {
+    var tables, classes;
+    this.addAction('tables', new TableAction(this.tables));
+    this.addAction('drag', new DragAction());
+    this.addAction('link', new LinkAction(this));
+    this.addAction('menu', new MenuAction(this.layers.dialog));
+    this.addAction('classes', new ClassManage(this.layers.panels));
 
-    // all registered actions
-    this.actions = [];
+    this.areas.add(this.actions['classes'].getArea(), 0);
+    this.areas.add(this.actions['tables'].getArea(), 1);
 }
 UIManager.prototype.dispatchEvent = function (evt) {
     var n = this.layers.schema.node();
@@ -1467,9 +1467,9 @@ UIManager.prototype.bindEntity = function (data) {
 UIManager.prototype.bindDatas = function (data) {
     this.bindEntity(data.entities);
 }
-UIManager.prototype.addAction = function (action) {
+UIManager.prototype.addAction = function (name, action) {
     action.register(this);
-    this.actions.push(action);
+    this.actions[name] = action;
 }
 UIManager.prototype.on = function (key, action) {
     if (key in ControlKeys) {
@@ -1615,6 +1615,11 @@ UIManager.prototype.exportEntity = function () {
     data.tables = this.tables.export();
     data.links = this.links.export();
     return data;
+}
+UIManager.prototype.onResize = function (w, h) {
+    this.areas.size(w, h);
+    console.log(this.actions['classes'].getArea());
+    console.log(this.actions['tables'].getArea());
 }
 
 // ==========================
@@ -1919,6 +1924,7 @@ function TableAction(tables) {
     Action.call(this);
     this.tables = tables;
     this.initEvent = 'drag.begin';
+    this.area = new Area();
 }
 _extends(TableAction, Action);
 TableAction.prototype.onRegister = function (manager) {
@@ -1932,7 +1938,9 @@ TableAction.prototype.onUserEvent = function (event) {
             break;
     }
 }
-
+TableAction.prototype.getArea = function () {
+    return this.area;
+}
 // ======================
 // global
 // ======================
@@ -1987,11 +1995,6 @@ var global = {
 var camera = new Camera(svg);
 
 var uiMgr = new UIManager();
-uiMgr.addAction(new TableAction(uiMgr.tables));
-uiMgr.addAction(new DragAction());
-uiMgr.addAction(new LinkAction(uiMgr));
-uiMgr.addAction(new MenuAction(uiMgr.layers.dialog));
-uiMgr.addAction(new ClassManage(uiMgr.layers.panels));
 // uiMgr.addAction(new TextInput(document.getElementById('input')));
 
 // global listeners register
@@ -2001,6 +2004,7 @@ window.addEventListener('resize', function () {
 //    camera.setStart(-100, 50);
 //    camera.scale(1.2, 0, 0);
     camera.apply();
+    uiMgr.onResize(width, height);
 });
 
 svg.on('mousedown.start', listenSvg(ControlType.SVG_DOWN_BEGIN), true);
@@ -2035,6 +2039,17 @@ var tt = setInterval(function () {
 
 block.select(document);
 block.select(document.querySelector('.chart'));
+
+//var liner = new LinerLayout(100, 50, 500, 400, 'h');
+//var a, b;
+//liner.add(a = new Area(0, 0, 100, 100));
+//liner.add(b = new Area(0, 0, 100, 100), 1);
+//liner.refresh();
+//console.log(a, b, liner);
+//
+//liner.setWidth(550);
+//console.log(a, b, liner);
+
 </script>
 </body>
 </html>
