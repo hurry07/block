@@ -392,7 +392,10 @@ CompTitle.prototype.prefer = {
  * @constructor
  */
 function ClassManage(root) {
-    this.view = root.append('g');
+    this.view = root.append('g').classed('classes', true);
+    this.bg = this.view.append('rect')
+            .classed('bg', true)
+            .attr({width: this.prefer.width, height: 0});
     this.root = Node.wrap(this.view);
 
     this.title = new CompTitle(this.view);
@@ -402,7 +405,7 @@ function ClassManage(root) {
     this.search.button.on('click', this.showHistory, this);
 
     this.input = new TextInput(document.getElementById('search'));
-    this.key = 'aabbcc';
+    this.key = '';
 
     var items = this._default = new ComponentGroup(this, this.root, 'DEFAULT');
     items.bind(config.types);
@@ -418,12 +421,23 @@ function ClassManage(root) {
             this._default,
             this.customers);
 
+    var _this = this;
     this.area = new Area(0, 0, this.prefer.width, 0);
+    this.area.onResize = function () {
+        _this.onResize();
+    };
 
     this.layout();
-    this.width(230);
+    this.onResize();
 }
 _extends(ClassManage, Action);
+ClassManage.prototype.onResize = function () {
+    var w = this.area.width();
+    this.bg.attr({width: w, height: this.area.height()});
+    this.children.iter(function (e) {
+        e.width(w);
+    });
+}
 /**
  * return an area that will be resized
  * @returns {Area}
@@ -442,12 +456,6 @@ ClassManage.prototype.showHistory = function () {
 }
 ClassManage.prototype.prefer = {
     width: 200
-}
-ClassManage.prototype.width = function (w) {
-    this._width = w;
-    this.children.iter(function (e) {
-        e.width(w);
-    });
 }
 ClassManage.prototype.layout = function () {
     var h = 0;
@@ -1059,56 +1067,64 @@ LinkCollection.prototype.export = function () {
 // ======================
 // camera
 // ======================
-function Camera(svg) {
-    this.svg = svg;
-    this.width = svg.attr('width');
-    this.height = svg.attr('height');
-    this.x = 0;
-    this.y = 0;
-    this.scalef = 1;
+function Camera(viewbox, bg) {
+    this.viewbox = viewbox;
+    this.bg = bg;
 
-    // touch start
+    // window size
+    this.width = 0;
+    this.height = 0;
+    // coordinate scale
+    this.scalef = 1;
+    // coordinate start
     this.startx = 0;
     this.starty = 0;
-
-    this.rect = svg.append('svg:rect')
-            .attr('fill', 'url(#gridPattern)')
-            .on('mouseout', this.handleOut)
-            .on('mouseover', this.handleOver)
-    this.apply();
-}
-Camera.prototype.getScale = function () {
-    return this.scalef;
-}
-Camera.prototype.touchStart = function (x, y) {
-    this.startx = x;
-    this.starty = y;
-}
-Camera.prototype.touchEnd = function (x, y) {
-    this.x -= (this.startx - x) / this.scalef;
-    this.y -= (this.starty - y) / this.scalef;
-    this.apply();
-}
-Camera.prototype.touchMove = function (x, y) {
-    var x = this.x - (this.startx - x) / this.scalef;
-    var y = this.y - (this.starty - y) / this.scalef;
-    this.apply(x, y);
-}
-Camera.prototype.setStart = function (x, y) {
-    this.x = x;
-    this.y = y;
 }
 /**
- * 离开背景图片, 进入到各种 UI 界面
+ * drag end
+ * @param mx
+ * @param my
  */
-Camera.prototype.handleOut = function () {
-    uiMgr.handleEvent({id: ControlType.SVG_BG_OUT})
+Camera.prototype.move = function (mx, my) {
+    this.startx -= mx / this.scalef;
+    this.starty -= my / this.scalef;
+    this.viewbox.attr('viewBox', sprintf('%f %f %f %f',
+            this.startx,
+            this.starty,
+            this.width / this.scalef,
+            this.height / this.scalef));
+}
+Camera.prototype.apply = function (sx, sy) {
+    if (arguments.length == 0) {
+        sx = this.startx;
+        sy = this.starty;
+    }
+    var w = this.width / this.scalef;
+    var h = this.height / this.scalef;
+    this.viewbox.attr('viewBox', sprintf('%f %f %f %f', sx, sy, w, h));
+    this.rect.attr({x: sx, y: sy, width: w, height: h});
 }
 /**
- * 鼠标从一个 UI 控件上离开
+ * during the drag movment
+ * @param mx
+ * @param my
  */
-Camera.prototype.handleOver = function () {
-    uiMgr.handleEvent({id: ControlType.SVG_BG_OVER})
+Camera.prototype.moving = function (mx, my) {
+    var sx = this.startx - mx / this.scalef;
+    var sy = this.starty - my / this.scalef;
+    this.apply(sx, sy);
+}
+/**
+ * when user resize the browser
+ *
+ * @param width
+ * @param height
+ */
+Camera.prototype.resize = function (width, height) {
+    this.width = width;
+    this.height = height;
+    this.viewbox.attr({width: this.width, height: this.height});
+    this.apply();
 }
 /**
  * 对屏幕上指定的点缩放
@@ -1119,23 +1135,9 @@ Camera.prototype.handleOver = function () {
  */
 Camera.prototype.scale = function (scalef, currentx, currenty) {
     this.scalef = scalef;
+    if (arguments.length == 3) {
+    }
     this.apply();
-}
-Camera.prototype.apply = function (endx, endy) {
-    var portx = this.x;
-    var porty = this.y;
-    var w = this.width = window.innerWidth;
-    var h = this.height = window.innerHeight;
-    var sw = w / this.scalef;
-    var sh = h / this.scalef;
-    this.svg.attr('viewBox', portx + ' ' + porty + ' ' + sw + ' ' + sh)
-            .attr('width', w)
-            .attr('height', h);
-
-    this.rect.attr('x', portx)
-            .attr('y', porty)
-            .attr('width', sw)
-            .attr('height', sh);
 }
 Camera.prototype.transformPoint = function (g, p) {
     var svgM = g.getTransformToElement(global.root);
@@ -1361,9 +1363,40 @@ function ComponentBoard() {
 }
 _extends(ComponentBoard, ListNode);
 // ==========================
+// Edit Area
+// ==========================
+function EditArea(root) {
+    this.view = root.append('g').classed('tables', true);
+
+    this.viewbox = this.view.append('svg');
+    this.rect = this.viewbox.append('svg:rect')
+            .attr('fill', 'url(#gridPattern)')
+            .on('mouseout', this.handleOut)
+            .on('mouseover', this.handleOver);
+    this.camera = new Camera(this.viewbox, this.rect);
+    this.area = new Area();
+}
+EditArea.prototype.getArea = function () {
+    return this.area;
+}
+/**
+ * 离开背景图片, 进入到各种 UI 界面
+ */
+EditArea.prototype.handleOut = function () {
+    uiMgr.handleEvent({id: ControlType.SVG_BG_OUT})
+}
+/**
+ * 鼠标从一个 UI 控件上离开
+ */
+EditArea.prototype.handleOver = function () {
+    uiMgr.handleEvent({id: ControlType.SVG_BG_OVER})
+}
+// ==========================
 // UI Manager
 // ==========================
-function UIManager() {
+function UIManager(svg) {
+    this.svg = svg;
+
     // listener binding
     this.controlListener = new DataMap();
     for (var i in ControlType) {
@@ -1394,6 +1427,8 @@ function UIManager() {
     this.areas = new LinerLayout();
     // all registered actions
     this.actions = {};
+    // all parts
+    this.components = {};
 
     this.init();
 //    svg.append('path')
@@ -1466,6 +1501,9 @@ UIManager.prototype.bindEntity = function (data) {
 }
 UIManager.prototype.bindDatas = function (data) {
     this.bindEntity(data.entities);
+}
+UIManager.prototype.addComponent = function (name, comp) {
+    this.components[name] = comp;
 }
 UIManager.prototype.addAction = function (name, action) {
     action.register(this);
@@ -1617,11 +1655,13 @@ UIManager.prototype.exportEntity = function () {
     return data;
 }
 UIManager.prototype.onResize = function (w, h) {
+    // the whole export of svg visiable area
+    this.svg.attr('viewBox', '0 0 ' + w + ' ' + h)
+            .attr('width', w)
+            .attr('height', h);
+    // separated panel resize
     this.areas.size(w, h);
-    console.log(this.actions['classes'].getArea());
-    console.log(this.actions['tables'].getArea());
 }
-
 // ==========================
 // TextInput
 // ==========================
@@ -1925,8 +1965,15 @@ function TableAction(tables) {
     this.tables = tables;
     this.initEvent = 'drag.begin';
     this.area = new Area();
+    var table = this;
+    this.area.onResize = function () {
+        table.onResize();
+    }
 }
 _extends(TableAction, Action);
+TableAction.prototype.onResize = function () {
+    console.log(this.area);
+}
 TableAction.prototype.onRegister = function (manager) {
     manager.on('drag.begin', this);
 }
@@ -1992,20 +2039,8 @@ var global = {
     root: document.getElementById('svg')
 }
 
-var camera = new Camera(svg);
-
-var uiMgr = new UIManager();
-// uiMgr.addAction(new TextInput(document.getElementById('input')));
-
-// global listeners register
-window.addEventListener('resize', function () {
-    var width = window.innerWidth;
-    var height = window.innerHeight;
-//    camera.setStart(-100, 50);
-//    camera.scale(1.2, 0, 0);
-    camera.apply();
-    uiMgr.onResize(width, height);
-});
+//var camera = new Camera(svg);
+var uiMgr = new UIManager(svg);
 
 svg.on('mousedown.start', listenSvg(ControlType.SVG_DOWN_BEGIN), true);
 svg.on('mousedown.end', listenSvg(ControlType.SVG_DOWN_END));
@@ -2013,11 +2048,22 @@ svg.on('mousemove', listenSvg(ControlType.SVG_MOVE), true);
 svg.on('mouseup.start', listenSvg(ControlType.SVG_UP_BEGIN), true);
 svg.on('mouseup.end', listenSvg(ControlType.SVG_UP_END));
 
+// global listeners register
+window.addEventListener('resize', function () {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+//    camera.setStart(-100, 50);
+//    camera.scale(1.2, 0, 0);
+//    camera.apply();
+    uiMgr.onResize(width, height);
+});
+uiMgr.onResize(window.innerWidth, window.innerHeight);
+
 // ==========================
 // binding data
 // ==========================
 d3.json('res/data.json', function (data) {
-    uiMgr.bindDatas(data);
+//    uiMgr.bindDatas(data);
 });
 
 // ==========================

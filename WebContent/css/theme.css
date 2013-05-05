@@ -200,6 +200,10 @@ g.comp:nth-child(even) {
 
 component menu styles
 */
+.pPanel .classes > .bg {
+    fill: #E6E6E6;
+}
+
 .pPanel .comp .topline {
     stroke: #CCCCCC;
     stroke-width: 0.1px;

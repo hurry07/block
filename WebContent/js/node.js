@@ -365,6 +365,7 @@ Area.prototype.size = function (w, h) {
     }
     this.setWidth(w);
     this.setHeight(h);
+    this.onResize();
 }
 Area.prototype.position = function (x, y) {
     if (arguments.length == 0) {
@@ -397,7 +398,11 @@ Area.prototype.getHeight = function () {
 Area.prototype.setHeight = function (h) {
     this._height = h;
 }
-Area.prototype.childResize = function (h) {
+Area.prototype.updateWidth = function (w) {
+    this.size(w, this._height);
+}
+Area.prototype.updateHeight = function (h) {
+    this.size(this._width, h);
 }
 Area.prototype.refresh = function () {
     this.width(this._width);
@@ -406,11 +411,7 @@ Area.prototype.refresh = function () {
 /**
  * notice current object's size has changed
  */
-Area.prototype.resize = function () {
-    var p = this.parent;
-    if (p) {
-        p.childResize(this);
-    }
+Area.prototype.onResize = function () {
 }
 // ==========================
 // container type
@@ -440,40 +441,38 @@ LinerLayout.prototype.childResize = function (child) {
     }
 }
 LinerLayout.prototype.setWidth = function (w) {
-    this.width = w;
-    var h = this.h;
+    this._width = w;
     // all element lays in vertical direction
     if (this.direction == 'v') {
         this.children.each(function (e) {
-            e.area.size(w, h);
+            e.area.updateWidth(w);
         })
         return;
     }
 
-    var height = this.getHeight();
+    var h = this.getHeight();
     this.layout(w, 'width',
         function (child, p) {
-            child.size(p, height);
+            child.size(p, h);
         },
         function (child, p) {
             child.position(p, 0);
         });
 }
 LinerLayout.prototype.setHeight = function (h) {
-    this.height = h;
-    var w = this.width;
+    this._height = h;
     // children layout from left to right
     if (this.direction == 'h') {
         this.children.each(function (e) {
-            e.area.size(w, h);
+            e.area.updateHeight(h);
         })
         return;
     }
 
-    var width = this.getWidth();
+    var w = this.getWidth();
     this.layout(h, 'height',
         function (child, p) {
-            child.size(width, p);
+            child.size(w, p);
         },
         function (child, p) {
             child.position(0, p);
@@ -541,7 +540,7 @@ FrameLayout.prototype.remove = function () {
     }
 }
 FrameLayout.prototype.setWidth = function (w) {
-    this.width = w;
+    this._width = w;
     this.children.each(function (e) {
         switch (e.type) {
             case 'fixed':
