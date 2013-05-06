@@ -458,7 +458,7 @@ ClassManage.prototype.showHistory = function () {
     console.log('showHistory');
 }
 ClassManage.prototype.prefer = {
-    width: 200
+    width: 180
 }
 // ----------------
 /**
@@ -501,7 +501,7 @@ ClassManage.prototype.startEdit = function (input) {
 }
 ClassManage.prototype.getTarget = function () {
     var node = this.search.inputBg;
-    var matrix = this.getWorldMatrix(node);
+    var matrix = this.getWorldMatrix(this.view, node);
     var p = this.transform(matrix, [0, 0]);
     p.push(node.attr('width'), node.attr('height'));
     return p;
@@ -542,8 +542,7 @@ Field.prototype.enter = function () {
 Field.prototype.update = function (dold, dnew) {
     var d = dnew;
     var ui = this.view;
-    ui.select('text')
-            .text(d.name);
+    ui.select('text').text(d.name);
 }
 Field.prototype.handleClick = function (d) {
     uiMgr.handle({id: ActionTypes.MOUSE_CLICK, 'target': Node.getNode(d), 'id': 'name'});
@@ -555,11 +554,11 @@ Field.prototype.identifier = function (d) {
 }
 Field.prototype.getLinkStart = function () {
     var p = Table.prototype.prefer;
-    return [p.width, p.field.height / 2];
+    return this.component.tablesLocal(this.view, [p.width, p.field.height / 2]);
 }
 Field.prototype.getLinkEnd = function () {
     var p = Table.prototype.prefer;
-    return [0, p.field.height / 2];
+    return this.component.tablesLocal(this.view, [0, p.field.height / 2]);
 }
 Field.prototype.getViewNode = function () {
     return this.view.tag();
@@ -659,8 +658,8 @@ Link.prototype.update = function (d) {
     if ((n1 = d.from.node()) && (n2 = d.to.node())) {
         this.show();
 
-        var p1 = camera.transformPoint(n1.getViewNode(), n1.getLinkStart());
-        var p2 = camera.transformPoint(n2.getViewNode(), n2.getLinkEnd());
+        var p1 = n1.getLinkStart();
+        var p2 = n2.getLinkEnd();
         this.start.attr('cx', p1[0]).attr('cy', p1[1]);
         this.end.attr('transform', 'translate(' + p2[0] + ',' + p2[1] + ')');
 
@@ -841,7 +840,7 @@ Table.prototype.enter = function (d) {
             .on('mouseover', this.handleOver, true, this)
 
     this.fields = new Fields(this, fieldsBg);
-    this.fields.bind(d.fields);
+    this.fields.component = this.component;
     this.fields.bind(d.fields);
 
 // footer
@@ -894,11 +893,11 @@ Table.prototype.getField = function (name) {
  */
 Table.prototype.getLinkStart = function () {
     var p = this.prefer;
-    return [p.width, p.header.height / 2];
+    return this.component.tablesLocal(this.view, [p.width, p.header.height / 2]);
 };
 Table.prototype.getLinkEnd = function () {
     var p = this.prefer;
-    return [0, p.header.height / 2];
+    return  this.component.tablesLocal(this.view, [0, p.header.height / 2]);
 };
 Table.prototype.getViewNode = function () {
     return this.view.tag();
@@ -989,6 +988,7 @@ var Fields = Node.createContainer(Field, {
         var child = new Field(this);
         child.create();
         child.table = this.parentNode;
+        child.component = this.component;
         return child;
     }
 });
@@ -996,11 +996,51 @@ var Fields = Node.createContainer(Field, {
 // ==========================
 // schema layer
 // ==========================
-function TableCollection(p, view) {
+function TableCollection(p, view, component) {
     ListNode.call(this, p);
     this.view = view;
+    this.tables = new d3.map();
+    this.component = component;
 }
 _extends(TableCollection, ListNode);
+TableCollection.prototype.updateEnd = function (children) {
+    var map = new d3.map();
+    children.each(function (t) {
+        map.set(t.getData().name, t);
+    });
+    this.tables = map;
+}
+/**
+ * find link end point
+ *
+ * @param nodeid
+ * @returns {*}
+ */
+TableCollection.prototype.getLinkNode = function (nodeid) {
+    var tables = this.tables;
+    var parts = (nodeid || '').split('.');
+    if (parts.length == 0) {
+        return null;
+    }
+    var table = tables.get(parts[0]);
+    if (!table) {
+        return null;
+    }
+
+    var p = new LinkTerminal();
+    p.table(table);
+
+    if (parts.length == 2) {
+        var field = table.getField(parts[1]);
+        if (!field) {
+            return null;
+        } else {
+            p.field(field);
+        }
+    }
+    p.updatetype();
+    return p;
+}
 /**
  * sort links and tables
  * @param table current focus table
@@ -1030,7 +1070,9 @@ TableCollection.prototype.getChildren = function () {
     return this.view.selectAll('g > .table');
 }
 TableCollection.prototype.createChild = function () {
-    return Table.create(this);
+    var t = Table.create(this);
+    t.component = this.component;
+    return t;
 }
 TableCollection.prototype.identifier = Table.identifier;
 TableCollection.prototype.export = function () {
@@ -1040,6 +1082,9 @@ TableCollection.prototype.export = function () {
     });
     return data;
 }
+// ==========================
+// Links
+// ==========================
 function LinkCollection(p, view) {
     ListNode.call(this, p);
     this.view = view;
@@ -1170,7 +1215,7 @@ DefaltMenu.prototype.runMenuAction = function (action) {
     }
     console.log(action);
 }
-function MenuAction(root) {
+function MenuAction(root, component) {
     Action.call(this);
 
     this.initEvent = _r(ControlType.SVG_DOWN_END);
@@ -1178,6 +1223,7 @@ function MenuAction(root) {
     this.target = null;
     this.backmenu = new DefaltMenu();
 
+    this.component = component;
     this.menu = Menu.create(Node.wrap(root), this);
 }
 _extends(MenuAction, Action);
@@ -1208,13 +1254,15 @@ MenuAction.prototype.popupMenu = function (event) {
     var target = this.checkTarget(event, 'mousedown.link', 'mousedown.field', 'mousedown.table');
     target = target || this.backmenu;
 
+    var local = this.component.menuLocal(block.event.x, block.event.y);
+
     // change position
     if (target === this.target) {
-        this.menu.showprevious(block.event.x, block.event.y);
+        this.menu.showprevious(local[0], local[1]);
         return;
     }
     this.target = target;
-    this.menu.show(block.event.x, block.event.y, target.getMenu());
+    this.menu.show(local[0], local[1], target.getMenu());
     this.active = true;
 }
 MenuAction.prototype.checkTarget = function (event) {
@@ -1260,38 +1308,52 @@ function EditArea(root) {
     // init svg layers that will used for drag and drop
     this.initLayers();
 
-    // TODO test
-//    this.cameras[0].move(-5, -10);
-//    this.cameras[0].scale(2);
+//    TODO test
+//    this.cameras[0].move(-50, -40);
+//    this.cameras[0].scale(2.5);
 }
 _extends(EditArea, WindowComponent);
 EditArea.prototype.onRegister = function (manager) {
     manager.addAction('drag', new DragAction());
     manager.addAction('link', new LinkAction(this.layers.assistant));
-    manager.addAction('menu', new MenuAction(this.layers.menu));
+    manager.addAction('menu', new MenuAction(this.layers.menu, this));
 }
 EditArea.prototype.bind = function (data) {
     var ts = data.tables;
     var tables = this.graphic.tables;
     tables.bind(data.tables);
 
-    // map all table nodes
-    var tmap = new d3.map();
-    tables.getChildren().each(function (node, i) {
-        (node = node.node()) && tmap.set(ts[i].name, node);
-    });
-
     // create link
     var link;
+    var links = this.graphic.links;
     for (var i = 0, ls = data.links, len = ls.length; i < len; i++) {
         link = ls[i];
         var p1, p2;
-        if ((p1 = this.getLinkNode(tmap, link.start)) && (p2 = this.getLinkNode(tmap, link.end))) {
-            link = this.links.bindChild({from: p1, to: p2});
+        if ((p1 = tables.getLinkNode(link.start)) && (p2 = tables.getLinkNode(link.end))) {
+            link = links.bindChild({from: p1, to: p2});
             p1.table().addLinkOut(link);
             p2.table().addLinkIn(link);
         }
     }
+}
+/**
+ * translate to table
+ */
+//EditArea.prototype.localTransform = function (g, p) {
+//    var a0 = vec2.clone(p);
+//    vec2.transformMat2d(a0, a0, this.getWorldMatrix(this.view, g, this.cameras[0]));
+//    console.log(a0);
+//    console.log(this.transform(this.getLocalMatrix(this.graphic.root, g, this.cameras[0]), p));
+//    var a = vec2.clone(p);
+//    vec2.transformMat2d(a, a, this.getLocalMatrix(this.view, g, this.cameras[0]));
+//    return [a[0], a[1]];
+//}
+EditArea.prototype.menuLocal = function (x, y) {
+    var area = this.area;
+    return [x - area.x, y - area.y];
+}
+EditArea.prototype.tablesLocal = function (t, p) {
+    return this.localTransform(this.view, t, p, this.cameras[0]);
 }
 EditArea.prototype.initLayers = function () {
     var t = this.layers = {};
@@ -1305,19 +1367,19 @@ EditArea.prototype.initLayers = function () {
 EditArea.prototype.initTables = function () {
     var t = this.graphic = {};
 
-    t.root = this.view.append('svg');
+    var root = t.root = this.view.append('svg');
 
     // background
-    t.background = t.root.append('svg:rect')
+    t.background = root.append('svg:rect')
             .attr('fill', 'url(#gridPattern)')
             .on('mouseout', this.handleOut)
             .on('mouseover', this.handleOver);
-    this.cameras.push(new BgCamera(t.root, t.background));
+    this.cameras.push(new BgCamera(root, t.background));
 
     // tables
-    var root = Node.wrap(t.root);
-    t.tables = new TableCollection(root, t.root);
-    t.links = new LinkCollection(root, t.root);
+    var node = Node.wrap(root);
+    t.tables = new TableCollection(node, root, this);
+    t.links = new LinkCollection(node, root);
 }
 //_extends(EditArea, WindowComponent);
 EditArea.prototype.onResize = function () {
@@ -1381,11 +1443,6 @@ function UIManager(svg) {
     };
 
     this.init();
-//    svg.append('path')
-//            .attr('d', 'm 9.4512443,0.05844875 c -0.121534,0.017841 -0.512253,0.075447 -0.868266,0.128016 -2.691328,0.397399 -4.442499,1.94247005 -5.07177,4.47485905 -0.159084,0.640207 -0.19233,1.024724 -0.189415,2.190713 0.0019,0.777818 0.0474,1.732412 0.101017,2.12132 0.05362,0.388909 0.206526,1.4827152 0.339802,2.4306802 0.181309,1.289612 0.243499,2.09077 0.247005,3.18198 0.0043,1.338389 -0.0127,1.501684 -0.206605,1.984268 -0.261445,0.650685 -0.854682,1.299738 -1.457564,1.594701 -0.496012,0.242676 -1.49607599,0.482933 -2.02030099,0.485361 l -0.331456,0.0015 0,1.281632 0,1.281631 0.35728,0 c 0.615297,0 1.69837899,0.268653 2.23710799,0.554904 0.598945,0.31828 1.033042,0.834113 1.267502,1.506189 0.269496,0.772509 0.211244,3.165156 -0.134887,5.540338 -0.506054,3.472587 -0.552336,4.747693 -0.225758,6.219728 0.366804,1.653349 1.39654,2.948355 2.951105,3.711338 0.461829,0.226666 1.156587,0.49186 1.543908,0.589319 0.729467,0.183552 2.2455597,0.34931 3.2069657,0.350626 l 0.552427,7.56e-4 0,-1.401079 0,-1.401078 -0.994369,-0.05407 C 8.5220473,36.710676 7.5216163,36.045698 7.0069643,34.340813 c -0.281635,-0.932969 -0.217438,-2.908483 0.180922,-5.567515 0.508605,-3.394917 0.447792,-4.95119 -0.24872,-6.364912 -0.167656,-0.340295 -0.447292,-0.78491 -0.621413,-0.988034 -0.405527,-0.473073 -1.242302,-1.031462 -1.911168,-1.275342 -0.288094,-0.105044 -0.523751,-0.215492 -0.523684,-0.245438 6.7e-5,-0.02995 0.228824,-0.121646 0.508349,-0.203777 0.641151,-0.188386 1.474002,-0.722958 1.913991,-1.228509 0.186648,-0.214461 0.474029,-0.669751 0.638624,-1.011757 0.688296,-1.430187 0.750981,-3.018652 0.254503,-6.44924 -0.371054,-2.5639332 -0.463756,-3.9727032 -0.321216,-4.8814512 0.351462,-2.240704 1.502226,-3.225865 3.9220147,-3.35761 l 0.950175,-0.05173 0,-1.356778 0,-1.35677805 -1.038563,0.01204 c -0.57121,0.0066 -1.1380007,0.02663 -1.2595347,0.04447 l 0,0 z')
-//            .attr('style', 'fill:black;');
-//    var comp = Component.create(this.layers.panels);
-//    comp.bind(config.types[0]);
 }
 UIManager.prototype.getGlobal = function (key) {
     return this.global[key];
@@ -1398,31 +1455,6 @@ UIManager.prototype.init = function () {
     // manage components's size and position
     this.areas.add(this.components['classes'].getArea(), 0);
     this.areas.add(this.components['editor'].getArea(), 1);
-}
-UIManager.prototype.getLinkNode = function (tables, nodeid) {
-    var parts = (nodeid || '').split('.');
-    if (parts.length == 0) {
-        return null;
-    }
-    var table = tables.get(parts[0]);
-    if (!table) {
-        return null;
-    }
-
-    var p = new LinkTerminal();
-    p.table(table);
-
-    if (parts.length == 2) {
-        var field = table.getField(parts[1]);
-        if (!field) {
-            return null;
-        } else {
-            p.field(field);
-        }
-    }
-
-    p.updatetype();
-    return p;
 }
 UIManager.prototype.bindDatas = function (data) {
     this.components['editor'].bind(data.entities);
@@ -1892,7 +1924,7 @@ LinkAction.prototype.start = function (event) {
     }
     d.updatetype();
     var n = d.node();
-    this.dragstart = camera.transformPoint(n.getViewNode(), n.getLinkStart());
+    this.dragstart = n.getLinkStart();
 
     this.active = true;
     this.fireEvent('link.begin', this.beginTable);

@@ -119,7 +119,7 @@ Node.prototype.direct = function (fn) {
  * @returns {*}
  */
 Node.prototype.rootView = function () {
-    if(!this.parentNode) {
+    if (!this.parentNode) {
         console.log('error---');
     }
     return this.parentNode.view;
@@ -633,47 +633,6 @@ Camera.prototype.scale = function (scalef, currentx, currenty) {
     this.apply();
 }
 /**
- * get a local to world matrix
- *
- * @param g
- * @returns {mat2d}
- */
-Camera.prototype.getMatrix = function (g) {
-    var svgM = g.getTransformToElement(this.viewbox);
-
-    var matrix = mat2d.create();
-
-    // apply child transform
-    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
-    // apply camera transform
-    mat2d.translate(matrix, matrix, vec2.clone([-this.startx, -this.starty]));
-    mat2d.scale(matrix, matrix, vec2.clone([this.scalef, this.scalef]));
-
-    return matrix;
-}
-Camera.prototype.transformPoint = function (g, p) {
-    var matrix = this.getMatrix(g);
-
-    // convert point on child to world
-    var world = vec2.clone(p);
-    vec2.transformMat2d(world, world, matrix);
-    return world;
-}
-Camera.prototype.transform = function (g, size) {
-    var matrix = this.getMatrix(g);
-
-    // convert point on child to world
-    var world = vec2.clone(size);
-    vec2.transformMat2d(world, world, matrix);
-    var x = world[0];
-    var y = world[1];
-
-    vec2.set(world, size[0] + size[2], size[1] + size[3]);
-    vec2.transformMat2d(world, world, matrix);
-
-    return [x, y, world[0] - x, world[1] - y];
-}
-/**
  * camera with a background
  *
  * @param viewbox
@@ -731,22 +690,44 @@ WindowComponent.prototype.getArea = function () {
  * @param camera
  * @returns {mat2d}
  */
-WindowComponent.prototype.getWorldMatrix = function (g, camera) {
-    var svgM = g.tag().getTransformToElement(this.view.tag());
+WindowComponent.prototype.getWorldMatrix = function (root, g, camera) {
+    var svgM = g.tag().getTransformToElement(root.tag());
+
+    var matrix = mat2d.create();
+    var area = this.area;
+
+    // apply camera transform
+    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
+    if (camera) {
+        mat2d.translate(matrix, matrix, vec2.clone([area.x * 2, area.y * 2]));
+    } else {
+        mat2d.translate(matrix, matrix, vec2.clone([area.x, area.y]));
+    }
+    return matrix;
+}
+/**
+ * get a matrix that will transform inner element to coordinate relative to current component
+ * do not consider camera's system.
+ *
+ * @param root
+ * @param g
+ * @param camera is an svg element
+ * @returns {mat2d}
+ */
+WindowComponent.prototype.getLocalMatrix = function (root, g, camera) {
+    var svgM = g.tag().getTransformToElement(root.tag());
 
     var matrix = mat2d.create();
     var area = this.area;
 
     // apply child transform
     mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
-    // apply camera transform
     if (camera) {
-        mat2d.translate(matrix, matrix, vec2.clone([-camera.startx, -camera.starty]));
-        mat2d.scale(matrix, matrix, vec2.clone([camera.scalef, camera.scalef]));
+        mat2d.translate(matrix, matrix, vec2.clone([
+            camera.startx * camera.scalef + area.x,
+            camera.starty * camera.scalef + area.y]));
+        mat2d.scale(matrix, matrix, vec2.clone([1 / camera.scalef, 1 / camera.scalef]));
     }
-    // apply area transform
-    mat2d.translate(matrix, matrix, vec2.clone([area.x, area.y]));// consider current component's position
-
     return matrix;
 }
 /**
@@ -759,4 +740,10 @@ WindowComponent.prototype.transform = function (matrix, p) {
     p = vec2.clone(p);
     vec2.transformMat2d(p, p, matrix);
     return [p[0], p[1]];
+}
+WindowComponent.prototype.worldTransform = function (root, g, p, camera) {
+    return this.transform(this.getWorldMatrix(root, g, camera), p);
+}
+WindowComponent.prototype.localTransform = function (root, g, p, camera) {
+    return this.transform(this.getLocalMatrix(root, g, camera), p);
 }
