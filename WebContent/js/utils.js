@@ -186,3 +186,7 @@ Collection.prototype.iter = function (fn) {
 function collection() {
     return new Collection(Array.prototype.slice.call(arguments, 0));
 }
+var transform = {
+
+}
+

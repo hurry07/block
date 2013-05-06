@@ -119,6 +119,9 @@ Node.prototype.direct = function (fn) {
  * @returns {*}
  */
 Node.prototype.rootView = function () {
+    if(!this.parentNode) {
+        console.log('error---');
+    }
     return this.parentNode.view;
 }
 /**
@@ -525,8 +528,10 @@ function FrameLayout() {
 }
 _extends(FrameLayout, Area);
 /**
+ *
  * @param area
  * @param type floating type fixed|relative|expand
+ * @param param more parameter of certain type
  */
 FrameLayout.prototype.add = function (area, type, param) {
     this.children.push({area: area, type: type || 'fixed', param: param});
@@ -557,4 +562,201 @@ FrameLayout.prototype.setWidth = function (w) {
 }
 FrameLayout.prototype.layoutRelative = function (area, param) {
     // TODO not needed currently
+}
+// ======================
+// camera
+// ======================
+function Camera(viewbox) {
+    this.viewbox = viewbox;
+
+    // window size
+    this.width = 0;
+    this.height = 0;
+    // coordinate scale
+    this.scalef = 1;
+    // coordinate start
+    this.startx = 0;
+    this.starty = 0;
+}
+Camera.prototype.apply = function (sx, sy) {
+    if (arguments.length == 0) {
+        sx = this.startx;
+        sy = this.starty;
+    }
+    var w = this.width / this.scalef;
+    var h = this.height / this.scalef;
+    this.viewbox.attr('viewBox', sprintf('%f %f %f %f', sx, sy, w, h));
+}
+/**
+ * drag end
+ * @param mx
+ * @param my
+ */
+Camera.prototype.move = function (mx, my) {
+    this.startx -= mx / this.scalef;
+    this.starty -= my / this.scalef;
+    this.apply();
+}
+/**
+ * during the drag movment
+ * @param mx
+ * @param my
+ */
+Camera.prototype.moving = function (mx, my) {
+    var sx = this.startx - mx / this.scalef;
+    var sy = this.starty - my / this.scalef;
+    this.apply(sx, sy);
+}
+/**
+ * when user resize the browser
+ *
+ * @param width
+ * @param height
+ */
+Camera.prototype.resize = function (width, height) {
+    this.width = width;
+    this.height = height;
+    this.viewbox.attr({width: this.width, height: this.height});
+    this.apply();
+}
+/**
+ * 对屏幕上指定的点缩放
+ *
+ * @param scalef
+ * @param currentx
+ * @param currenty
+ */
+Camera.prototype.scale = function (scalef, currentx, currenty) {
+    this.scalef = scalef;
+    if (arguments.length == 3) {
+    }
+    this.apply();
+}
+/**
+ * get a local to world matrix
+ *
+ * @param g
+ * @returns {mat2d}
+ */
+Camera.prototype.getMatrix = function (g) {
+    var svgM = g.getTransformToElement(this.viewbox);
+
+    var matrix = mat2d.create();
+
+    // apply child transform
+    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
+    // apply camera transform
+    mat2d.translate(matrix, matrix, vec2.clone([-this.startx, -this.starty]));
+    mat2d.scale(matrix, matrix, vec2.clone([this.scalef, this.scalef]));
+
+    return matrix;
+}
+Camera.prototype.transformPoint = function (g, p) {
+    var matrix = this.getMatrix(g);
+
+    // convert point on child to world
+    var world = vec2.clone(p);
+    vec2.transformMat2d(world, world, matrix);
+    return world;
+}
+Camera.prototype.transform = function (g, size) {
+    var matrix = this.getMatrix(g);
+
+    // convert point on child to world
+    var world = vec2.clone(size);
+    vec2.transformMat2d(world, world, matrix);
+    var x = world[0];
+    var y = world[1];
+
+    vec2.set(world, size[0] + size[2], size[1] + size[3]);
+    vec2.transformMat2d(world, world, matrix);
+
+    return [x, y, world[0] - x, world[1] - y];
+}
+/**
+ * camera with a background
+ *
+ * @param viewbox
+ * @param bg
+ * @constructor
+ */
+function BgCamera(viewbox, bg) {
+    Camera.call(this, viewbox);
+    this.bg = bg;
+}
+_extends(BgCamera, Camera);
+BgCamera.prototype.apply = function (sx, sy) {
+    if (arguments.length == 0) {
+        sx = this.startx;
+        sy = this.starty;
+    }
+    var w = this.width / this.scalef;
+    var h = this.height / this.scalef;
+    this.viewbox.attr('viewBox', sprintf('%f %f %f %f', sx, sy, w, h));
+    this.bg.attr({x: sx, y: sy, width: w, height: h});
+}
+// ==========================
+// Component of tool
+// ==========================
+/**
+ * a part of the whole editor
+ * @constructor
+ */
+function WindowComponent(view, size) {
+    // root of the whole component
+    this.view = view;
+
+    var _this = this;
+    if (size) {
+        this.area = new Area(0, 0, size.width || 0, size.height || 0);
+    } else {
+        this.area = new Area();
+    }
+    this.area.onResize = function () {
+        _this.onResize();
+    }
+}
+WindowComponent.prototype.onResize = function () {
+    this.view.attr('transform', sprintf('translate(%f,%f)', this.area.x, this.area.y));
+}
+WindowComponent.prototype.onRegister = function (manaager) {
+}
+WindowComponent.prototype.getArea = function () {
+    return this.area;
+}
+/**
+ * get a local to world (browser coordinate) matrix
+ *
+ * @param g
+ * @param camera
+ * @returns {mat2d}
+ */
+WindowComponent.prototype.getWorldMatrix = function (g, camera) {
+    var svgM = g.tag().getTransformToElement(this.view.tag());
+
+    var matrix = mat2d.create();
+    var area = this.area;
+
+    // apply child transform
+    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
+    // apply camera transform
+    if (camera) {
+        mat2d.translate(matrix, matrix, vec2.clone([-camera.startx, -camera.starty]));
+        mat2d.scale(matrix, matrix, vec2.clone([camera.scalef, camera.scalef]));
+    }
+    // apply area transform
+    mat2d.translate(matrix, matrix, vec2.clone([area.x, area.y]));// consider current component's position
+
+    return matrix;
+}
+/**
+ * apply matrix to a point and return the result
+ *
+ * @param matrix
+ * @param p [x,y]
+ */
+WindowComponent.prototype.transform = function (matrix, p) {
+    p = vec2.clone(p);
+    vec2.transformMat2d(p, p, matrix);
+    return [p[0], p[1]];
 }

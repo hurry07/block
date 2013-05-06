@@ -10,13 +10,13 @@
     <link type="text/css" rel="stylesheet" href="css/theme.css"/>
     <script type="text/javascript" src="js/d3.js"></script>
     <script type="text/javascript" src="js/mootools-core-1.4.5.js"></script>
+    <script type="text/javascript" src="js/gl-matrix.js"></script>
+    <script type="text/javascript" src="js/sprintf.js"></script>
     <script type="text/javascript" src="js/utils.js"></script>
     <script type="text/javascript" src="js/menus.js"></script>
     <script type="text/javascript" src="js/dom.js"></script>
     <script type="text/javascript" src="js/node.js"></script>
     <script type="text/javascript" src="js/operation.js"></script>
-    <script type="text/javascript" src="js/gl-matrix.js"></script>
-    <script type="text/javascript" src="js/sprintf.js"></script>
 </head>
 <body>
 <div class='chart'>
@@ -334,7 +334,7 @@ function SearchBox(view) {
             });
     this.text = this.input.append('text')
             .attr({'x': p.indent, 'y': p.height, dy: p.dy})
-            .text('aabbcc');
+            .text('');
 
     this.button = v.append('rect')
             .classed('button', true)
@@ -387,26 +387,31 @@ CompTitle.prototype.position = function (x, y) {
 CompTitle.prototype.prefer = {
     height: 12
 }
+var ClassManage_id = 0;
 /**
  * @param root parent node
  * @constructor
  */
 function ClassManage(root) {
-    this.view = root.append('g').classed('classes', true);
+    // init as window component
+    WindowComponent.call(this, root.append('g').classed('classes', true), {width: this.prefer.width});
+
+    this.id = ClassManage_id++;
     this.bg = this.view.append('rect')
             .classed('bg', true)
             .attr({width: this.prefer.width, height: 0});
     this.root = Node.wrap(this.view);
 
+    // title search box
     this.title = new CompTitle(this.view);
 
     this.search = new SearchBox(this.view);
     this.search.input.on('mousedown', this.showSearch, this);
     this.search.button.on('click', this.showHistory, this);
 
-    this.input = new TextInput(document.getElementById('search'));
     this.key = '';
 
+    // create default groups
     var items = this._default = new ComponentGroup(this, this.root, 'DEFAULT');
     items.bind(config.types);
     this.customers = [new ComponentGroup(this, this.root, 'CUSTOMER')];
@@ -421,17 +426,14 @@ function ClassManage(root) {
             this._default,
             this.customers);
 
-    var _this = this;
-    this.area = new Area(0, 0, this.prefer.width, 0);
-    this.area.onResize = function () {
-        _this.onResize();
-    };
-
+    // init components's position
     this.layout();
-    this.onResize();
 }
-_extends(ClassManage, Action);
+//_extends(ClassManage, Action);
+_extends(ClassManage, WindowComponent);
 ClassManage.prototype.onResize = function () {
+    this.view.attr('transform', sprintf('translate(%f,%f)', this.area.x, this.area.y));
+
     var w = this.area.width();
     this.bg.attr({width: w, height: this.area.height()});
     this.children.iter(function (e) {
@@ -449,13 +451,25 @@ ClassManage.prototype.component = function (pkg) {
     return new Component(this, this.root, pkg);
 }
 ClassManage.prototype.showSearch = function () {
-    this.input.show(this);
+    // TODO send customer event to svg root element is better
+    uiMgr.getGlobal('inputSearch').show(this);
 }
 ClassManage.prototype.showHistory = function () {
     console.log('showHistory');
 }
 ClassManage.prototype.prefer = {
     width: 200
+}
+// ----------------
+/**
+ * order items on user input
+ * @param text
+ */
+ClassManage.prototype.filter = function (text) {
+    this.comps.iter(function (e) {
+        e.filter(text);
+    });
+    this.layout();
 }
 ClassManage.prototype.layout = function () {
     var h = 0;
@@ -464,29 +478,7 @@ ClassManage.prototype.layout = function () {
         h += e.height();
     });
 }
-ClassManage.prototype.onRegister = function (manager) {
-    console.log('onRegister', manager);
-    this.on(ControlType.SVG_DOWN_END);
-    this.on(_r(ControlType.SVG_DOWN_END));
-}
-ClassManage.prototype.filter = function (text) {
-    this.comps.iter(function (e) {
-        e.filter(text);
-    });
-    this.layout();
-}
-ClassManage.prototype.onEvent = function (event) {
-    switch (event.id) {
-        case _r(ControlType.SVG_DOWN_END):
-            this.popupMenu(event);
-            break;
-        case ControlType.SVG_DOWN_END:
-            if (!this.focus) {
-                this.stopMenu();
-            }
-            break;
-    }
-}
+// ----------------
 // interact with input
 ClassManage.prototype.setText = function (t) {
     var o = this.key;
@@ -496,18 +488,23 @@ ClassManage.prototype.setText = function (t) {
         this.filter(t);
     }
 }
-ClassManage.prototype.endEdit = function () {
-    this.search.input.style('visibility', 'visible');
+/**
+ * inter act with edit action
+ */
+ClassManage.prototype.endEdit = function (input) {
+    this.search.text.style('visibility', 'visible');
 }
 ClassManage.prototype.startEdit = function (input) {
+    input.style({'font-size': '22px', 'text-indent': '4px'});
     input.tag().value = this.key;
-    input.style('font-size', Math.round(22 * camera.getScale()) + 'px')
-            .style('text-indent', Math.round(4 * camera.getScale()) + 'px');
-    this.search.input.style('visibility', 'hidden');
+    this.search.text.style('visibility', 'hidden');
 }
 ClassManage.prototype.getTarget = function () {
     var node = this.search.inputBg;
-    return {node: node.tag(), size: [0, 0, node.attr('width'), node.attr('height')]};
+    var matrix = this.getWorldMatrix(node);
+    var p = this.transform(matrix, [0, 0]);
+    p.push(node.attr('width'), node.attr('height'));
+    return p;
 }
 // ==========================
 // Field
@@ -1065,122 +1062,6 @@ LinkCollection.prototype.export = function () {
     return data;
 }
 // ======================
-// camera
-// ======================
-function Camera(viewbox, bg) {
-    this.viewbox = viewbox;
-    this.bg = bg;
-
-    // window size
-    this.width = 0;
-    this.height = 0;
-    // coordinate scale
-    this.scalef = 1;
-    // coordinate start
-    this.startx = 0;
-    this.starty = 0;
-}
-/**
- * drag end
- * @param mx
- * @param my
- */
-Camera.prototype.move = function (mx, my) {
-    this.startx -= mx / this.scalef;
-    this.starty -= my / this.scalef;
-    this.viewbox.attr('viewBox', sprintf('%f %f %f %f',
-            this.startx,
-            this.starty,
-            this.width / this.scalef,
-            this.height / this.scalef));
-}
-Camera.prototype.apply = function (sx, sy) {
-    if (arguments.length == 0) {
-        sx = this.startx;
-        sy = this.starty;
-    }
-    var w = this.width / this.scalef;
-    var h = this.height / this.scalef;
-    this.viewbox.attr('viewBox', sprintf('%f %f %f %f', sx, sy, w, h));
-    this.rect.attr({x: sx, y: sy, width: w, height: h});
-}
-/**
- * during the drag movment
- * @param mx
- * @param my
- */
-Camera.prototype.moving = function (mx, my) {
-    var sx = this.startx - mx / this.scalef;
-    var sy = this.starty - my / this.scalef;
-    this.apply(sx, sy);
-}
-/**
- * when user resize the browser
- *
- * @param width
- * @param height
- */
-Camera.prototype.resize = function (width, height) {
-    this.width = width;
-    this.height = height;
-    this.viewbox.attr({width: this.width, height: this.height});
-    this.apply();
-}
-/**
- * 对屏幕上指定的点缩放
- *
- * @param scalef
- * @param currentx
- * @param currenty
- */
-Camera.prototype.scale = function (scalef, currentx, currenty) {
-    this.scalef = scalef;
-    if (arguments.length == 3) {
-    }
-    this.apply();
-}
-Camera.prototype.transformPoint = function (g, p) {
-    var svgM = g.getTransformToElement(global.root);
-
-    var matrix = mat2d.create();
-
-    // apply child transform
-    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
-    // apply camera transform
-    mat2d.translate(matrix, matrix, vec2.clone([-this.x, -this.y]));
-    mat2d.scale(matrix, matrix, vec2.clone([this.scalef, this.scalef]));
-
-    // convert point on child to world
-    var world = vec2.clone(p);
-    vec2.transformMat2d(world, world, matrix);
-    return world;
-}
-Camera.prototype.toLocal = function (x, y) {
-    return [x, y];
-}
-Camera.prototype.transform = function (g, size) {
-    var svgM = g.getTransformToElement(global.root);
-
-    var matrix = mat2d.create();
-
-    // apply child transform
-    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
-    // apply camera transform
-    mat2d.translate(matrix, matrix, vec2.clone([-this.x, -this.y]));
-    mat2d.scale(matrix, matrix, vec2.clone([this.scalef, this.scalef]));
-
-    // convert point on child to world
-    var world = vec2.clone(size);
-    vec2.transformMat2d(world, world, matrix);
-    var x = world[0];
-    var y = world[1];
-
-    vec2.set(world, size[0] + size[2], size[1] + size[3]);
-    vec2.transformMat2d(world, world, matrix);
-
-    return [x, y, world[0] - x, world[1] - y];
-}
-// ======================
 // Menu
 // ======================
 function Menu(p, action) {
@@ -1289,7 +1170,7 @@ DefaltMenu.prototype.runMenuAction = function (action) {
     }
     console.log(action);
 }
-function MenuAction(layer) {
+function MenuAction(root) {
     Action.call(this);
 
     this.initEvent = _r(ControlType.SVG_DOWN_END);
@@ -1297,7 +1178,7 @@ function MenuAction(layer) {
     this.target = null;
     this.backmenu = new DefaltMenu();
 
-    this.menu = Menu.create(layer, this);
+    this.menu = Menu.create(Node.wrap(root), this);
 }
 _extends(MenuAction, Action);
 MenuAction.prototype.onRegister = function (manager) {
@@ -1365,16 +1246,86 @@ _extends(ComponentBoard, ListNode);
 // ==========================
 // Edit Area
 // ==========================
+/**
+ * @param root underlying svg:g tag
+ * @constructor
+ */
 function EditArea(root) {
-    this.view = root.append('g').classed('tables', true);
+    // root container of table area
+    WindowComponent.call(this, root.append('g').classed('entity', true));
+    this.cameras = [];
 
-    this.viewbox = this.view.append('svg');
-    this.rect = this.viewbox.append('svg:rect')
+    // table window clip window
+    this.initTables();
+    // init svg layers that will used for drag and drop
+    this.initLayers();
+
+    // TODO test
+//    this.cameras[0].move(-5, -10);
+//    this.cameras[0].scale(2);
+}
+_extends(EditArea, WindowComponent);
+EditArea.prototype.onRegister = function (manager) {
+    manager.addAction('drag', new DragAction());
+    manager.addAction('link', new LinkAction(this.layers.assistant));
+    manager.addAction('menu', new MenuAction(this.layers.menu));
+}
+EditArea.prototype.bind = function (data) {
+    var ts = data.tables;
+    var tables = this.graphic.tables;
+    tables.bind(data.tables);
+
+    // map all table nodes
+    var tmap = new d3.map();
+    tables.getChildren().each(function (node, i) {
+        (node = node.node()) && tmap.set(ts[i].name, node);
+    });
+
+    // create link
+    var link;
+    for (var i = 0, ls = data.links, len = ls.length; i < len; i++) {
+        link = ls[i];
+        var p1, p2;
+        if ((p1 = this.getLinkNode(tmap, link.start)) && (p2 = this.getLinkNode(tmap, link.end))) {
+            link = this.links.bindChild({from: p1, to: p2});
+            p1.table().addLinkOut(link);
+            p2.table().addLinkIn(link);
+        }
+    }
+}
+EditArea.prototype.initLayers = function () {
+    var t = this.layers = {};
+
+    var root = t.root = this.view.append('svg');
+    this.cameras.push(new Camera(root));
+
+    t.assistant = root.append('svg:g').classed('pAssistant', true);
+    t.menu = root.append('svg:g').classed('pMenu', true);
+}
+EditArea.prototype.initTables = function () {
+    var t = this.graphic = {};
+
+    t.root = this.view.append('svg');
+
+    // background
+    t.background = t.root.append('svg:rect')
             .attr('fill', 'url(#gridPattern)')
             .on('mouseout', this.handleOut)
             .on('mouseover', this.handleOver);
-    this.camera = new Camera(this.viewbox, this.rect);
-    this.area = new Area();
+    this.cameras.push(new BgCamera(t.root, t.background));
+
+    // tables
+    var root = Node.wrap(t.root);
+    t.tables = new TableCollection(root, t.root);
+    t.links = new LinkCollection(root, t.root);
+}
+//_extends(EditArea, WindowComponent);
+EditArea.prototype.onResize = function () {
+    var a = this.area;
+    this.view.attr('transform', sprintf('translate(%f,%f)', a.x, a.y));
+    this.cameras.each(function (e) {
+        e.resize(a.width(), a.height());
+    });
 }
 EditArea.prototype.getArea = function () {
     return this.area;
@@ -1412,16 +1363,10 @@ function UIManager(svg) {
 
     // ui drawing layers
     this.layers = {
-        schema: Node.wrap(svg.append('svg:g').classed('entity', true)),
-        assistant: Node.wrap(svg.append('svg:g').classed('pAssistant', true)),
-        dialog: Node.wrap(svg.append('svg:g').classed('pDialog', true)),
         panels: svg.append('svg:g').classed('pPanel', true),
-        message: Node.wrap(svg.append('svg:g').classed('pMessage', true))
+        editor: svg.append('svg:g').classed('pEditor', true),
+        message: svg.append('svg:g').classed('pMessage', true)
     };
-
-    // all tables
-    this.tables = new TableCollection(this.layers.schema, this.layers.schema.view);
-    this.links = new LinkCollection(this.layers.schema, this.layers.schema.view);
 
     // hold the whole ui layout
     this.areas = new LinerLayout();
@@ -1430,6 +1375,11 @@ function UIManager(svg) {
     // all parts
     this.components = {};
 
+    // hold html adapter
+    this.global = {
+        inputSearch: new TextInput(document.getElementById('search'))
+    };
+
     this.init();
 //    svg.append('path')
 //            .attr('d', 'm 9.4512443,0.05844875 c -0.121534,0.017841 -0.512253,0.075447 -0.868266,0.128016 -2.691328,0.397399 -4.442499,1.94247005 -5.07177,4.47485905 -0.159084,0.640207 -0.19233,1.024724 -0.189415,2.190713 0.0019,0.777818 0.0474,1.732412 0.101017,2.12132 0.05362,0.388909 0.206526,1.4827152 0.339802,2.4306802 0.181309,1.289612 0.243499,2.09077 0.247005,3.18198 0.0043,1.338389 -0.0127,1.501684 -0.206605,1.984268 -0.261445,0.650685 -0.854682,1.299738 -1.457564,1.594701 -0.496012,0.242676 -1.49607599,0.482933 -2.02030099,0.485361 l -0.331456,0.0015 0,1.281632 0,1.281631 0.35728,0 c 0.615297,0 1.69837899,0.268653 2.23710799,0.554904 0.598945,0.31828 1.033042,0.834113 1.267502,1.506189 0.269496,0.772509 0.211244,3.165156 -0.134887,5.540338 -0.506054,3.472587 -0.552336,4.747693 -0.225758,6.219728 0.366804,1.653349 1.39654,2.948355 2.951105,3.711338 0.461829,0.226666 1.156587,0.49186 1.543908,0.589319 0.729467,0.183552 2.2455597,0.34931 3.2069657,0.350626 l 0.552427,7.56e-4 0,-1.401079 0,-1.401078 -0.994369,-0.05407 C 8.5220473,36.710676 7.5216163,36.045698 7.0069643,34.340813 c -0.281635,-0.932969 -0.217438,-2.908483 0.180922,-5.567515 0.508605,-3.394917 0.447792,-4.95119 -0.24872,-6.364912 -0.167656,-0.340295 -0.447292,-0.78491 -0.621413,-0.988034 -0.405527,-0.473073 -1.242302,-1.031462 -1.911168,-1.275342 -0.288094,-0.105044 -0.523751,-0.215492 -0.523684,-0.245438 6.7e-5,-0.02995 0.228824,-0.121646 0.508349,-0.203777 0.641151,-0.188386 1.474002,-0.722958 1.913991,-1.228509 0.186648,-0.214461 0.474029,-0.669751 0.638624,-1.011757 0.688296,-1.430187 0.750981,-3.018652 0.254503,-6.44924 -0.371054,-2.5639332 -0.463756,-3.9727032 -0.321216,-4.8814512 0.351462,-2.240704 1.502226,-3.225865 3.9220147,-3.35761 l 0.950175,-0.05173 0,-1.356778 0,-1.35677805 -1.038563,0.01204 c -0.57121,0.0066 -1.1380007,0.02663 -1.2595347,0.04447 l 0,0 z')
@@ -1437,20 +1387,17 @@ function UIManager(svg) {
 //    var comp = Component.create(this.layers.panels);
 //    comp.bind(config.types[0]);
 }
-UIManager.prototype.init = function () {
-    var tables, classes;
-    this.addAction('tables', new TableAction(this.tables));
-    this.addAction('drag', new DragAction());
-    this.addAction('link', new LinkAction(this));
-    this.addAction('menu', new MenuAction(this.layers.dialog));
-    this.addAction('classes', new ClassManage(this.layers.panels));
-
-    this.areas.add(this.actions['classes'].getArea(), 0);
-    this.areas.add(this.actions['tables'].getArea(), 1);
+UIManager.prototype.getGlobal = function (key) {
+    return this.global[key];
 }
-UIManager.prototype.dispatchEvent = function (evt) {
-    var n = this.layers.schema.node();
-    n.dispatchEvent(evt);
+UIManager.prototype.init = function () {
+    // add tool components
+    this.addComponent('classes', new ClassManage(this.layers.panels));
+    this.addComponent('editor', new EditArea(this.layers.editor));
+
+    // manage components's size and position
+    this.areas.add(this.components['classes'].getArea(), 0);
+    this.areas.add(this.components['editor'].getArea(), 1);
 }
 UIManager.prototype.getLinkNode = function (tables, nodeid) {
     var parts = (nodeid || '').split('.');
@@ -1477,33 +1424,12 @@ UIManager.prototype.getLinkNode = function (tables, nodeid) {
     p.updatetype();
     return p;
 }
-UIManager.prototype.bindEntity = function (data) {
-    var ts = data.tables;
-    this.tables.bind(data.tables);
-
-    // map all table nodes
-    var tmap = new d3.map();
-    this.tables.getChildren().each(function (node, i) {
-        (node = node.node()) && tmap.set(ts[i].name, node);
-    });
-
-    // create link
-    var link;
-    for (var i = 0, ls = data.links, len = ls.length; i < len; i++) {
-        link = ls[i];
-        var p1, p2;
-        if ((p1 = this.getLinkNode(tmap, link.start)) && (p2 = this.getLinkNode(tmap, link.end))) {
-            link = this.links.bindChild({from: p1, to: p2});
-            p1.table().addLinkOut(link);
-            p2.table().addLinkIn(link);
-        }
-    }
-}
 UIManager.prototype.bindDatas = function (data) {
-    this.bindEntity(data.entities);
+    this.components['editor'].bind(data.entities);
 }
 UIManager.prototype.addComponent = function (name, comp) {
     this.components[name] = comp;
+    comp.onRegister(this);
 }
 UIManager.prototype.addAction = function (name, action) {
     action.register(this);
@@ -1665,26 +1591,36 @@ UIManager.prototype.onResize = function (w, h) {
 // ==========================
 // TextInput
 // ==========================
+var TextInput_id = 0;
 function TextInput(div) {
+    this.id = TextInput_id++;
     this.div = block.select(div);
+    this.focus = false;
     this.input = block.select(div.getElementsByTagName('input')[0])
             .on('change', this.submit, this)
             .on('input', this.submit, this)
-            .on('blur', this.hide, this)
+            .on('blur', this.onBlur, this)
+            .on('focus', this.onFocus, this);
 }
 TextInput.prototype.submit = function () {
+    console.log('TextInput.prototype.submit');
     var a = this.adapter;
     if (a) {
         a.setText(this.input.tag().value);
     }
 }
-TextInput.prototype.hide = function () {
+TextInput.prototype.onBlur = function () {
+    console.log('TextInput.prototype.hide');
     this.submit();
     var a = this.adapter;
     if (a) {
-        a.endEdit();
+        a.endEdit(this.input);
     }
     this.div.style('visibility', 'hidden');
+}
+TextInput.prototype.onFocus = function () {
+    console.log('TextInput.prototype.focus');
+    this.div.style('visibility', 'visible');
 }
 /**
  * @param adapter will interact with html text input tag
@@ -1695,17 +1631,22 @@ TextInput.prototype.show = function (adapter) {
         return;
     }
 
+    // end previous edit
+    var _adapter = this.adapter;
+    _adapter && _adapter.endEdit(this.input);
+
+    // reset editor
     this.adapter = adapter;
     var target = adapter.getTarget();
-    var size = camera.transform(target.node, target.size);
 
-    adapter.startEdit(this.input);
     this.div.style({
-        'left': size[0] + 'px',
-        'top': size[1] + 'px',
-        'width': size[2] + 'px',
-        'height': size[3] + 'px'});
+        'left': target[0] + 'px',
+        'top': target[1] + 'px',
+        'width': target[2] + 'px',
+        'height': target[3] + 'px'});
     this.div.style('visibility', 'visible');
+    //this.input.tag().focus();
+    adapter.startEdit(this.input);
 }
 // ==========================
 // DragControl
@@ -1850,10 +1791,10 @@ LinkTerminal.prototype.clone = function () {
 // ==========================
 // LinkAction
 // ==========================
-function LinkAction(manager) {
+function LinkAction(root) {
     Action.call(this);
 
-    this.link = manager.createLink();
+    this.link = Link.create(Node.wrap(root));
     this.link.disablePointer();
     this.data = {
         from: new LinkTerminal(),
@@ -2063,7 +2004,7 @@ uiMgr.onResize(window.innerWidth, window.innerHeight);
 // binding data
 // ==========================
 d3.json('res/data.json', function (data) {
-//    uiMgr.bindDatas(data);
+    uiMgr.bindDatas(data);
 });
 
 // ==========================
