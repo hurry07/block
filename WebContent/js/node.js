@@ -566,8 +566,17 @@ FrameLayout.prototype.layoutRelative = function (area, param) {
 // ======================
 // camera
 // ======================
-function Camera(viewbox) {
+/**
+ *
+ * @param area is outer of viewbox
+ * @param viewbox
+ * @param root element of viewbox
+ * @constructor
+ */
+function Camera(area, viewbox, root) {
     this.viewbox = viewbox;
+    this.root = root.tag();
+    this.area = area;
 
     // window size
     this.width = 0;
@@ -632,15 +641,70 @@ Camera.prototype.scale = function (scalef, currentx, currenty) {
     }
     this.apply();
 }
+// matrix transform util methods
+/**
+ * transform form local coordinate to screen coordinate
+ * @param g
+ * @returns {mat2d}
+ */
+Camera.prototype.getWorldMatrix = function (g) {
+    var matrix = this.getRootMatrix(g);
+
+    mat2d.translate(matrix, matrix, vec2.clone([
+        -this.startx + area.x * this.scalef,
+        -this.starty + area.y * this.scalef]));
+    mat2d.scale(matrix, matrix, vec2.clone([1 / this.scalef, 1 / this.scalef]));
+    return matrix;
+}
+/**
+ * transform to root coordinate system
+ * @param g
+ * @returns {mat2d}
+ */
+Camera.prototype.getRootMatrix = function (g) {
+    var svgM = g.tag().getTransformToElement(this.root);
+
+    var matrix = mat2d.create();
+    var area = this.area;
+
+    // apply child transform
+    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
+    return matrix;
+}
+/**
+ * apply matrix to a point and return the result
+ *
+ * @param matrix
+ * @param p [x,y]
+ */
+Camera.prototype.transform = function (matrix, p) {
+    p = vec2.clone(p);
+    vec2.transformMat2d(p, p, matrix);
+    return [p[0], p[1]];
+}
+Camera.prototype.toWorld = function (g, p) {
+    return this.transform(this.getWorldMatrix(g), p);
+}
+Camera.prototype.toLocal = function (x, y) {
+    return [
+        (x - this.area.x) / this.scalef + this.startx,
+        (y - this.area.y) / this.scalef + this.starty
+    ];
+}
+Camera.prototype.getLocal = function (g, p) {
+    return this.transform(this.getRootMatrix(g), p);
+}
 /**
  * camera with a background
  *
+ * @param area
  * @param viewbox
- * @param bg
+ * @param root
+ * @param bg is a child of root element
  * @constructor
  */
-function BgCamera(viewbox, bg) {
-    Camera.call(this, viewbox);
+function BgCamera(area, viewbox, root, bg) {
+    Camera.call(this, area, viewbox, root);
     this.bg = bg;
 }
 _extends(BgCamera, Camera);
@@ -682,68 +746,4 @@ WindowComponent.prototype.onRegister = function (manaager) {
 }
 WindowComponent.prototype.getArea = function () {
     return this.area;
-}
-/**
- * get a local to world (browser coordinate) matrix
- *
- * @param g
- * @param camera
- * @returns {mat2d}
- */
-WindowComponent.prototype.getWorldMatrix = function (root, g, camera) {
-    var svgM = g.tag().getTransformToElement(root.tag());
-
-    var matrix = mat2d.create();
-    var area = this.area;
-
-    // apply camera transform
-    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
-    if (camera) {
-        mat2d.translate(matrix, matrix, vec2.clone([area.x * 2, area.y * 2]));
-    } else {
-        mat2d.translate(matrix, matrix, vec2.clone([area.x, area.y]));
-    }
-    return matrix;
-}
-/**
- * get a matrix that will transform inner element to coordinate relative to current component
- * do not consider camera's system.
- *
- * @param root
- * @param g
- * @param camera is an svg element
- * @returns {mat2d}
- */
-WindowComponent.prototype.getLocalMatrix = function (root, g, camera) {
-    var svgM = g.tag().getTransformToElement(root.tag());
-
-    var matrix = mat2d.create();
-    var area = this.area;
-
-    // apply child transform
-    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
-    if (camera) {
-        mat2d.translate(matrix, matrix, vec2.clone([
-            camera.startx * camera.scalef + area.x,
-            camera.starty * camera.scalef + area.y]));
-        mat2d.scale(matrix, matrix, vec2.clone([1 / camera.scalef, 1 / camera.scalef]));
-    }
-    return matrix;
-}
-/**
- * apply matrix to a point and return the result
- *
- * @param matrix
- * @param p [x,y]
- */
-WindowComponent.prototype.transform = function (matrix, p) {
-    p = vec2.clone(p);
-    vec2.transformMat2d(p, p, matrix);
-    return [p[0], p[1]];
-}
-WindowComponent.prototype.worldTransform = function (root, g, p, camera) {
-    return this.transform(this.getWorldMatrix(root, g, camera), p);
-}
-WindowComponent.prototype.localTransform = function (root, g, p, camera) {
-    return this.transform(this.getLocalMatrix(root, g, camera), p);
 }

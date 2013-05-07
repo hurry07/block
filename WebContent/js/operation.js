@@ -45,26 +45,30 @@ Action.prototype.onRegister = function (manager) {
 /**
  * object drag or move
  *
- * @param p
- * @param g
+ * @param p point object that log the moving
+ * @param g the moving object
+ * @param camera
  * @constructor
  */
-function MoveAdapter(p, g) {
+function MoveAdapter(p, g, camera) {
     this.position = p;
     this.g = g;
+    this.camera = camera;
     this.offsetx = 0;
     this.offsety = 0;
 }
 MoveAdapter.prototype.startMove = function (x, y) {
-    this.offsetx = this.position.x - x;
-    this.offsety = this.position.y - y;
+    var p = this.camera.toLocal(x, y);
+    this.offsetx = this.position.x - p[0];
+    this.offsety = this.position.y - p[1];
 }
 MoveAdapter.prototype.moveTo = function (x, y) {
-    this.position.x = x + this.offsetx;
-    this.position.y = y + this.offsety;
+    var p = this.camera.toLocal(x, y);
+    this.position.x = p[0] + this.offsetx;
+    this.position.y = p[1] + this.offsety;
     this.g.attr('transform', 'translate('
-        + (this.position.x = x + this.offsetx) + ','
-        + (this.position.y = y + this.offsety) + ')');
+        + (this.position.x = p[0] + this.offsetx) + ','
+        + (this.position.y = p[1] + this.offsety) + ')');
 }
 MoveAdapter.prototype.stopMove = function (x, y) {
 }

@@ -554,11 +554,11 @@ Field.prototype.identifier = function (d) {
 }
 Field.prototype.getLinkStart = function () {
     var p = Table.prototype.prefer;
-    return this.component.tablesLocal(this.view, [p.width, p.field.height / 2]);
+    return this.camera.getLocal(this.view, [p.width, p.field.height / 2]);
 }
 Field.prototype.getLinkEnd = function () {
     var p = Table.prototype.prefer;
-    return this.component.tablesLocal(this.view, [0, p.field.height / 2]);
+    return this.camera.getLocal(this.view, [0, p.field.height / 2]);
 }
 Field.prototype.getViewNode = function () {
     return this.view.tag();
@@ -840,7 +840,7 @@ Table.prototype.enter = function (d) {
             .on('mouseover', this.handleOver, true, this)
 
     this.fields = new Fields(this, fieldsBg);
-    this.fields.component = this.component;
+    this.fields.camera = this.camera;
     this.fields.bind(d.fields);
 
 // footer
@@ -893,11 +893,11 @@ Table.prototype.getField = function (name) {
  */
 Table.prototype.getLinkStart = function () {
     var p = this.prefer;
-    return this.component.tablesLocal(this.view, [p.width, p.header.height / 2]);
+    return this.camera.getLocal(this.view, [p.width, p.header.height / 2]);
 };
 Table.prototype.getLinkEnd = function () {
     var p = this.prefer;
-    return  this.component.tablesLocal(this.view, [0, p.header.height / 2]);
+    return  this.camera.getLocal(this.view, [0, p.header.height / 2]);
 };
 Table.prototype.getViewNode = function () {
     return this.view.tag();
@@ -926,7 +926,7 @@ Table.prototype.getMoveFeature = function () {
     var table = this;
     var links = [].concat(this.linkout).concat(this.linkin);
     return new (_extends(function () {
-        MoveAdapter.call(this, table.data.position, table.view);
+        MoveAdapter.call(this, table.data.position, table.view, table.camera);
     }, MoveAdapter, {
         startMove: function (x, y) {
             MoveAdapter.prototype.startMove.call(this, x, y);
@@ -988,7 +988,7 @@ var Fields = Node.createContainer(Field, {
         var child = new Field(this);
         child.create();
         child.table = this.parentNode;
-        child.component = this.component;
+        child.camera = this.camera;
         return child;
     }
 });
@@ -996,11 +996,11 @@ var Fields = Node.createContainer(Field, {
 // ==========================
 // schema layer
 // ==========================
-function TableCollection(p, view, component) {
+function TableCollection(p, view, camera) {
     ListNode.call(this, p);
     this.view = view;
     this.tables = new d3.map();
-    this.component = component;
+    this.camera = camera;
 }
 _extends(TableCollection, ListNode);
 TableCollection.prototype.updateEnd = function (children) {
@@ -1071,7 +1071,7 @@ TableCollection.prototype.getChildren = function () {
 }
 TableCollection.prototype.createChild = function () {
     var t = Table.create(this);
-    t.component = this.component;
+    t.camera = this.camera;
     return t;
 }
 TableCollection.prototype.identifier = Table.identifier;
@@ -1215,7 +1215,7 @@ DefaltMenu.prototype.runMenuAction = function (action) {
     }
     console.log(action);
 }
-function MenuAction(root, component) {
+function MenuAction(root, camera) {
     Action.call(this);
 
     this.initEvent = _r(ControlType.SVG_DOWN_END);
@@ -1223,7 +1223,7 @@ function MenuAction(root, component) {
     this.target = null;
     this.backmenu = new DefaltMenu();
 
-    this.component = component;
+    this.camera = camera;
     this.menu = Menu.create(Node.wrap(root), this);
 }
 _extends(MenuAction, Action);
@@ -1254,7 +1254,7 @@ MenuAction.prototype.popupMenu = function (event) {
     var target = this.checkTarget(event, 'mousedown.link', 'mousedown.field', 'mousedown.table');
     target = target || this.backmenu;
 
-    var local = this.component.menuLocal(block.event.x, block.event.y);
+    var local = this.camera.toLocal(block.event.x, block.event.y);
 
     // change position
     if (target === this.target) {
@@ -1295,12 +1295,12 @@ _extends(ComponentBoard, ListNode);
 // Edit Area
 // ==========================
 /**
- * @param root underlying svg:g tag
+ * @param root of the editor area
  * @constructor
  */
 function EditArea(root) {
     // root container of table area
-    WindowComponent.call(this, root.append('g').classed('entity', true));
+    WindowComponent.call(this, root);
     this.cameras = [];
 
     // table window clip window
@@ -1308,15 +1308,15 @@ function EditArea(root) {
     // init svg layers that will used for drag and drop
     this.initLayers();
 
-//    TODO test
-//    this.cameras[0].move(-50, -40);
-//    this.cameras[0].scale(2.5);
+    //TODO test
+    this.graphic.camera.move(-50, -40);
+    this.graphic.camera.scale(0.5);
 }
 _extends(EditArea, WindowComponent);
 EditArea.prototype.onRegister = function (manager) {
     manager.addAction('drag', new DragAction());
     manager.addAction('link', new LinkAction(this.layers.assistant));
-    manager.addAction('menu', new MenuAction(this.layers.menu, this));
+    manager.addAction('menu', new MenuAction(this.layers.menu, this.layers.camera));
 }
 EditArea.prototype.bind = function (data) {
     var ts = data.tables;
@@ -1336,18 +1336,6 @@ EditArea.prototype.bind = function (data) {
         }
     }
 }
-/**
- * translate to table
- */
-//EditArea.prototype.localTransform = function (g, p) {
-//    var a0 = vec2.clone(p);
-//    vec2.transformMat2d(a0, a0, this.getWorldMatrix(this.view, g, this.cameras[0]));
-//    console.log(a0);
-//    console.log(this.transform(this.getLocalMatrix(this.graphic.root, g, this.cameras[0]), p));
-//    var a = vec2.clone(p);
-//    vec2.transformMat2d(a, a, this.getLocalMatrix(this.view, g, this.cameras[0]));
-//    return [a[0], a[1]];
-//}
 EditArea.prototype.menuLocal = function (x, y) {
     var area = this.area;
     return [x - area.x, y - area.y];
@@ -1358,8 +1346,9 @@ EditArea.prototype.tablesLocal = function (t, p) {
 EditArea.prototype.initLayers = function () {
     var t = this.layers = {};
 
-    var root = t.root = this.view.append('svg');
-    this.cameras.push(new Camera(root));
+    var viewbox = this.view.append('svg');
+    var root = t.root = viewbox.append('g').classed('tools', true);
+    this.cameras.push(t.camera = new Camera(this.area, viewbox, root));
 
     t.assistant = root.append('svg:g').classed('pAssistant', true);
     t.menu = root.append('svg:g').classed('pMenu', true);
@@ -1367,18 +1356,20 @@ EditArea.prototype.initLayers = function () {
 EditArea.prototype.initTables = function () {
     var t = this.graphic = {};
 
-    var root = t.root = this.view.append('svg');
+    var viewbox = this.view.append('svg');
+    var root = t.root = viewbox.append('g').classed('entity', true);
 
     // background
     t.background = root.append('svg:rect')
             .attr('fill', 'url(#gridPattern)')
             .on('mouseout', this.handleOut)
             .on('mouseover', this.handleOver);
-    this.cameras.push(new BgCamera(root, t.background));
+    var camera = t.camera = new BgCamera(this.area, viewbox, root, t.background);
+    this.cameras.push(camera);
 
     // tables
     var node = Node.wrap(root);
-    t.tables = new TableCollection(node, root, this);
+    t.tables = new TableCollection(node, root, camera);
     t.links = new LinkCollection(node, root);
 }
 //_extends(EditArea, WindowComponent);
