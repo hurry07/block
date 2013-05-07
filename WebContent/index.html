@@ -501,8 +501,8 @@ ClassManage.prototype.startEdit = function (input) {
 }
 ClassManage.prototype.getTarget = function () {
     var node = this.search.inputBg;
-    var matrix = this.getWorldMatrix(this.view, node);
-    var p = this.transform(matrix, [0, 0]);
+    var matrix = Camera.prototype.getMatrix(node.tag(), this.view.tag());
+    var p = Camera.prototype.transform(matrix, [0, 0]);
     p.push(node.attr('width'), node.attr('height'));
     return p;
 }
@@ -1310,7 +1310,7 @@ function EditArea(root) {
 
     //TODO test
     this.graphic.camera.move(-50, -40);
-    this.graphic.camera.scale(0.5);
+    this.graphic.camera.scale(1);
 }
 _extends(EditArea, WindowComponent);
 EditArea.prototype.onRegister = function (manager) {
@@ -1372,7 +1372,6 @@ EditArea.prototype.initTables = function () {
     t.tables = new TableCollection(node, root, camera);
     t.links = new LinkCollection(node, root);
 }
-//_extends(EditArea, WindowComponent);
 EditArea.prototype.onResize = function () {
     var a = this.area;
     this.view.attr('transform', sprintf('translate(%f,%f)', a.x, a.y));

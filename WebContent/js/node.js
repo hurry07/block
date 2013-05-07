@@ -119,9 +119,6 @@ Node.prototype.direct = function (fn) {
  * @returns {*}
  */
 Node.prototype.rootView = function () {
-    if (!this.parentNode) {
-        console.log('error---');
-    }
     return this.parentNode.view;
 }
 /**
@@ -662,14 +659,11 @@ Camera.prototype.getWorldMatrix = function (g) {
  * @returns {mat2d}
  */
 Camera.prototype.getRootMatrix = function (g) {
-    var svgM = g.tag().getTransformToElement(this.root);
-
-    var matrix = mat2d.create();
-    var area = this.area;
-
-    // apply child transform
-    mat2d.multiply(matrix, matrix, mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]));
-    return matrix;
+    return this.getMatrix(g.tag(), this.root);
+}
+Camera.prototype.getMatrix = function (from, to) {
+    var svgM = from.getTransformToElement(to);
+    return mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]);
 }
 /**
  * apply matrix to a point and return the result
