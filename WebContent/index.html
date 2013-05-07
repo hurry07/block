@@ -75,11 +75,6 @@ var ControlKeys = (function () {
 // ==========================
 // function
 // ==========================
-function listenSvg(id) {
-    return function () {
-        uiMgr.handleEvent({'id': id});
-    }
-}
 function listenEvent(event) {
     return function () {
         uiMgr.handle({id: event, target: this});
@@ -1446,8 +1441,8 @@ function UIManager(svg) {
  */
 UIManager.prototype.listenEvent = function (id) {
     var comp = this;
-    return function (param) {
-        comp.eventbus.fireGlobalEvent({id: id, target: param || this});
+    return function (event, target) {
+        comp.handleEvent({id: id, target: this});
     }
 }
 UIManager.prototype.getEventBus = function (key) {
@@ -1464,6 +1459,13 @@ UIManager.prototype.init = function () {
     // manage components's size and position
     this.areas.add(this.components['classes'].getArea(), 0);
     this.areas.add(this.components['editor'].getArea(), 1);
+
+    var svg = this.svg;
+    svg.on('mousedown.start', this.listenEvent(ControlType.SVG_DOWN_BEGIN), true, svg);
+    svg.on('mousedown.end', this.listenEvent(ControlType.SVG_DOWN_END), svg);
+    svg.on('mousemove', this.listenEvent(ControlType.SVG_MOVE), true, svg);
+    svg.on('mouseup.start', this.listenEvent(ControlType.SVG_UP_BEGIN), true, svg);
+    svg.on('mouseup.end', this.listenEvent(ControlType.SVG_UP_END), svg);
 }
 UIManager.prototype.bindDatas = function (data) {
     this.components['editor'].bind(data.entities);
@@ -2023,12 +2025,6 @@ var global = {
 
 //var camera = new Camera(svg);
 var uiMgr = new UIManager(svg);
-
-svg.on('mousedown.start', listenSvg(ControlType.SVG_DOWN_BEGIN), true);
-svg.on('mousedown.end', listenSvg(ControlType.SVG_DOWN_END));
-svg.on('mousemove', listenSvg(ControlType.SVG_MOVE), true);
-svg.on('mouseup.start', listenSvg(ControlType.SVG_UP_BEGIN), true);
-svg.on('mouseup.end', listenSvg(ControlType.SVG_UP_END));
 
 // global listeners register
 window.addEventListener('resize', function () {
