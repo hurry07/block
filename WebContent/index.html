@@ -178,7 +178,7 @@ Component.prototype.match = function (text) {
 }
 Component.prototype.width = function (w) {
     this.bg.attr('width', w);
-    this.topline.attr('d', sprintf('M0,0 l%f,0', w));
+    this.topline.path().M(0, 0).l(w, 0).end();
 }
 Component.prototype.position = function (x, y) {
     this.view.attr('transform', sprintf('translate(%f,%f)', x, y));
@@ -545,8 +545,6 @@ Field.prototype.update = function (dold, dnew) {
 Field.prototype.handleClick = function (d) {
     uiMgr.handle({id: ActionTypes.MOUSE_CLICK, 'target': Node.getNode(d), 'id': 'name'});
 }
-Field.prototype.handleDown = listenEvent(ActionTypes.MOUSE_DOWN)
-Field.prototype.handleOver = listenEvent(ActionTypes.MOUSE_OVER)
 Field.prototype.identifier = function (d) {
     return d.type + d.name;
 }
@@ -659,7 +657,7 @@ Link.prototype.update = function (d) {
         var p1 = n1.getLinkStart();
         var p2 = n2.getLinkEnd();
         this.start.attr('cx', p1[0]).attr('cy', p1[1]);
-        this.end.attr('transform', 'translate(' + p2[0] + ',' + p2[1] + ')');
+        this.end.transform().translate(p2[0], p2[1]).end();
 
         this.updateCurve(p1, p2);
     } else {
@@ -681,18 +679,17 @@ Link.prototype.updateCurve = function (p1, p2) {
     var gy = p2[1] - p1[1];
     var c = Math.max(-Math.min(gx, gy), Math.max(gx, gy)) / 4;
 
-    var path = 'M' + p1[0] + ',' + p1[1]//
+    var path = this.curve.path().M(p1[0], p1[1]);
     if (gx > 0) {
-        path += ' q' + c + ',0' + ' ' + gx / 2 + ',' + gy / 2
-        path += ' t' + gx / 2 + ',' + gy / 2;
+        path.q(c, 0, gx / 2, gy / 2);
+        path.t(gx / 2, gy / 2);
     } else {
-        path += ' q' + -c + ',0' + ' ' + (gx / 2 - c) + ',' + gy / 2
-        path += ' t' + (gx / 2 + c) + ',' + gy / 2;
+        path.q(-c, 0, gx / 2 - c, gy / 2);
+        path.t(gx / 2 + c, gy / 2);
     }
-
-    this.curve.attr('d', path);
+    path.end();
     this.start.attr('cx', p1[0]).attr('cy', p1[1]);
-    this.end.attr('transform', 'translate(' + p2[0] + ',' + p2[1] + ')');
+    this.end.transform().translate(p2[0], p2[1]).end();
 }
 Link.prototype.endArc = d3.svg.arc()
         .innerRadius(0)
@@ -838,7 +835,6 @@ Table.prototype.enter = function (d) {
             .on('mouseover', this.handleOver, true, this)
 
     this.fields = new Fields(this, fieldsBg);
-    this.fields.camera = this.camera;
     this.fields.bind(d.fields);
 
 // footer
@@ -867,8 +863,6 @@ Table.prototype.getHeight = function () {
     var p = this.prefer;
     return d.fields.length * p.field.height + p.header.height + p.footer.height;
 };
-Table.prototype.handleDown = listenEvent(ActionTypes.MOUSE_DOWN);
-Table.prototype.handleOver = listenEvent(ActionTypes.MOUSE_OVER);
 Table.prototype.isTable = function (t) {
     return this.types.indexOf(t) != -1;
 };
@@ -986,7 +980,6 @@ var Fields = Node.createContainer(Field, {
         var child = new Field(this);
         child.create();
         child.table = this.parentNode;
-        child.camera = this.camera;
         return child;
     }
 });
@@ -994,11 +987,10 @@ var Fields = Node.createContainer(Field, {
 // ==========================
 // schema layer
 // ==========================
-function TableCollection(p, view, camera) {
+function TableCollection(p, view) {
     ListNode.call(this, p);
     this.view = view;
     this.tables = new d3.map();
-    this.camera = camera;
 }
 _extends(TableCollection, ListNode);
 TableCollection.prototype.updateEnd = function (children) {
@@ -1068,9 +1060,7 @@ TableCollection.prototype.getChildren = function () {
     return this.view.selectAll('g > .table');
 }
 TableCollection.prototype.createChild = function () {
-    var t = Table.create(this);
-    t.camera = this.camera;
-    return t;
+    return Table.create(this);
 }
 TableCollection.prototype.identifier = Table.identifier;
 TableCollection.prototype.export = function () {
@@ -1301,6 +1291,15 @@ function EditArea(root) {
     WindowComponent.call(this, root);
     this.cameras = [];
 
+    // collect background event
+    this.view.on('mouseout', this.listen('root.out'))
+            .on('mouseover', this.listen('root.over'))
+            .on('mousemove', this.listen('root.move'))
+            .on('mousedown.start', this.listen('root.downstart'), true)
+            .on('mousedown.end', this.listen('root.downend'), true)
+            .on('mouseup', this.listen('root.up'), true)
+    this.eventData = new DataMap();
+
     // table window clip window
     this.initTables();
     // init svg layers that will used for drag and drop
@@ -1358,12 +1357,18 @@ EditArea.prototype.initTables = function () {
     var root = t.root = viewbox.append('g').classed('entity', true);
 
     // background
-    t.background = root.append('svg:rect')
-            .attr('fill', 'url(#gridPattern)')
-            .on('mouseout', this.handleOut)
-            .on('mouseover', this.handleOver);
+    t.background = root.append('svg:rect').attr('fill', 'url(#gridPattern)')
     var camera = t.camera = new BgCamera(this.area, viewbox, root, t.background);
     this.cameras.push(camera);
+
+    // bind listener to current component
+    Table.prototype.camera = camera;
+    Table.prototype.handleDown = this.listen('table.down');
+    Table.prototype.handleOver = this.listen('table.over');
+
+    Field.prototype.camera = camera;
+    Field.prototype.handleDown = this.listen('field.down');
+    Field.prototype.handleOver = this.listen('field.over');
 
     // tables
     var node = Node.wrap(root);
@@ -1372,7 +1377,7 @@ EditArea.prototype.initTables = function () {
 }
 EditArea.prototype.onResize = function () {
     var a = this.area;
-    this.view.attr('transform', sprintf('translate(%f,%f)', a.x, a.y));
+    this.view.transform().translate(a.x, a.y).end();
     this.cameras.each(function (e) {
         e.resize(a.width(), a.height());
     });
@@ -1380,17 +1385,33 @@ EditArea.prototype.onResize = function () {
 EditArea.prototype.getArea = function () {
     return this.area;
 }
-/**
- * 离开背景图片, 进入到各种 UI 界面
- */
-EditArea.prototype.handleOut = function () {
-    uiMgr.handleEvent({id: ControlType.SVG_BG_OUT})
-}
-/**
- * 鼠标从一个 UI 控件上离开
- */
-EditArea.prototype.handleOver = function () {
-    uiMgr.handleEvent({id: ControlType.SVG_BG_OVER})
+EditArea.prototype.handleEvent = function (event) {
+    switch (event.id) {
+        case 'root.out':
+        case 'root.over':
+            this.eventData.clean('mouseover');
+            break;
+        case 'root.downstart':
+            this.eventData.clean('mousedown');
+            break;
+        case 'table.down':
+            this.eventData.clean('mousedown.field');
+            this.eventData.value('mousedown.table', event.target);
+            break;
+        case 'table.over':
+            this.eventData.clean('mouseover.field');
+            this.eventData.value('mouseover.table', event.target);
+            break;
+        case 'field.down':
+            this.eventData.value('mousedown.field', event.target);
+            break;
+        case 'field.over':
+            this.eventData.value('mouseover.field', event.target);
+            break;
+        default :
+            this.eventbus.fireEvent(event);
+            break;
+    }
 }
 // ==========================
 // UI Manager

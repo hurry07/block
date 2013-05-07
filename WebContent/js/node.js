@@ -818,14 +818,17 @@ WindowComponent.prototype.getArea = function () {
 WindowComponent.prototype.onGlobalEvent = function (event) {
     this.eventbus.fireEvent(event);
 }
+WindowComponent.prototype.handleEvent = function (event) {
+
+}
 /**
  * return an temp event listener which will send event to WindowComponent
  * @param id
  * @returns {Function}
  */
-WindowComponent.prototype.listenEvent = function (id) {
+WindowComponent.prototype.listen = function (id) {
     var comp = this;
-    return function (param) {
-        comp.eventbus.fireEvent({id: id, target: param || this});
+    return function (event, target) {
+        comp.handleEvent({id: id, target: this});
     }
 }

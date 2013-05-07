@@ -22,6 +22,151 @@ var block = {};
     }
 
     /**
+     * simplify setting of transform
+     * @param node SvgSelect
+     * @constructor
+     */
+    function SvgTransform(node) {
+        this.node = node;
+        this.attrs = [];
+    };
+    SvgTransform.prototype.matrix = function (a, b, c, d, e, f) {
+        this.attrs.push('matrix(' + Array.prototype.slice.call(arguments, 0).join(' ') + ')');
+        return this;
+    }
+    SvgTransform.prototype.translate = function (x, y) {
+        this.attrs.push('translate(' + x + ',' + ( y || 0) + ')');
+        return this;
+    }
+    SvgTransform.prototype.scale = function (x, y) {
+        this.attrs.push('scale(' + x + ',' + (y === 0 ? y : (y || x)) + ')');
+        return this;
+    }
+    SvgTransform.prototype.rotate = function (a) {
+        if (arguments.length == 1) {
+            this.attrs.push('rotate(' + a + ')');
+        } else {
+            this.attrs.push('rotate(' + a + ',' + arguments[1] + ',' + arguments[1] + ')');
+        }
+        return this;
+    }
+    SvgTransform.prototype.skewX = function (x) {
+        this.attrs.push('skewX(' + x + ')', x);
+        return this;
+    }
+    SvgTransform.prototype.skewY = function (y) {
+        this.attrs.push('skewY(' + x + ')', y);
+        return this;
+    }
+    SvgTransform.prototype.end = function () {
+        return this.node.attr('transform', this.attrs.join(' '));
+    }
+
+    /**
+     * utils for path::d easily setup
+     * @param node
+     * @constructor
+     */
+    function SvgPath(node) {
+        this.node = node;
+        this.attrs = [];
+    };
+    /**
+     * M moveto
+     * L lineto
+     * T smooth quadratic Belzier curveto
+     */
+    (function (str) {
+        str += str.toLowerCase();
+        str.split('').each(function (c) {
+            SvgPath.prototype[c] = function (x, y) {
+                this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+                return this;
+            }
+        })
+    })('MLT');
+    /**
+     * H horizontal lineto
+     * @param x
+     * @constructor
+     */
+    SvgPath.prototype.H = function (x) {
+        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    SvgPath.prototype.h = function (x) {
+        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    /**
+     * V vertical lineto
+     * @param y
+     * @constructor
+     */
+    SvgPath.prototype.V = function (y) {
+        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    SvgPath.prototype.v = function (y) {
+        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    /**
+     * curveto
+     * @constructor
+     */
+    SvgPath.prototype.C = function (x1, y1, x2, y2, x, y) {
+        this.attrs.push('C' + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    SvgPath.prototype.c = function (x1, y1, x2, y2, x, y) {
+        this.attrs.push('c' + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    /**
+     * smooth curveto
+     * @constructor
+     */
+    SvgPath.prototype.S = function (x2, y2, x, y) {
+        this.attrs.push('S' + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    SvgPath.prototype.s = function (x2, y2, x, y) {
+        this.attrs.push('s' + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    /**
+     * quadratic Belzier curve
+     * @constructor
+     */
+    SvgPath.prototype.Q = function (x1, y1, x, y) {
+        this.attrs.push('Q' + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+    SvgPath.prototype.q = function (x1, y1, x, y) {
+        this.attrs.push('q' + Array.prototype.slice.call(arguments, 0).join(' '));
+        return this;
+    }
+//    /**
+//     * elliptical Arc ? not under stand TODO
+//     * @constructor
+//     */
+//    SvgPath.prototype.A = function () {
+//        return this;
+//    }
+    /**
+     * closepath
+     * @constructor
+     */
+    SvgPath.prototype.z = SvgPath.prototype.Z = function () {
+        this.attrs.push('Z');
+        return this;
+    }
+    SvgPath.prototype.end = function () {
+        return this.node.attr('d', this.attrs.join(' '));
+    }
+
+    /**
      * Created with JetBrains WebStorm.
      * User: jie
      * Date: 13-4-23
@@ -30,8 +175,7 @@ var block = {};
      */
     function SvgSelect(tag) {
         this.htmltag = tag;
-    }
-
+    };
     /**
      * child tag name
      * @param name
@@ -160,7 +304,12 @@ var block = {};
         __tag_style.call(this.tag(), name, value, priority);
         return this;
     };
-
+    SvgSelect.prototype.transform = function () {
+        return new SvgTransform(this);
+    }
+    SvgSelect.prototype.path = function () {
+        return new SvgPath(this);
+    }
     /**
      * taken from d3
      *
