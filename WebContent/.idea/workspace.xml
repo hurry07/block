@@ -37,10 +37,10 @@
     <splitter split-orientation="horizontal" split-proportion="0.47143888">
       <split-first>
         <leaf>
-          <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="true">
+          <file leaf-file-name="index.html" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/index.html">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="1874" column="48" selection-start="52545" selection-end="52545" vertical-scroll-proportion="0.556266">
+                <state line="1848" column="7" selection-start="51765" selection-end="51765" vertical-scroll-proportion="0.057544757">
                   <folding />
                 </state>
               </provider>
@@ -68,7 +68,7 @@
       </split-first>
       <split-second>
         <leaf>
-          <file leaf-file-name="index.html" pinned="false" current="true" current-in-tab="true">
+          <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/index.html">
               <provider selected="true" editor-type-id="text-editor">
                 <state line="509" column="19" selection-start="14732" selection-end="14732" vertical-scroll-proportion="-0.681761">
@@ -502,7 +502,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="509" column="19" selection-start="14732" selection-end="14732" vertical-scroll-proportion="-0.681761">
+        <state line="1848" column="7" selection-start="51765" selection-end="51765" vertical-scroll-proportion="0.057544757">
           <folding />
         </state>
       </provider>
