@@ -431,6 +431,9 @@ function ClassManage(root) {
 }
 //_extends(ClassManage, Action);
 _extends(ClassManage, WindowComponent);
+ClassManage.prototype.createArea = function () {
+    return new Area(this).init(this.prefer.width, 0);
+}
 ClassManage.prototype.onResize = function () {
     this.view.attr('transform', sprintf('translate(%f,%f)', this.area.x, this.area.y));
 
@@ -1309,8 +1312,8 @@ function EditArea(root) {
     this.initLayers();
 
     //TODO test
-    this.graphic.camera.move(-50, -40);
-    this.graphic.camera.scale(1);
+//    this.graphic.camera.move(-50, -40);
+//    this.graphic.camera.scale(2);
 }
 _extends(EditArea, WindowComponent);
 EditArea.prototype.onRegister = function (manager) {
@@ -1426,6 +1429,8 @@ function UIManager(svg) {
     this.actions = {};
     // all parts
     this.components = {};
+    // event dispatcher config
+    this.eventbus = new EventBus();
 
     // hold html adapter
     this.global = {
@@ -1433,6 +1438,20 @@ function UIManager(svg) {
     };
 
     this.init();
+}
+/**
+ * return an temp event listener which will send event to WindowComponent
+ * @param id
+ * @returns {Function}
+ */
+UIManager.prototype.listenEvent = function (id) {
+    var comp = this;
+    return function (param) {
+        comp.eventbus.fireGlobalEvent({id: id, target: param || this});
+    }
+}
+UIManager.prototype.getEventBus = function (key) {
+    return this.eventbus;
 }
 UIManager.prototype.getGlobal = function (key) {
     return this.global[key];

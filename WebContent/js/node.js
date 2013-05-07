@@ -348,16 +348,30 @@ ListNode.prototype.bindChild = function (d) {
 // ==========================
 // Area stands for a screen area, layout logic will interact with this interface
 // ==========================
-function Area(x, y, w, h) {
+function Area(listener) {
+    if (listener) {
+        this.listener = listener;
+    }
+    this.x = this.y = 0;
+    this._width = this._height = 0;
+}
+Area.prototype.init = function (x, y, w, h) {
     if (arguments.length == 4) {
         this.x = x;
         this.y = y;
         this._width = w;
         this._height = h;
-    } else {
-        this.x = this.y = 0;
-        this._width = this._height = 0;
+        return this;
     }
+    this.x = this.y = 0;
+    if (arguments.length == 2) {
+        this._width = x;
+        this._height = y;
+    }
+    return this;
+}
+Area.prototype.addListener = function (lis) {
+    this.listener = lis;
 }
 Area.prototype.size = function (w, h) {
     if (arguments.length == 0) {
@@ -412,6 +426,9 @@ Area.prototype.refresh = function () {
  * notice current object's size has changed
  */
 Area.prototype.onResize = function () {
+    if (this.listener) {
+        this.listener.onResize();
+    }
 }
 // ==========================
 // container type
@@ -533,7 +550,7 @@ _extends(FrameLayout, Area);
 FrameLayout.prototype.add = function (area, type, param) {
     this.children.push({area: area, type: type || 'fixed', param: param});
 }
-FrameLayout.prototype.remove = function () {
+FrameLayout.prototype.remove = function (child) {
     for (var i = 0, c = this.children, len = c.length; i < len; i++) {
         if (c[i].area === child) {
             c.splice(i, 1);
@@ -713,31 +730,102 @@ BgCamera.prototype.apply = function (sx, sy) {
     this.bg.attr({x: sx, y: sy, width: w, height: h});
 }
 // ==========================
+// Event Wiring
+// ==========================
+function EventBus() {
+    this.config = new DataMap();
+}
+EventBus.prototype.on = function (types, listener) {
+    types = (types || '').split(',').each(function (name) {
+        if (name != '') {
+            this.add(name, listener);
+        }
+    }, this);
+}
+EventBus.prototype.add = function (name, listener) {
+    var ls = this.config.value(name);
+    if (!ls) {
+        this.config.value(name, [listener]);
+    } else if (ls.indexOf(listener) == -1) {
+        ls.push(listener);
+    }
+}
+EventBus.prototype.off = function (types, listener) {
+    types = (types || '').split(',').each(function (name) {
+        if (name != '') {
+            this.remove(name, listener);
+        }
+    }, this);
+}
+EventBus.prototype.remove = function (name, listener) {
+    var vs = this.config.value(name);
+    var i = !vs ? -1 : vs.indexOf(listener);
+    if (i != -1) {
+        vs.splice(i, 1);
+        if (vs.length == 0) {
+            this.config.del(name);
+        }
+    }
+}
+EventBus.prototype.fireEvent = function (event) {
+    var l = this.config.value(event.id);
+    if (l) {
+        for (var i = -1, len = l.length; ++i < len;) {
+            l[i].onEvent(event);
+        }
+    }
+}
+EventBus.prototype.fireGlobalEvent = function (event) {
+    var l = this.config.value(event.id);
+    if (l) {
+        for (var i = -1, len = l.length; ++i < len;) {
+            l[i].onGlobalEvent(event);
+        }
+    }
+}
+// ==========================
 // Component of tool
 // ==========================
 /**
  * a part of the whole editor
  * @constructor
  */
-function WindowComponent(view, size) {
-    // root of the whole component
+function WindowComponent(view) {
     this.view = view;
-
-    var _this = this;
-    if (size) {
-        this.area = new Area(0, 0, size.width || 0, size.height || 0);
-    } else {
-        this.area = new Area();
-    }
-    this.area.onResize = function () {
-        _this.onResize();
-    }
+    this.area = this.createArea();
+    this.eventbus = new EventBus();
+}
+WindowComponent.prototype.createArea = function () {
+    return new Area(this);
 }
 WindowComponent.prototype.onResize = function () {
     this.view.attr('transform', sprintf('translate(%f,%f)', this.area.x, this.area.y));
 }
-WindowComponent.prototype.onRegister = function (manaager) {
+/**
+ * when container binding to tool
+ * @param manager
+ */
+WindowComponent.prototype.onRegister = function (manager) {
+    manager.getEventBus().on('mousemove', this);
 }
 WindowComponent.prototype.getArea = function () {
     return this.area;
+}
+/**
+ * receive container event
+ * @param event
+ */
+WindowComponent.prototype.onGlobalEvent = function (event) {
+    this.eventbus.fireEvent(event);
+}
+/**
+ * return an temp event listener which will send event to WindowComponent
+ * @param id
+ * @returns {Function}
+ */
+WindowComponent.prototype.listenEvent = function (id) {
+    var comp = this;
+    return function (param) {
+        comp.eventbus.fireEvent({id: id, target: param || this});
+    }
 }

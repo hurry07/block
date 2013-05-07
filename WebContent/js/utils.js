@@ -99,12 +99,6 @@ DataMap.prototype.data = function () {
 DataMap.prototype.value = function (path, value) {
     var node = this.root;
     var isget = arguments.length == 1;
-    if (!path) {
-        console.log(path);
-    }
-    if (typeOf(path) != 'string') {
-        console.log(path);
-    }
     for (var i = 0, paths = path.split('\.'), l = paths.length, e; i < l, e = paths[i]; i++) {
         if (i == l - 1) {
             if (!node.hasOwnProperty(e)) {

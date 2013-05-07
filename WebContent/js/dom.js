@@ -6,6 +6,9 @@ var block = {};
      * @param value
      */
     function __tag_attr(name, value) {
+//        if (value == NaN || (value + '').indexOf('NaN') != -1) {
+//            console.log('error');
+//        }
         name = d3.ns.qualify(name);
         (value == null)
             ? (name.local ? this.removeAttributeNS(name.space, name.local) : this.removeAttribute(name))
