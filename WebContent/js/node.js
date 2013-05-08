@@ -138,6 +138,7 @@ Node.prototype.destroy = function () {
     this.view.remove();
     this.data = null;
     this.init = false;
+    console.log('Node.prototype.destroy');
 }
 /**
  * customer ui creating
@@ -166,6 +167,7 @@ Node.prototype.updateIdentity = function (pred, d) {
  * you can release customer ui, or you may send some release event
  */
 Node.prototype.exit = function () {
+    console.log('Node.prototype.exit');
 }
 /**
  * create a empty node
@@ -326,6 +328,12 @@ ListNode.prototype.exit = function () {
     this.getChildren().each(function (node) {
         node.remove();
     });
+}
+ListNode.prototype.refresh = function () {
+    var children = this.getChildren();
+    for (var i = -1, eles = this.getChildren(), len = eles.length; ++i < len;) {
+        children[i].refresh();
+    }
 }
 ListNode.prototype.getChildren = function () {
     return this.view.childNodes();
@@ -730,36 +738,82 @@ BgCamera.prototype.apply = function (sx, sy) {
     this.bg.attr({x: sx, y: sy, width: w, height: h});
 }
 // ==========================
+// Action is an status machine, it listen to eventbus
+// and can dispatch its own event to the bus
+// ==========================
+function Action() {
+    this.active = false;
+    this.events = [];
+}
+/**
+ * @param manager WindowComponent
+ */
+Action.prototype.register = function (manager) {
+    this.manager = manager;
+    this.onRegister(manager);
+}
+Action.prototype.onRegister = function (manager) {
+}
+Action.prototype.isActive = function () {
+    return this.active;
+}
+/**
+ * handle event
+ * @param event
+ */
+Action.prototype.onEvent = function (event) {
+}
+/**
+ * send customer event
+ * @param event
+ */
+Action.prototype.dispatchEvent = function (event) {
+    this.manager.handleEvent(event);
+}
+/**
+ * add and remove event listing wiring
+ * @param id
+ */
+Action.prototype.on = function (id) {
+    this.manager.getEvents().on(id, this);
+}
+Action.prototype.off = function (id) {
+    this.manager.getEvents().off(id, this);
+}
+/**
+ * get data from manager
+ * @param id
+ * @returns {*}
+ */
+Action.prototype.getParam = function (id) {
+    var data = this.manager.getData();
+    if (data.has(id)) {
+        return data.value(id);
+    }
+    return null;
+}
+// ==========================
 // Event Wiring
 // ==========================
 function EventBus() {
     this.config = new DataMap();
 }
-EventBus.prototype.on = function (types, listener) {
-    types = (types || '').split(',').each(function (name) {
-        if (name != '') {
-            this.add(name, listener);
-        }
-    }, this);
-}
-EventBus.prototype.add = function (name, listener) {
+/**
+ * add action with a name
+ * @param name
+ * @param action
+ */
+EventBus.prototype.on = function (name, action) {
     var ls = this.config.value(name);
     if (!ls) {
-        this.config.value(name, [listener]);
-    } else if (ls.indexOf(listener) == -1) {
-        ls.push(listener);
+        this.config.value(name, [action]);
+    } else if (ls.indexOf(action) == -1) {
+        ls.push(action);
     }
 }
-EventBus.prototype.off = function (types, listener) {
-    types = (types || '').split(',').each(function (name) {
-        if (name != '') {
-            this.remove(name, listener);
-        }
-    }, this);
-}
-EventBus.prototype.remove = function (name, listener) {
+EventBus.prototype.off = function (name, action) {
     var vs = this.config.value(name);
-    var i = !vs ? -1 : vs.indexOf(listener);
+    var i = !vs ? -1 : vs.indexOf(action);
     if (i != -1) {
         vs.splice(i, 1);
         if (vs.length == 0) {
@@ -771,17 +825,17 @@ EventBus.prototype.fireEvent = function (event) {
     var l = this.config.value(event.id);
     if (l) {
         for (var i = -1, len = l.length; ++i < len;) {
-            l[i].onEvent(event);
+            this.runEvent(l[i], event);
         }
     }
 }
-EventBus.prototype.fireGlobalEvent = function (event) {
-    var l = this.config.value(event.id);
-    if (l) {
-        for (var i = -1, len = l.length; ++i < len;) {
-            l[i].onGlobalEvent(event);
-        }
-    }
+/**
+ * run event on an Action
+ * @param action
+ * @param event
+ */
+EventBus.prototype.runEvent = function (action, event) {
+    (action.initEvent == event.id || action.isActive()) && action.onEvent(event);
 }
 // ==========================
 // Component of tool
@@ -792,34 +846,57 @@ EventBus.prototype.fireGlobalEvent = function (event) {
  */
 function WindowComponent(view) {
     this.view = view;
+
+    // the area field make it possible be managed by global layout controller
     this.area = this.createArea();
+
+    // event and listener wiring
     this.eventbus = new EventBus();
+    this.compdata = new DataMap();
+
+    // a component may has multi layer with each a camera
+    this.cameras = [];
+
+    // editor's function will be brought up by actions
+    this.actions = {};
 }
 WindowComponent.prototype.createArea = function () {
     return new Area(this);
 }
+/**
+ * react to window resize event
+ */
 WindowComponent.prototype.onResize = function () {
-    this.view.attr('transform', sprintf('translate(%f,%f)', this.area.x, this.area.y));
+    this.view.$t().translate(this.area.x, this.area.y).end();
 }
 /**
- * when container binding to tool
+ * when container binding to parent window
  * @param manager
  */
 WindowComponent.prototype.onRegister = function (manager) {
-    manager.getEventBus().on('mousemove', this);
 }
 WindowComponent.prototype.getArea = function () {
     return this.area;
 }
 /**
- * receive container event
+ * interact with action
+ * @returns {*}
+ */
+WindowComponent.prototype.getEvents = function () {
+    return this.eventbus;
+}
+WindowComponent.prototype.getData = function () {
+    return this.compdata;
+}
+/**
+ * all user event should be collected to event bus
  * @param event
  */
-WindowComponent.prototype.onGlobalEvent = function (event) {
-    this.eventbus.fireEvent(event);
-}
 WindowComponent.prototype.handleEvent = function (event) {
-
+}
+WindowComponent.prototype.addAction = function (name, action) {
+    this.actions[name] = action;
+    action.register(this);
 }
 /**
  * return an temp event listener which will send event to WindowComponent
@@ -830,5 +907,11 @@ WindowComponent.prototype.listen = function (id) {
     var comp = this;
     return function (event, target) {
         comp.handleEvent({id: id, target: this});
+    }
+}
+WindowComponent.prototype.listenId = function (id) {
+    var comp = this;
+    return function (event, target) {
+        comp.handleEvent({id: id});
     }
 }

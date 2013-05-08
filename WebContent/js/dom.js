@@ -91,11 +91,11 @@ var block = {};
      * @constructor
      */
     SvgPath.prototype.H = function (x) {
-        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        this.attrs.push('H' + Array.prototype.slice.call(arguments, 0).join(' '));
         return this;
     }
     SvgPath.prototype.h = function (x) {
-        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        this.attrs.push('h' + Array.prototype.slice.call(arguments, 0).join(' '));
         return this;
     }
     /**
@@ -104,11 +104,11 @@ var block = {};
      * @constructor
      */
     SvgPath.prototype.V = function (y) {
-        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        this.attrs.push('V' + Array.prototype.slice.call(arguments, 0).join(' '));
         return this;
     }
     SvgPath.prototype.v = function (y) {
-        this.attrs.push(c + Array.prototype.slice.call(arguments, 0).join(' '));
+        this.attrs.push('v' + Array.prototype.slice.call(arguments, 0).join(' '));
         return this;
     }
     /**
@@ -304,11 +304,19 @@ var block = {};
         __tag_style.call(this.tag(), name, value, priority);
         return this;
     };
-    SvgSelect.prototype.transform = function () {
+    SvgSelect.prototype.$t = SvgSelect.prototype.transform = function () {
         return new SvgTransform(this);
     }
-    SvgSelect.prototype.path = function () {
+    SvgSelect.prototype.$d = SvgSelect.prototype.path = function () {
         return new SvgPath(this);
+    }
+    SvgSelect.prototype.$ = function (c) {
+        switch (c) {
+            case 't':
+                return this.transform();
+            case 'd':
+                return this.path();
+        }
     }
     /**
      * taken from d3

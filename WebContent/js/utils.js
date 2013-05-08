@@ -118,6 +118,7 @@ DataMap.prototype.del = function (path) {
     var node = this.root;
     for (var i = 0, paths = path.split('\.'), l = paths.length, e; i < l, e = paths[i]; i++) {
         if (i == l - 1) {
+            console.log('delete ' + e);
             delete node[e];
         } else {
             if (!(node = node[e])) {
@@ -137,6 +138,7 @@ DataMap.prototype.clean = function (path) {
                         delete c[rm];
                     }
                 } else {
+                    console.log('delete ' + e);
                     delete node[e];
                 }
             }
@@ -161,7 +163,13 @@ DataMap.prototype.has = function (path) {
     }
     return false;
 }
-
+DataMap.prototype.log = function (nodes) {
+    nodes.each(function (id) {
+        if (this.has(id)) {
+            console.log(id, this.value(id));
+        }
+    }, this);
+}
 function Collection(elements) {
     this.args = elements;
 }

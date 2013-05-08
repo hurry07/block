@@ -509,6 +509,7 @@ ClassManage.prototype.getTarget = function () {
 // ==========================
 function Field(p) {
     Node.call(this, p);
+    console.log('new Filed');
 }
 _node(Field, Node);
 Field.prototype.targetType = Target.FIELD;
@@ -524,18 +525,20 @@ Field.prototype.enter = function () {
     var d = this.data;
 
     //.on('click', this.handleEdit)
-    this.view.on('mousedown', this.handleDown, this)
+    this.view
+            .on('mousedown', this.handleDown, this)
             .on('mouseover', this.handleOver, this)
-            .attr('transform', 'translate(' + 0 + ',' + (fh * i) + ')');
+            .$t().translate(0, (fh * i)).end();
 
-    this.view.append('svg:rect')
+    this.view
+            .append('svg:rect')
             .attr({'width': fw, 'height': fh});
 
-    this.view.append('svg:text')
+    this.view
+            .append('svg:text')
             .classed('fieldname', true)
             .attr({'x': fp, 'y': fh / 2, 'dy': 6})
             .text(d.name)
-    //.on('click', this.handleClick)
 }
 Field.prototype.update = function (dold, dnew) {
     var d = dnew;
@@ -560,6 +563,9 @@ Field.prototype.getViewNode = function () {
     return this.view.tag();
 }
 Field.prototype.getName = function () {
+    if (!this.table) {
+        console.log(this.name);
+    }
     return this.table.getName() + '.' + this.data.name;
 }
 // ----------------------
@@ -644,6 +650,9 @@ Link.prototype.enter = function (d) {
     this.id = this.identifier(d);
 
     this.update(d);
+}
+Link.prototype.exit = function () {
+    console.log('Link.prototype.exit');
 }
 Link.prototype.handleDown = listenEvent(ActionTypes.MOUSE_DOWN);
 Link.prototype.getId = function () {
@@ -798,7 +807,7 @@ Table.prototype.enter = function (d) {
     this.view.attr('transform', 'translate(' + d.position.x + ',' + d.position.y + ')')
             .classed('table', true)
             .classed(d.type, true)
-            .on('mousedown', this.handleDown, this);
+            .on('mousedown', this.handleDown, true, this);
 
     // header
     this.header = this.view
@@ -810,39 +819,30 @@ Table.prototype.enter = function (d) {
             .attr('height', p.height)
             .classed('header', true);
 
+    // title
     this.title = this.header.append('svg:text')
-            .attr({
-                x: p.prefix,
-                y: p.height / 2,
-                dy: 8
-            })
+            .attr({x: p.prefix, y: p.height / 2, dy: 8})
             .classed('headername', true)
             .text(d.name);
-    this.typetext = this.header.append('svg:text')
-            .attr({
-                x: this.prefer.width - 15,
-                y: p.height / 2,
-                dy: 13
-            })
-            .classed('type', true)
-            .text('{');
 
-// fields
+    // fields bg
     var fieldsBg = this.view.append('svg:g')
             .attr("transform", 'translate(0,' + p.height + ')')
             .classed('fields', true)
-            .on('mousedown', this.handleDown, this)
+            .on('mousedown', this.handleDown, true, this)
             .on('mouseover', this.handleOver, true, this)
 
+    // fields
     this.fields = new Fields(this, fieldsBg);
     this.fields.bind(d.fields);
 
-// footer
+    // footer
     p = this.prefer.footer;
     this.footer = this.view.append('svg:rect')
             .attr('width', w)
             .attr('height', p.height)
             .attr('y', this.getHeight() - p.height)
+            .on('mousedown', this.handleDown, this)
             .classed('footer', true);
 }
 ;
@@ -979,7 +979,7 @@ var Fields = Node.createContainer(Field, {
     createChild: function () {
         var child = new Field(this);
         child.create();
-        child.table = this.parentNode;
+        child.table = this.parentNode;// bind table
         return child;
     }
 });
@@ -1203,7 +1203,7 @@ DefaltMenu.prototype.runMenuAction = function (action) {
     }
     console.log(action);
 }
-function MenuAction(root, camera) {
+function MenuAction(root) {
     Action.call(this);
 
     this.initEvent = _r(ControlType.SVG_DOWN_END);
@@ -1211,7 +1211,6 @@ function MenuAction(root, camera) {
     this.target = null;
     this.backmenu = new DefaltMenu();
 
-    this.camera = camera;
     this.menu = Menu.create(Node.wrap(root), this);
 }
 _extends(MenuAction, Action);
@@ -1289,16 +1288,13 @@ _extends(ComponentBoard, ListNode);
 function EditArea(root) {
     // root container of table area
     WindowComponent.call(this, root);
-    this.cameras = [];
 
     // collect background event
-    this.view.on('mouseout', this.listen('root.out'))
-            .on('mouseover', this.listen('root.over'))
-            .on('mousemove', this.listen('root.move'))
-            .on('mousedown.start', this.listen('root.downstart'), true)
-            .on('mousedown.end', this.listen('root.downend'), true)
-            .on('mouseup', this.listen('root.up'), true)
-    this.eventData = new DataMap();
+    this.view
+            .on('mousemove', this.listenId('root.move'))
+            .on('mousedown.start', this.listenId('root.downstart'), true)
+            .on('mousedown.end', this.listenId('root.downend'))
+            .on('mouseup', this.listenId('root.up'), true)
 
     // table window clip window
     this.initTables();
@@ -1310,11 +1306,20 @@ function EditArea(root) {
 //    this.graphic.camera.scale(2);
 }
 _extends(EditArea, WindowComponent);
+// ==========================
+// global managed methods
 EditArea.prototype.onRegister = function (manager) {
-    manager.addAction('drag', new DragAction());
-    manager.addAction('link', new LinkAction(this.layers.assistant));
-    manager.addAction('menu', new MenuAction(this.layers.menu, this.layers.camera));
 }
+EditArea.prototype.onResize = function () {
+    var a = this.area;
+    this.view.$t().translate(a.x, a.y).end();
+    this.cameras.each(function (e) {
+        e.resize(a.width(), a.height());
+    });
+}
+
+// ==========================
+// data binding function
 EditArea.prototype.bind = function (data) {
     var ts = data.tables;
     var tables = this.graphic.tables;
@@ -1333,22 +1338,24 @@ EditArea.prototype.bind = function (data) {
         }
     }
 }
-EditArea.prototype.menuLocal = function (x, y) {
-    var area = this.area;
-    return [x - area.x, y - area.y];
-}
-EditArea.prototype.tablesLocal = function (t, p) {
-    return this.localTransform(this.view, t, p, this.cameras[0]);
-}
+// ==========================
+// functions setup
 EditArea.prototype.initLayers = function () {
     var t = this.layers = {};
 
     var viewbox = this.view.append('svg');
     var root = t.root = viewbox.append('g').classed('tools', true);
-    this.cameras.push(t.camera = new Camera(this.area, viewbox, root));
+    var camera = t.camera = new Camera(this.area, viewbox, root);
+    this.cameras.push(camera);
 
     t.assistant = root.append('svg:g').classed('pAssistant', true);
     t.menu = root.append('svg:g').classed('pMenu', true);
+
+    // add actions
+    MenuAction.prototype.camera = camera;
+    LinkAction.prototype.camera = camera;
+    this.addAction('link', new LinkAction(this.layers.assistant));
+    this.addAction('menu', new MenuAction(this.layers.menu));
 }
 EditArea.prototype.initTables = function () {
     var t = this.graphic = {};
@@ -1356,8 +1363,10 @@ EditArea.prototype.initTables = function () {
     var viewbox = this.view.append('svg');
     var root = t.root = viewbox.append('g').classed('entity', true);
 
-    // background
+    // background is not parent Tag od tables area, so mouseover from tables will not propagate to it
     t.background = root.append('svg:rect').attr('fill', 'url(#gridPattern)')
+            .on('mouseover', this.listenId('bg.over'))
+            .on('mouseout', this.listenId('bg.out'));
     var camera = t.camera = new BgCamera(this.area, viewbox, root, t.background);
     this.cameras.push(camera);
 
@@ -1372,46 +1381,65 @@ EditArea.prototype.initTables = function () {
 
     // tables
     var node = Node.wrap(root);
-    t.tables = new TableCollection(node, root, camera);
+    t.tables = new TableCollection(node, root);
     t.links = new LinkCollection(node, root);
+
+    // add actions
+    DragAction.prototype.camera = camera;
+    this.addAction('drag', new DragAction());
 }
-EditArea.prototype.onResize = function () {
-    var a = this.area;
-    this.view.transform().translate(a.x, a.y).end();
-    this.cameras.each(function (e) {
-        e.resize(a.width(), a.height());
-    });
-}
-EditArea.prototype.getArea = function () {
-    return this.area;
-}
+// ==========================
+// handle event
 EditArea.prototype.handleEvent = function (event) {
     switch (event.id) {
-        case 'root.out':
-        case 'root.over':
-            this.eventData.clean('mouseover');
+        // reset table event
+        case 'bg.over':
+            this.compdata.clean('mouseover');
+            break;
+        case 'bg.out':
+            this.compdata.clean('mouseover');
             break;
         case 'root.downstart':
-            this.eventData.clean('mousedown');
+            this.compdata.clean('mousedown');
             break;
+
+        // log table event
         case 'table.down':
-            this.eventData.clean('mousedown.field');
-            this.eventData.value('mousedown.table', event.target);
-            break;
-        case 'table.over':
-            this.eventData.clean('mouseover.field');
-            this.eventData.value('mouseover.table', event.target);
+            this.compdata.del('mousedown.field');
+            this.compdata.value('mousedown.table', event.target);
             break;
         case 'field.down':
-            this.eventData.value('mousedown.field', event.target);
+            this.compdata.value('mousedown.field', event.target);
+            break;
+
+        case 'table.over':
+            this.compdata.del('mouseover.field');
+            this.compdata.value('mouseover.table', event.target);
             break;
         case 'field.over':
-            this.eventData.value('mouseover.field', event.target);
+            this.compdata.value('mouseover.field', event.target);
             break;
+
+        // root.up
+        // root.downend
+        // root.move
         default :
             this.eventbus.fireEvent(event);
             break;
     }
+
+    this.eventbus.fireEvent(event);
+//    if (event.id != 'root.move') {
+//        console.log('---------------------');
+//        console.log(event);
+//        console.log('--------');
+//        this.compdata.log([
+//            'mousedown.field',
+//            'mousedown.table',
+//            'mouseover.field',
+//            'mouseover.table']);
+//        //console.log(event, this.compdata);
+//    }
 }
 // ==========================
 // UI Manager
@@ -1494,10 +1522,6 @@ UIManager.prototype.bindDatas = function (data) {
 UIManager.prototype.addComponent = function (name, comp) {
     this.components[name] = comp;
     comp.onRegister(this);
-}
-UIManager.prototype.addAction = function (name, action) {
-    action.register(this);
-    this.actions[name] = action;
 }
 UIManager.prototype.on = function (key, action) {
     if (key in ControlKeys) {
@@ -1717,13 +1741,14 @@ TextInput.prototype.show = function (adapter) {
 // ==========================
 function DragAction() {
     Action.call(this);
-    this.initEvent = ControlType.SVG_DOWN_END;
+    this.initEvent = 'root.downend';
 }
 _extends(DragAction, Action);
 DragAction.prototype.onRegister = function (manager) {
-    this.on(ControlType.SVG_DOWN_END);
-    this.on(ControlType.SVG_MOVE);
-    this.on(ControlType.SVG_UP_END);
+    this.on('root.downend');
+    this.on('root.move');
+    this.on('root.move');
+    this.on('root.up');
     this.on('link.begin');
 }
 DragAction.prototype.inactive = function () {
@@ -1736,7 +1761,7 @@ DragAction.prototype.inactive = function () {
 }
 DragAction.prototype.onEvent = function (event) {
     switch (event.id) {
-        case ControlType.SVG_DOWN_END:
+        case 'root.downend':
             this.inactive();
 
             // if user release the ctrl key, stop dragging
@@ -1744,18 +1769,16 @@ DragAction.prototype.onEvent = function (event) {
                 break;
             }
 
-            var target = this.getParam(event, 'mousedown.table');
+            var target = this.getParam('mousedown.table');
             if (target) {
                 this.node = target.getFeature('move');
                 this.node.startMove(block.event.x, block.event.y);
                 this.active = true;
-                this.fireEvent('drag.begin', target);
-            } else {
-                // TODO drag camera
+                this.dispatchEvent({id: 'drag.begin'});
             }
             break;
 
-        case ControlType.SVG_MOVE:
+        case 'root.move':
             if (!UIManager.prototype.ctrlKey()) {
                 this.inactive();
                 break;
@@ -1763,7 +1786,7 @@ DragAction.prototype.onEvent = function (event) {
             this.node.moveTo(block.event.x, block.event.y);
             break;
 
-        case ControlType.SVG_UP_END:
+        case 'root.up':
             this.inactive();
             break;
     }
@@ -1961,38 +1984,6 @@ LinkAction.prototype.start = function (event) {
     this.active = true;
     this.fireEvent('link.begin', this.beginTable);
 }
-
-// ==========================
-// TableAction
-// ==========================
-function TableAction(tables) {
-    Action.call(this);
-    this.tables = tables;
-    this.initEvent = 'drag.begin';
-    this.area = new Area();
-    var table = this;
-    this.area.onResize = function () {
-        table.onResize();
-    }
-}
-_extends(TableAction, Action);
-TableAction.prototype.onResize = function () {
-    console.log(this.area);
-}
-TableAction.prototype.onRegister = function (manager) {
-    manager.on('drag.begin', this);
-}
-TableAction.prototype.onUserEvent = function (event) {
-    switch (event.id) {
-        case 'drag.begin':
-            // console.log(event);
-            this.tables.order(event.param);
-            break;
-    }
-}
-TableAction.prototype.getArea = function () {
-    return this.area;
-}
 // ======================
 // global
 // ======================
@@ -2005,10 +1996,7 @@ function initDefs(svg) {
     var defs = svg.append('svg:defs');
     defs.append('svg:pattern')
             .attr('id', 'gridPattern')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', 15)
-            .attr('height', 15)
+            .attr({'x': 0, 'y': 0, 'width': 15, 'height': 15})
             .attr('patternUnits', 'userSpaceOnUse')
             .append('svg:path')
             .attr('d', 'M 15 0 L 0 0 0 15')
