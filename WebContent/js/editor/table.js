@@ -105,7 +105,15 @@ Table.prototype.enter = function (d) {
         .on('mouseover', this.handleOver, true, this)
 
     // fields
-    this.fields = new Fields(this, fieldsBg);
+    var fields = this.fields = new Fields(this, fieldsBg);
+    var table = this;
+
+    // use closure to bind table instance to filed created
+    this.fields.createChild = function () {
+        var c = Field.create(fields);
+        c.table = table;
+        return c;
+    }
     this.fields.bind(d.fields);
 
     // footer
@@ -151,21 +159,10 @@ Table.prototype.hasField = function (f) {
 Table.prototype.getField = function (name) {
     return this.fields.getField(name);
 };
-/**
- * get relative start to this table
- */
-Table.prototype.getLinkStart = function () {
-    var p = this.prefer;
-    return this.camera.getLocal(this.view, [p.width, p.header.height / 2]);
-};
 Table.prototype.getLinkEnd = function () {
     var p = this.prefer;
     return  this.camera.getLocal(this.view, [0, p.header.height / 2]);
 };
-Table.prototype.getViewNode = function () {
-    return this.view.tag();
-};
-
 // interact with menu
 Table.prototype.getMenu = function () {
     return [
@@ -213,13 +210,17 @@ Table.prototype.getMoveFeature = function () {
  * @returns {*}
  */
 Table.prototype.getFeature = function (f) {
+    var p = this.prefer;
     switch (f) {
         case 'move':
             return this.getMoveFeature();
-        default :
-            console.error('Unsupported feature found:' + f);
-            return null;
+        case 'link.start':
+            return new LinkTerminal(this).setTarget(this.view.tag(), [p.width, p.header.height / 2]);
+        case 'link.end':
+            return new LinkTerminal(this).setTarget(this.view.tag(), [0, p.header.height / 2]);
     }
+    console.error('Unsupported feature found:' + f);
+    return null;
 }
 Table.prototype.export = function () {
     var td = this.data;

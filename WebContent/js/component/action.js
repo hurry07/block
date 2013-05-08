@@ -9,22 +9,14 @@
 // Action is an status machine, it listen to eventbus
 // and can dispatch its own event to the bus
 // ==========================
-function Action() {
+function Action(view, camera) {
+    Layer.call(this, view, camera);
     this.active = false;
-    this.events = [];
 }
-/**
- * @param manager WindowComponent
- */
-Action.prototype.register = function (manager) {
-    this.manager = manager;
-    this.onRegister(manager);
-}
+_extends(Action, Layer);
 Action.prototype.onInit = function (id) {
     this.initEvent = id;
     this.on(id);
-}
-Action.prototype.onRegister = function (manager) {
 }
 Action.prototype.isActive = function () {
     return this.active;
@@ -35,32 +27,6 @@ Action.prototype.isActive = function () {
  */
 Action.prototype.onEvent = function (event) {
 }
-/**
- * send customer event
- * @param event
- */
-Action.prototype.dispatchEvent = function (event) {
-    this.manager.handleEvent(event);
-}
-/**
- * add and remove event listing wiring
- * @param id
- */
-Action.prototype.on = function (id) {
-    this.manager.getEvents().on(id, this);
-}
-Action.prototype.off = function (id) {
-    this.manager.getEvents().off(id, this);
-}
-/**
- * get data from manager
- * @param id
- * @returns {*}
- */
-Action.prototype.getParam = function (id) {
-    var data = this.manager.getData();
-    if (data.has(id)) {
-        return data.value(id);
-    }
-    return null;
+Action.prototype.applyEvent = function (event) {
+    (this.initEvent == event.id || this.active) && this.onEvent(event);
 }

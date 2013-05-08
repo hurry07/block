@@ -170,6 +170,14 @@ Node.prototype.exit = function () {
     console.log('Node.prototype.exit');
 }
 /**
+ * interact with Action, return will use as an Action adapter
+ * @param id
+ * @returns {null}
+ */
+Node.prototype.getFeature = function (id) {
+    return null;
+}
+/**
  * create a empty node
  *
  * @param sel

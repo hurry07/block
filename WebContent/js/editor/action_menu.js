@@ -8,14 +8,14 @@
 // ==========================
 // show right click menu
 // ==========================
-function MenuAction(root) {
-    Action.call(this);
+function MenuAction(view, camera) {
+    Action.call(this, view, camera);
 
     this.focus = false;
     this.target = null;
-    this.backmenu = new DefaltMenu();
+    this.backmenu = new DefaultMenu();
 
-    this.menu = Menu.create(Node.wrap(root), this);
+    this.menu = Menu.create(Node.wrap(view), this);
 }
 _extends(MenuAction, Action);
 MenuAction.prototype.onRegister = function (manager) {
@@ -23,28 +23,22 @@ MenuAction.prototype.onRegister = function (manager) {
     this.on('root.downend');
 }
 MenuAction.prototype.onEvent = function (event) {
-    switch (event.id) {
-        case 'root.downend_r':
-            this.popupMenu(event);
-            break;
-        case 'root.downend':
-            if (!this.focus) {
-                this.stopMenu();
-            }
-            break;
+    if (eventBt(block.event, 2)) {
+        this.popupMenu(event);
+    } else {
+        if (!this.focus) {
+            this.stopMenu();
+        }
     }
 }
 /**
  * popup right click menu
- * @param event
  */
-MenuAction.prototype.popupMenu = function (event) {
+MenuAction.prototype.popupMenu = function () {
     this.focus = false;
 
     // if table menu
-    var target = this.checkTarget(event, 'mousedown.link', 'mousedown.field', 'mousedown.table');
-    target = target || this.backmenu;
-
+    var target = this.getParam('mousedown.link', 'mousedown.field', 'mousedown.table') || this.backmenu;
     var local = this.camera.toLocal(block.event.x, block.event.y);
 
     // change position
@@ -52,18 +46,10 @@ MenuAction.prototype.popupMenu = function (event) {
         this.menu.showprevious(local[0], local[1]);
         return;
     }
+
     this.target = target;
     this.menu.show(local[0], local[1], target.getMenu());
     this.active = true;
-}
-MenuAction.prototype.checkTarget = function (event) {
-    var t;
-    for (var i = 1, l = arguments.length; i < l; i++) {
-        if (t = this.getParam(event, arguments[i])) {
-            return t;
-        }
-    }
-    return null;
 }
 MenuAction.prototype.onMenuClick = function (command) {
     this.target.runMenuAction(command);

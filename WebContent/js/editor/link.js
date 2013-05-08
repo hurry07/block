@@ -5,86 +5,9 @@
  * Time: 下午8:15
  * To change this template use File | Settings | File Templates.
  */
-// ==========================
-// Link end point
-// ==========================
-function LinkTerminal() {
-    this.type = this.Types.NONE;
-}
-LinkTerminal.prototype.table = function () {
-    var t;
-    if (t = arguments[0]) {
-        if (this.mtable !== t) {
-            delete this.mfield;
-        }
-        this.mtable = t;
-        this.updatetype();
-    } else {
-        return this.mtable;
-    }
-}
-LinkTerminal.prototype.getId = function () {
-    var id;
-    var t;
-    if (t = this.table()) {
-        id = t.getName();
-    } else {
-        id = '';
-    }
-    if (t = this.field()) {
-        id += '.' + t.getName();
-    }
-    return id;
-}
-LinkTerminal.prototype.field = function () {
-    var t;
-    if (t = arguments[0]) {
-        this.mfield = t;
-        this.updatetype();
-    } else {
-        return this.mfield
-    }
-}
-LinkTerminal.prototype.delfield = function () {
-    delete this.mfield;
-}
-LinkTerminal.prototype.deltable = function () {
-    delete this.mtable;
-}
-LinkTerminal.prototype.node = function () {
-    return this.type != this.Types.NONE && (this.mfield || this.mtable);
-}
-LinkTerminal.prototype.updatetype = function () {
-    if (this.mfield) {
-        this.type = this.Types.FIELD;
-    } else if (this.mtable) {
-        this.type = this.Types.TABLE;
-    }
-}
-LinkTerminal.prototype.reset = function () {
-    delete this.mfield;
-    delete this.mtable;
-    this.type = this.Types.NONE;
-}
-LinkTerminal.prototype.Types = {
-    TABLE: 'table',
-    FIELD: 'field',
-    NONE: 'none'
-}
-LinkTerminal.prototype.clone = function () {
-    var t = new LinkTerminal();
-    if (this.mtable) {
-        t.mtable = this.mtable;
-    }
-    if (this.mfield) {
-        t.mfield = this.mfield;
-    }
-    t.type = this.type;
-    return t;
-}
-// ======================
+// =====================
 // Link
-// ======================
+// =====================
 function Link(p) {
     Node.call(this, p);
     this.id = '';

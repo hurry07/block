@@ -80,7 +80,7 @@ Menu.prototype.show = function (x, y, items) {
     this.showprevious(x, y);
 }
 Menu.prototype.showprevious = function (x, y) {
-    this.view.attr('transform', 'translate(' + x + ',' + y + ')');
+    this.view.$t.translate(x, y).end();
     this.view.style('visibility', 'visible');
 }
 Menu.prototype.hide = function () {
@@ -90,16 +90,16 @@ Menu.prototype.hide = function () {
  * menu when you click at an empty space
  * @constructor
  */
-function DefaltMenu() {
+function DefaultMenu() {
 }
-DefaltMenu.prototype.getMenu = function () {
+DefaultMenu.prototype.getMenu = function () {
     return [
         {keys: 'A', command: 'global.add.table'},
         {keys: '', command: 'global.export'},
         {keys: '', command: 'global.save'}
     ];
 }
-DefaltMenu.prototype.runMenuAction = function (action) {
+DefaultMenu.prototype.runMenuAction = function (action) {
     switch (action) {
         case 'global.add.table':
             break;

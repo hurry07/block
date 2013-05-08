@@ -8,16 +8,12 @@
 // ==========================
 // LinkAction
 // ==========================
-function LinkAction(root) {
-    Action.call(this);
+function LinkAction(view, camera) {
+    Action.call(this, view, camera);
 
-    this.link = Link.create(Node.wrap(root));
+    this.link = Link.create(Node.wrap(view));
     this.link.disablePointer();
-    this.data = {
-        from: new LinkTerminal(),
-        to: new LinkTerminal()
-    };
-    this.link.bind(this.data);
+    this.link.bind({from: new LinkTerminal(), to: new LinkTerminal()});
 }
 _extends(LinkAction, Action);
 LinkAction.prototype.onRegister = function (manager) {
@@ -28,9 +24,7 @@ LinkAction.prototype.onRegister = function (manager) {
 }
 LinkAction.prototype.inactive = function () {
     this.active = false;
-    this.data.from.reset();
-    this.data.to.reset();
-    this.link.hide();
+    this.endnode = null;
 }
 LinkAction.prototype.onEvent = function (event) {
     switch (event.id) {
@@ -38,10 +32,9 @@ LinkAction.prototype.onEvent = function (event) {
             this.inactive();
 
             // if user release the ctrl key, stop dragging
-            if (UIManager.prototype.ctrlKey()) {
+            if (ctrlKey(block.event)) {
                 break;
             }
-
             this.start(event);
             break;
 
@@ -50,7 +43,6 @@ LinkAction.prototype.onEvent = function (event) {
                 this.inactive();
                 break;
             }
-
             this.updateEnd(event);
             break;
 
@@ -60,57 +52,33 @@ LinkAction.prototype.onEvent = function (event) {
     }
 }
 LinkAction.prototype.addLink = function () {
-    var d = this.data;
-    var endt = d.to.table();
-    if (endt) {
-        uiMgr.addLink(d);
+    var start = this.startnode;
+    var end = this.endnode;
+    if (this.active && end) {
+        this.dispatchEvent({id: 'link.setup', data: {from: start, to: end}});
     }
     this.inactive();
 }
 LinkAction.prototype.updateEnd = function (event) {
-    var d = this.data.to;
-
-    var table = this.getParam(event, 'mouseover.table');
-    if (table && table != this.data.from.table()) {
-        d.table(table);
-        var field = this.getParam(event, 'mouseover.field');
-        if (field) {
-            d.field(field);
-        } else {
-            d.delfield();
+    var node = this.getParam('mousedown.field', 'mousedown.table');
+    if (node) {
+        if (!this.endnode || this.endnode.node() !== node) {
+            this.endnode = node.getFeature('link.end');
         }
+        this.link.updateCurve(this.startpoint, this.endnode.transform(this.camera));
     } else {
-        d.reset();
+        this.link.updateCurve(this.startpoint, this.camera.toLocal(block.event.x, block.event.y));
+        this.endnode = null;
     }
-
-    var n = d.node();
-    if (n) {
-        this.dragend = camera.transformPoint(n.getViewNode(), n.getLinkEnd());
-    } else {
-        this.dragend = camera.toLocal(block.event.x, block.event.y);
-    }
-
-    this.link.updateCurve(this.dragstart, this.dragend);
     this.link.show();
 }
 LinkAction.prototype.start = function (event) {
-    var d = this.data.from;
-    d.reset();
-
-    var table = this.getParam(event, 'mousedown.table');
-    if (!table) {
+    var node = this.getParam('mousedown.field', 'mousedown.table');
+    if (!node) {
         return;
     }
-
-    d.table(table);
-    var field = this.getParam(event, 'mousedown.field');
-    if (field) {
-        d.field(field);
-    }
-    d.updatetype();
-    var n = d.node();
-    this.dragstart = n.getLinkStart();
-
+    this.startnode = node.getFeature('link.start');
+    this.startpoint = this.startnode.transform(this.camera);
     this.active = true;
-    this.fireEvent('link.begin', this.beginTable);
+    this.dispatchEvent({id: 'link.begin'});
 }

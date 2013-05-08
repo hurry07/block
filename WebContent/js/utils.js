@@ -195,3 +195,6 @@ function collection() {
 function ctrlKey(event) {
     return event.metaKey || event.ctrlKey;
 }
+function eventBt(event, b) {
+    return event.button == b;
+}

@@ -37,13 +37,6 @@ _extends(EditArea, WindowComponent);
 // global managed methods
 EditArea.prototype.onRegister = function (manager) {
 }
-EditArea.prototype.onResize = function () {
-    var a = this.area;
-    this.view.$t().translate(a.x, a.y).end();
-    this.cameras.each(function (e) {
-        e.resize(a.width(), a.height());
-    });
-}
 // ==========================
 // data binding function
 EditArea.prototype.bind = function (data) {
@@ -65,36 +58,17 @@ EditArea.prototype.bind = function (data) {
     }
 }
 // ==========================
-// functions setup
-EditArea.prototype.initLayers = function () {
-    var t = this.layers = {};
-
-    var viewbox = this.view.append('svg');
-    var root = t.root = viewbox.append('g').classed('tools', true);
-    var camera = t.camera = new Camera(this.area, viewbox, root);
-    this.cameras.push(camera);
-
-    t.assistant = root.append('svg:g').classed('pAssistant', true);
-    t.menu = root.append('svg:g').classed('pMenu', true);
-
-    // add actions
-    MenuAction.prototype.camera = camera;
-    LinkAction.prototype.camera = camera;
-    //this.addAction('link', new LinkAction(this.layers.assistant));
-    this.addAction('menu', new MenuAction(this.layers.menu));
-}
+// setup functions
 EditArea.prototype.initTables = function () {
-    var t = this.graphic = {};
-
     var viewbox = this.view.append('svg');
-    var root = t.root = viewbox.append('g').classed('entity', true);
-
+    var root = viewbox.append('g')
+        .classed('entity', true);
     // background is not parent Tag od tables area, so mouseover from tables will not propagate to it
-    t.background = root.append('svg:rect').attr('fill', 'url(#gridPattern)')
+    var background = root.append('svg:rect')
+        .attr('fill', 'url(#gridPattern)')
         .on('mouseover', this.listenId('bg.over'))
         .on('mouseout', this.listenId('bg.out'));
-    var camera = t.camera = new BgCamera(this.area, viewbox, root, t.background);
-    this.cameras.push(camera);
+    var camera = new BgCamera(this.area, viewbox, root, background);
 
     // bind listener to current component
     Table.prototype.camera = camera;
@@ -106,15 +80,18 @@ EditArea.prototype.initTables = function () {
     Field.prototype.handleOver = this.listen('field.over');
 
     Link.prototype.handleDown = this.listen('link.down');
+    this.addLayer(new TableLayer(root, camera));
 
-    // tables
-    var node = Node.wrap(root);
-    t.tables = new TableCollection(node, root);
-    t.links = new LinkCollection(node, root);
-
-    // add actions
     DragAction.prototype.camera = camera;
-    this.addAction('drag', new DragAction());
+    this.addAction(new DragAction());
+}
+EditArea.prototype.initLayers = function () {
+    var viewbox = this.view.append('svg');
+    var root = viewbox.append('g').classed('tools', true);
+    var camera = new Camera(this.area, viewbox, root);
+
+    this.addAction(new LinkAction(root.append('svg:g').classed('pAssistant', true), camera));
+    this.addAction(new MenuAction(root.append('svg:g').classed('pMenu', true), camera));
 }
 // ==========================
 // handle event

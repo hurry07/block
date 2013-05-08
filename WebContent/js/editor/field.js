@@ -45,22 +45,8 @@ Field.prototype.update = function (dold, dnew) {
     var ui = this.view;
     ui.select('text').text(d.name);
 }
-Field.prototype.handleClick = function (d) {
-    uiMgr.handle({id: ActionTypes.MOUSE_CLICK, 'target': Node.getNode(d), 'id': 'name'});
-}
 Field.prototype.identifier = function (d) {
     return d.type + d.name;
-}
-Field.prototype.getLinkStart = function () {
-    var p = Table.prototype.prefer;
-    return this.camera.getLocal(this.view, [p.width, p.field.height / 2]);
-}
-Field.prototype.getLinkEnd = function () {
-    var p = Table.prototype.prefer;
-    return this.camera.getLocal(this.view, [0, p.field.height / 2]);
-}
-Field.prototype.getViewNode = function () {
-    return this.view.tag();
 }
 Field.prototype.getName = function () {
     if (!this.table) {
@@ -104,6 +90,16 @@ Field.prototype.runMenuAction = function (action) {
     }
     console.log(action);
 }
+Field.prototype.getFeature = function (id) {
+    switch (id) {
+        case 'link.start':
+            return new LinkTerminal(this.table, this).setTarget(this.view.tag(), [p.width, p.header.height / 2]);
+        case 'link.end':
+            return new LinkTerminal(this.table, this).setTarget(this.view.tag(), [0, p.header.height / 2]);
+    }
+    console.error('Unsupported feature found:' + f);
+    return null;
+}
 // ==========================
 // container types
 // ==========================
@@ -124,11 +120,6 @@ var Fields = Node.createContainer(Field, {
             data.push(node.node().getData())
         });
         return data;
-    },
-    createChild: function () {
-        var child = new Field(this);
-        child.create();
-        child.table = this.parentNode;// bind table
-        return child;
     }
+    // createChild Table.fields.createChild
 });

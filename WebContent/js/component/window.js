@@ -35,10 +35,10 @@ EventBus.prototype.off = function (name, action) {
     }
 }
 EventBus.prototype.fireEvent = function (event) {
-    var l = this.config.value(event.id);
-    if (l) {
-        for (var i = -1, len = l.length; ++i < len;) {
-            this.runEvent(l[i], event);
+    var listeners = this.config.value(event.id);
+    if (listeners) {
+        for (var i = -1, len = listeners.length; ++i < len;) {
+            listeners[i].applyEvent(event);
         }
     }
 }
@@ -67,11 +67,9 @@ function WindowComponent(view) {
     this.eventbus = new EventBus();
     this.compdata = new DataMap();
 
-    // a component may has multi layer with each a camera
-    this.cameras = [];
-
     // editor's function will be brought up by actions
-    this.actions = {};
+    this.actions = [];
+    this.layers = [];
 }
 WindowComponent.prototype.createArea = function () {
     return new Area(this);
@@ -80,7 +78,13 @@ WindowComponent.prototype.createArea = function () {
  * react to window resize event
  */
 WindowComponent.prototype.onResize = function () {
+    // put component to new position
     this.view.$t().translate(this.area.x, this.area.y).end();
+    // resize all layers
+    var w = this.area.width(), h = this.area.height();
+    for (var i = -1, L = this.layers, len = L.length; ++i < len;) {
+        L[i].onSizeChange(w, h);
+    }
 }
 /**
  * when container binding to parent window
@@ -107,9 +111,13 @@ WindowComponent.prototype.getData = function () {
  */
 WindowComponent.prototype.handleEvent = function (event) {
 }
-WindowComponent.prototype.addAction = function (name, action) {
-    this.actions[name] = action;
+WindowComponent.prototype.addAction = function (action) {
+    this.actions.push(action);
     action.register(this);
+}
+WindowComponent.prototype.addLayer = function (layer) {
+    this.layers.push(layer);
+    layer.register(this);
 }
 /**
  * return an temp event listener which will send event to WindowComponent
