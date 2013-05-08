@@ -239,9 +239,7 @@ ListNode.prototype.createView = function () {
  */
 //ListNode.prototype.identifier = function (d) {
 //}
-ListNode.prototype.enter = function (data) {
-}
-ListNode.prototype.update = function (data) {
+Node.prototype.enter = ListNode.prototype.update = function (data) {
     var id = this.identifier;
     var children = this.getChildren();
     var m = children.length;

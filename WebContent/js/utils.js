@@ -118,7 +118,6 @@ DataMap.prototype.del = function (path) {
     var node = this.root;
     for (var i = 0, paths = path.split('\.'), l = paths.length, e; i < l, e = paths[i]; i++) {
         if (i == l - 1) {
-            console.log('delete ' + e);
             delete node[e];
         } else {
             if (!(node = node[e])) {
@@ -127,6 +126,12 @@ DataMap.prototype.del = function (path) {
         }
     }
 }
+/**
+ * please be careful not clean your object type property.
+ *
+ * @param path
+ * @returns {boolean}
+ */
 DataMap.prototype.clean = function (path) {
     var node = this.root;
     for (var i = 0, paths = path.split('\.'), l = paths.length, e; i < l, e = paths[i]; i++) {
@@ -138,7 +143,6 @@ DataMap.prototype.clean = function (path) {
                         delete c[rm];
                     }
                 } else {
-                    console.log('delete ' + e);
                     delete node[e];
                 }
             }
