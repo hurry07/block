@@ -6,322 +6,6 @@
  * To change this template use File | Settings | File Templates.
  */
 // ==========================
-// Link curve
-// ==========================
-function LinkTerminal() {
-    this.type = this.Types.NONE;
-}
-LinkTerminal.prototype.table = function () {
-    var t;
-    if (t = arguments[0]) {
-        if (this.mtable !== t) {
-            delete this.mfield;
-        }
-        this.mtable = t;
-        this.updatetype();
-    } else {
-        return this.mtable;
-    }
-}
-LinkTerminal.prototype.getId = function () {
-    var id;
-    var t;
-    if (t = this.table()) {
-        id = t.getName();
-    } else {
-        id = '';
-    }
-    if (t = this.field()) {
-        id += '.' + t.getName();
-    }
-    return id;
-}
-LinkTerminal.prototype.field = function () {
-    var t;
-    if (t = arguments[0]) {
-        this.mfield = t;
-        this.updatetype();
-    } else {
-        return this.mfield
-    }
-}
-LinkTerminal.prototype.delfield = function () {
-    delete this.mfield;
-}
-LinkTerminal.prototype.deltable = function () {
-    delete this.mtable;
-}
-LinkTerminal.prototype.node = function () {
-    return this.type != this.Types.NONE && (this.mfield || this.mtable);
-}
-LinkTerminal.prototype.updatetype = function () {
-    if (this.mfield) {
-        this.type = this.Types.FIELD;
-    } else if (this.mtable) {
-        this.type = this.Types.TABLE;
-    }
-}
-LinkTerminal.prototype.reset = function () {
-    delete this.mfield;
-    delete this.mtable;
-    this.type = this.Types.NONE;
-}
-LinkTerminal.prototype.Types = {
-    TABLE: 'table',
-    FIELD: 'field',
-    NONE: 'none'
-}
-LinkTerminal.prototype.clone = function () {
-    var t = new LinkTerminal();
-    if (this.mtable) {
-        t.mtable = this.mtable;
-    }
-    if (this.mfield) {
-        t.mfield = this.mfield;
-    }
-    t.type = this.type;
-    return t;
-}
-// ==========================
-// LinkAction
-// ==========================
-function LinkAction(root) {
-    Action.call(this);
-
-    this.link = Link.create(Node.wrap(root));
-    this.link.disablePointer();
-    this.data = {
-        from: new LinkTerminal(),
-        to: new LinkTerminal()
-    };
-    this.link.bind(this.data);
-}
-_extends(LinkAction, Action);
-LinkAction.prototype.onRegister = function (manager) {
-    this.initEvent = ControlType.SVG_DOWN_END;
-    this.on(ControlType.SVG_DOWN_END);
-    this.on(ControlType.SVG_MOVE);
-    this.on(ControlType.SVG_UP_END);
-}
-LinkAction.prototype.inactive = function () {
-    this.active = false;
-    this.data.from.reset();
-    this.data.to.reset();
-    this.link.hide();
-}
-LinkAction.prototype.onEvent = function (event) {
-    switch (event.id) {
-        case ControlType.SVG_DOWN_END:
-            this.inactive();
-
-            // if user release the ctrl key, stop dragging
-            if (UIManager.prototype.ctrlKey()) {
-                break;
-            }
-
-            this.start(event);
-            break;
-
-        case ControlType.SVG_MOVE:
-            if (UIManager.prototype.ctrlKey()) {
-                this.inactive();
-                break;
-            }
-
-            this.updateEnd(event);
-            break;
-
-        case ControlType.SVG_UP_END:
-            this.addLink();
-            break;
-    }
-}
-LinkAction.prototype.addLink = function () {
-    var d = this.data;
-    var endt = d.to.table();
-    if (endt) {
-        uiMgr.addLink(d);
-    }
-    this.inactive();
-}
-LinkAction.prototype.updateEnd = function (event) {
-    var d = this.data.to;
-
-    var table = this.getParam(event, 'mouseover.table');
-    if (table && table != this.data.from.table()) {
-        d.table(table);
-        var field = this.getParam(event, 'mouseover.field');
-        if (field) {
-            d.field(field);
-        } else {
-            d.delfield();
-        }
-    } else {
-        d.reset();
-    }
-
-    var n = d.node();
-    if (n) {
-        this.dragend = camera.transformPoint(n.getViewNode(), n.getLinkEnd());
-    } else {
-        this.dragend = camera.toLocal(block.event.x, block.event.y);
-    }
-
-    this.link.updateCurve(this.dragstart, this.dragend);
-    this.link.show();
-}
-LinkAction.prototype.start = function (event) {
-    var d = this.data.from;
-    d.reset();
-
-    var table = this.getParam(event, 'mousedown.table');
-    if (!table) {
-        return;
-    }
-
-    d.table(table);
-    var field = this.getParam(event, 'mousedown.field');
-    if (field) {
-        d.field(field);
-    }
-    d.updatetype();
-    var n = d.node();
-    this.dragstart = n.getLinkStart();
-
-    this.active = true;
-    this.fireEvent('link.begin', this.beginTable);
-}
-// ==========================
-// DragControl
-// ==========================
-function DragAction() {
-    Action.call(this);
-    this.initEvent = 'root.downend';
-}
-_extends(DragAction, Action);
-DragAction.prototype.onRegister = function (manager) {
-    this.on('root.downend');
-    this.on('root.move');
-    this.on('root.move');
-    this.on('root.up');
-    this.on('link.begin');
-}
-DragAction.prototype.inactive = function () {
-    this.active = false;
-    var n = this.node;
-    if (n) {
-        n.stopMove(block.event.x, block.event.y);
-        this.node = null;
-    }
-}
-DragAction.prototype.onEvent = function (event) {
-    switch (event.id) {
-        case 'root.downend':
-            this.inactive();
-
-            // if user release the ctrl key, stop dragging
-            if (!UIManager.prototype.ctrlKey()) {
-                break;
-            }
-
-            var target = this.getParam('mousedown.table');
-            if (target) {
-                this.node = target.getFeature('move');
-                var p = this.camera.toLocal(block.event.x, block.event.y);
-                this.node.startMove(p[0], p[1]);
-                this.active = true;
-                this.dispatchEvent({id: 'drag.begin'});
-            }
-            break;
-
-        case 'root.move':
-            if (!UIManager.prototype.ctrlKey()) {
-                this.inactive();
-                break;
-            }
-            var p = this.camera.toLocal(block.event.x, block.event.y);
-            this.node.moveTo(p[0], p[1]);
-            break;
-
-        case 'root.up':
-        case 'link.begin':
-            this.inactive();
-            break;
-    }
-}
-// ==========================
-// show right click menu
-// ==========================
-function MenuAction(root) {
-    Action.call(this);
-
-    this.initEvent = _r(ControlType.SVG_DOWN_END);
-    this.focus = false;
-    this.target = null;
-    this.backmenu = new DefaltMenu();
-
-    this.menu = Menu.create(Node.wrap(root), this);
-}
-_extends(MenuAction, Action);
-MenuAction.prototype.onRegister = function (manager) {
-    this.on(ControlType.SVG_DOWN_END);
-    this.on(_r(ControlType.SVG_DOWN_END));
-}
-MenuAction.prototype.onEvent = function (event) {
-    switch (event.id) {
-        case _r(ControlType.SVG_DOWN_END):
-            this.popupMenu(event);
-            break;
-        case ControlType.SVG_DOWN_END:
-            if (!this.focus) {
-                this.stopMenu();
-            }
-            break;
-    }
-}
-/**
- * popup right click menu
- * @param event
- */
-MenuAction.prototype.popupMenu = function (event) {
-    this.focus = false;
-
-    // if table menu
-    var target = this.checkTarget(event, 'mousedown.link', 'mousedown.field', 'mousedown.table');
-    target = target || this.backmenu;
-
-    var local = this.camera.toLocal(block.event.x, block.event.y);
-
-    // change position
-    if (target === this.target) {
-        this.menu.showprevious(local[0], local[1]);
-        return;
-    }
-    this.target = target;
-    this.menu.show(local[0], local[1], target.getMenu());
-    this.active = true;
-}
-MenuAction.prototype.checkTarget = function (event) {
-    var t;
-    for (var i = 1, l = arguments.length; i < l; i++) {
-        if (t = this.getParam(event, arguments[i])) {
-            return t;
-        }
-    }
-    return null;
-}
-MenuAction.prototype.onMenuClick = function (command) {
-    this.target.runMenuAction(command);
-    this.stopMenu();
-}
-MenuAction.prototype.onMenuDown = function () {
-    this.focus = true;
-}
-MenuAction.prototype.stopMenu = function () {
-    this.menu.hide();
-    this.target = null;
-}
-// ==========================
 // Edit Area
 // ==========================
 /**
@@ -360,7 +44,6 @@ EditArea.prototype.onResize = function () {
         e.resize(a.width(), a.height());
     });
 }
-
 // ==========================
 // data binding function
 EditArea.prototype.bind = function (data) {
@@ -397,7 +80,7 @@ EditArea.prototype.initLayers = function () {
     // add actions
     MenuAction.prototype.camera = camera;
     LinkAction.prototype.camera = camera;
-    this.addAction('link', new LinkAction(this.layers.assistant));
+    //this.addAction('link', new LinkAction(this.layers.assistant));
     this.addAction('menu', new MenuAction(this.layers.menu));
 }
 EditArea.prototype.initTables = function () {
@@ -421,6 +104,8 @@ EditArea.prototype.initTables = function () {
     Field.prototype.camera = camera;
     Field.prototype.handleDown = this.listen('field.down');
     Field.prototype.handleOver = this.listen('field.over');
+
+    Link.prototype.handleDown = this.listen('link.down');
 
     // tables
     var node = Node.wrap(root);
@@ -463,11 +148,9 @@ EditArea.prototype.handleEvent = function (event) {
             this.compdata.value('mouseover.field', event.target);
             break;
 
-        // root.up
-        // root.downend
-        // root.move
-        default :
-            this.eventbus.fireEvent(event);
+        // log link event
+        case 'link.down':
+            this.compdata.value('mousedown.link', event.target);
             break;
     }
 

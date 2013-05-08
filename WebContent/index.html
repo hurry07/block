@@ -17,9 +17,21 @@
     <script type="text/javascript" src="js/dom.js"></script>
     <script type="text/javascript" src="js/node.js"></script>
     <script type="text/javascript" src="js/operation.js"></script>
-    <!-- main editor area -->
+    <!-- window component -->
+    <script type="text/javascript" src="js/component/action.js"></script>
+    <script type="text/javascript" src="js/component/input.js"></script>
+    <script type="text/javascript" src="js/component/layout.js"></script>
+    <script type="text/javascript" src="js/component/camera.js"></script>
+    <script type="text/javascript" src="js/component/window.js"></script>
+    <!-- main editor render element -->
+    <script type="text/javascript" src="js/editor/field.js"></script>
     <script type="text/javascript" src="js/editor/tables.js"></script>
+    <script type="text/javascript" src="js/editor/link.js"></script>
     <script type="text/javascript" src="js/editor/menu.js"></script>
+    <!-- actions and main editor area -->
+    <script type="text/javascript" src="js/editor/action_drag.js"></script>
+    <script type="text/javascript" src="js/editor/action_link.js"></script>
+    <script type="text/javascript" src="js/editor/action_menu.js"></script>
     <script type="text/javascript" src="js/editor/editor.js"></script>
     <!-- classes search area -->
     <script type="text/javascript" src="js/classes/searchbox.js"></script>
@@ -46,19 +58,6 @@ function join() {
 // ==========================
 function UIManager(svg) {
     this.svg = svg;
-
-    // listener binding
-    this.controlListener = new DataMap();
-    for (var i in ControlType) {
-        this.controlListener.value(ControlType[i], []);
-    }
-    this.userListener = new DataMap();
-
-    // init record
-    this.eventRecord = new DataMap();
-    for (var action in ActionTypes) {
-        this.eventRecord.value(ActionTypes[action], {});
-    }
 
     // ui drawing layers
     this.layers = {
@@ -116,9 +115,6 @@ UIManager.prototype.addComponent = function (name, comp) {
     this.components[name] = comp;
     comp.onRegister(this);
 }
-UIManager.prototype.ctrlKey = function () {
-    return block.event.metaKey || block.event.ctrlKey;
-}
 UIManager.prototype.loseFocus = function () {
     block.selectAll('.focus')
             .classed('focus', false);
@@ -148,66 +144,6 @@ UIManager.prototype.onResize = function (w, h) {
             .attr('height', h);
     // separated panel resize
     this.areas.size(w, h);
-}
-// ==========================
-// TextInput
-// ==========================
-var TextInput_id = 0;
-function TextInput(div) {
-    this.id = TextInput_id++;
-    this.div = block.select(div);
-    this.focus = false;
-    this.input = block.select(div.getElementsByTagName('input')[0])
-            .on('change', this.submit, this)
-            .on('input', this.submit, this)
-            .on('blur', this.onBlur, this)
-            .on('focus', this.onFocus, this);
-}
-TextInput.prototype.submit = function () {
-    console.log('TextInput.prototype.submit');
-    var a = this.adapter;
-    if (a) {
-        a.setText(this.input.tag().value);
-    }
-}
-TextInput.prototype.onBlur = function () {
-    console.log('TextInput.prototype.hide');
-    this.submit();
-    var a = this.adapter;
-    if (a) {
-        a.endEdit(this.input);
-    }
-    this.div.style('visibility', 'hidden');
-}
-TextInput.prototype.onFocus = function () {
-    console.log('TextInput.prototype.focus');
-    this.div.style('visibility', 'visible');
-}
-/**
- * @param adapter will interact with html text input tag
- *     {getNode, getText, setText}
- */
-TextInput.prototype.show = function (adapter) {
-    if (!adapter) {
-        return;
-    }
-
-    // end previous edit
-    var _adapter = this.adapter;
-    _adapter && _adapter.endEdit(this.input);
-
-    // reset editor
-    this.adapter = adapter;
-    var target = adapter.getTarget();
-
-    this.div.style({
-        'left': target[0] + 'px',
-        'top': target[1] + 'px',
-        'width': target[2] + 'px',
-        'height': target[3] + 'px'});
-    this.div.style('visibility', 'visible');
-    //this.input.tag().focus();
-    adapter.startEdit(this.input);
 }
 // ======================
 // global
@@ -294,20 +230,6 @@ var tt = setInterval(function () {
     document.oncontextmenu = menuListener;
     clearInterval(tt);
 }, 2000);
-
-block.select(document);
-block.select(document.querySelector('.chart'));
-
-//var liner = new LinerLayout(100, 50, 500, 400, 'h');
-//var a, b;
-//liner.add(a = new Area(0, 0, 100, 100));
-//liner.add(b = new Area(0, 0, 100, 100), 1);
-//liner.refresh();
-//console.log(a, b, liner);
-//
-//liner.setWidth(550);
-//console.log(a, b, liner);
-
 </script>
 </body>
 </html>

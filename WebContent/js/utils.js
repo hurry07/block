@@ -192,3 +192,6 @@ Collection.prototype.iter = function (fn) {
 function collection() {
     return new Collection(Array.prototype.slice.call(arguments, 0));
 }
+function ctrlKey(event) {
+    return event.metaKey || event.ctrlKey;
+}
