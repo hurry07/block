@@ -138,7 +138,6 @@ Node.prototype.destroy = function () {
     this.view.remove();
     this.data = null;
     this.init = false;
-    console.log('Node.prototype.destroy');
 }
 /**
  * customer ui creating
@@ -167,7 +166,6 @@ Node.prototype.updateIdentity = function (pred, d) {
  * you can release customer ui, or you may send some release event
  */
 Node.prototype.exit = function () {
-    console.log('Node.prototype.exit');
 }
 /**
  * interact with Action, return will use as an Action adapter

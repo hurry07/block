@@ -51,9 +51,6 @@ Link.prototype.enter = function (d) {
 
     this.update(d);
 }
-Link.prototype.exit = function () {
-    console.log('Link.prototype.exit');
-}
 Link.prototype.getId = function () {
     return this.id;
 }
