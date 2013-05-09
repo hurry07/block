@@ -49,9 +49,6 @@ Field.prototype.identifier = function (d) {
     return d.type + d.name;
 }
 Field.prototype.getName = function () {
-    if (!this.table) {
-        console.log(this.name);
-    }
     return this.table.getName() + '.' + this.data.name;
 }
 // ----------------------

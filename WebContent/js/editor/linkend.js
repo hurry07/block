@@ -60,9 +60,9 @@ LinkTerminal.prototype.table = function () {
 LinkTerminal.prototype.getId = function () {
     switch (this.type) {
         case this.Types.FIELD:
-            return  this._table.getName() + '.' + this._field.getName();
+            return this._field.getName();
         case this.Types.TABLE:
-            return  this._table.getName();
+            return this._table.getName();
     }
     return '';
 }

@@ -80,7 +80,7 @@ Menu.prototype.show = function (x, y, items) {
     this.showprevious(x, y);
 }
 Menu.prototype.showprevious = function (x, y) {
-    this.view.$t.translate(x, y).end();
+    this.view.$t().translate(x, y).end();
     this.view.style('visibility', 'visible');
 }
 Menu.prototype.hide = function () {

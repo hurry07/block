@@ -29,6 +29,7 @@ LinkAction.prototype.onRegister = function (manager) {
 LinkAction.prototype.inactive = function () {
     this.active = false;
     this.endnode = null;
+    this.link.hide();
 }
 LinkAction.prototype.onEvent = function (event) {
     switch (event.id) {

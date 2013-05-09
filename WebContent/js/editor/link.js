@@ -70,6 +70,7 @@ Link.prototype.update = function (d) {
     } else {
         this.hide();
     }
+    this.id = this.identifier(d);
 }
 Link.prototype.export = function () {
     var n1, n2, d = this.getData();
