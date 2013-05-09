@@ -182,28 +182,30 @@ Table.prototype.runMenuAction = function (action) {
     }
     console.log(action);
 }
+/**
+ * return a adapter to inter act with moving action
+ */
 Table.prototype.getMoveFeature = function () {
     var table = this;
     var links = [].concat(this.linkout).concat(this.linkin);
     return new (_extends(function () {
         MoveAdapter.call(this, table.data.position, table.view);
     }, MoveAdapter, {
-        startMove: function (x, y) {
-            MoveAdapter.prototype.startMove.call(this, x, y);
+        onMoveStart: function () {
             table.view.classed('focus', true);
         },
-        moveTo: function (x, y) {
-            MoveAdapter.prototype.moveTo.call(this, x, y);
-            // update link terminate when moving the table
+        // update link terminate when moving the table
+        onMoving: function () {
             for (var i = 0, l = links.length; i < l; i++) {
                 links[i].refresh();
             }
         },
-        stopMove: function (x, y) {
+        onMoveStop: function () {
             table.view.classed('focus', false);
         }
     }))();
 }
+
 /**
  * interact with global function
  * @param f

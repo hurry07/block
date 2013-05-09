@@ -21,13 +21,18 @@ function MoveAdapter(p, g) {
 MoveAdapter.prototype.startMove = function (x, y) {
     this.offsetx = this.position.x - x;
     this.offsety = this.position.y - y;
+    this.onMoveStart();
+}
+MoveAdapter.prototype.onMoveStart = function () {
 }
 MoveAdapter.prototype.moveTo = function (x, y) {
-    this.position.x = x + this.offsetx;
-    this.position.y = y + this.offsety;
-    this.g.attr('transform', 'translate('
-        + (this.position.x = x + this.offsetx) + ','
-        + (this.position.y = y + this.offsety) + ')');
+    this.g.$t().translate(this.position.x = x + this.offsetx, this.position.y = y + this.offsety).end();
+    this.onMoving();
+}
+MoveAdapter.prototype.onMoving = function () {
 }
 MoveAdapter.prototype.stopMove = function (x, y) {
+    this.onMoveStop();
+}
+MoveAdapter.prototype.onMoveStop = function () {
 }
