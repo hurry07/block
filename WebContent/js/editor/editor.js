@@ -29,8 +29,8 @@ function EditArea(root) {
     this.initLayers();
 
     //TODO test
-//    this.graphic.camera.move(-50, -40);
-//    this.graphic.camera.scale(2);
+    this.tables.camera.move(-50, -40);
+    this.tables.camera.scale(0.8);
 }
 _extends(EditArea, WindowComponent);
 // ==========================

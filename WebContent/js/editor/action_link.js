@@ -60,7 +60,8 @@ LinkAction.prototype.end = function () {
     var start = this.startnode;
     var end = this.endnode;
     if (this.active && end) {
-        this.tables.addLink({from: start, to: end});
+        var data = {from: start, to: end};
+        this.tables.addLink(data);
     }
     this.inactive();
 }
