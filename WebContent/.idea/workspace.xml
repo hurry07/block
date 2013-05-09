@@ -17,7 +17,7 @@
     <file path="/operation.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368009808119" ignored="false" />
     <file path="/test.html" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1367855430844" ignored="false" />
     <file path="/editor.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368108396417" ignored="false" />
-    <file path="/action_link.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368108536846" ignored="false" />
+    <file path="/action_link.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368115783187" ignored="false" />
     <file path="/action.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368032950730" ignored="false" />
     <file path="/action_drag.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368107526942" ignored="false" />
     <file path="/action_menu.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368108513597" ignored="false" />
@@ -53,10 +53,19 @@
       <file leaf-file-name="table.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/editor/table.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="185" column="51" selection-start="4850" selection-end="4850" vertical-scroll-proportion="5.576923">
+            <state line="55" column="9" selection-start="1331" selection-end="1336" vertical-scroll-proportion="-10.0">
               <folding>
                 <element signature="e#2918#3006#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="field.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/editor/field.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="98" column="63" selection-start="2646" selection-end="2655" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -70,13 +79,40 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="adapter_move.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="adapter_move.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/editor/adapter_move.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="25" selection-start="670" selection-end="679" vertical-scroll-proportion="0.6709265">
+            <state line="14" column="29" selection-start="309" selection-end="309" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="action_link.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/js/editor/action_link.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="76" column="51" selection-start="2089" selection-end="2089" vertical-scroll-proportion="0.47284344">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="linkend.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/editor/linkend.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="56" column="23" selection-start="1396" selection-end="1396" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="action.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/component/action.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="33" column="17" selection-start="781" selection-end="781" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -99,14 +135,14 @@
         <option value="$PROJECT_DIR$/js/component/layer.js" />
         <option value="$PROJECT_DIR$/js/editor/editor.js" />
         <option value="$PROJECT_DIR$/js/editor/action_menu.js" />
-        <option value="$PROJECT_DIR$/js/editor/action_link.js" />
         <option value="$PROJECT_DIR$/js/component/camera.js" />
         <option value="$PROJECT_DIR$/js/editor/link.js" />
-        <option value="$PROJECT_DIR$/js/editor/field.js" />
         <option value="$PROJECT_DIR$/js/editor/layer_table.js" />
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/js/editor/table.js" />
         <option value="$PROJECT_DIR$/js/editor/adapter_move.js" />
+        <option value="$PROJECT_DIR$/js/editor/field.js" />
+        <option value="$PROJECT_DIR$/js/editor/action_link.js" />
       </list>
     </option>
   </component>
@@ -278,6 +314,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="component" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="css" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -436,20 +490,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="4" />
+      <option name="time" value="7" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/js/editor/action_drag.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="10" column="0" selection-start="229" selection-end="229" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/component/action.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="9" selection-start="322" selection-end="322" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -468,23 +515,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/action_link.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="61" column="27" selection-start="1563" selection-end="1570" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/editor/action_menu.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="10" column="9" selection-start="248" selection-end="248" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/linkend.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="32" selection-start="663" selection-end="672" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -501,13 +534,6 @@
     <entry file="file://$PROJECT_DIR$/js/editor/link.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="65" column="36" selection-start="1603" selection-end="1603" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/field.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="98" column="87" selection-start="2674" selection-end="2680" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -540,21 +566,49 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/js/editor/adapter_move.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="29" selection-start="309" selection-end="309" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/js/editor/table.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="185" column="51" selection-start="4850" selection-end="4850" vertical-scroll-proportion="5.576923">
+        <state line="55" column="9" selection-start="1331" selection-end="1336" vertical-scroll-proportion="-10.0">
           <folding>
             <element signature="e#2918#3006#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/adapter_move.js">
+    <entry file="file://$PROJECT_DIR$/js/editor/field.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="25" selection-start="670" selection-end="679" vertical-scroll-proportion="0.6709265">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
+        <state line="98" column="63" selection-start="2646" selection-end="2655" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/component/action.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="17" selection-start="781" selection-end="781" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/editor/linkend.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="56" column="23" selection-start="1396" selection-end="1396" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/editor/action_link.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="76" column="51" selection-start="2089" selection-end="2089" vertical-scroll-proportion="0.47284344">
+          <folding />
         </state>
       </provider>
     </entry>

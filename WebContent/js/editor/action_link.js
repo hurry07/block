@@ -47,15 +47,15 @@ LinkAction.prototype.onEvent = function (event) {
                 this.inactive();
                 break;
             }
-            this.updateEnd(event);
+            this.update(event);
             break;
 
         case 'root.up':
-            this.addLink();
+            this.end();
             break;
     }
 }
-LinkAction.prototype.addLink = function () {
+LinkAction.prototype.end = function () {
     var start = this.startnode;
     var end = this.endnode;
     if (this.active && end) {
@@ -63,18 +63,22 @@ LinkAction.prototype.addLink = function () {
     }
     this.inactive();
 }
-LinkAction.prototype.updateEnd = function (event) {
-    var node = this.getParam('mousedown.field', 'mousedown.table');
-    if (node) {
-        if (!this.endnode || this.endnode.node() !== node) {
-            this.endnode = node.getFeature('link.end');
-        }
-        this.link.updateCurve(this.startpoint, this.endnode.transform(this.camera));
-    } else {
-        this.link.updateCurve(this.startpoint, this.camera.toLocal(block.event.x, block.event.y));
+LinkAction.prototype.update = function (event) {
+    // if target table is start table, end link action
+    var node = this.getParam('mouseover.table');
+    var x = block.event.x, y = block.event.y;
+    if (!node || node === this.startnode.table()) {
         this.endnode = null;
+        this.link.updateCurve(this.startpoint, this.camera.toLocal(x, y));
+        return;
     }
-    this.link.show();
+
+    // if start end are from different tables
+    node = this.getParam('mouseover.field') || node;
+    if (!this.endnode || this.endnode.node() !== node) {
+        this.endnode = node.getFeature('link.end');
+    }
+    this.link.updateCurve(this.startpoint, this.endnode.transform(this.camera));
 }
 LinkAction.prototype.start = function (event) {
     var node = this.getParam('mousedown.field', 'mousedown.table');
@@ -84,5 +88,6 @@ LinkAction.prototype.start = function (event) {
     this.startnode = node.getFeature('link.start');
     this.startpoint = this.startnode.transform(this.camera);
     this.active = true;
+    this.link.show();
     this.dispatchEvent({id: 'link.begin'});
 }
