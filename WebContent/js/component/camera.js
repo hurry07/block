@@ -104,7 +104,7 @@ Camera.prototype.getWorldMatrix = function (g) {
  * @returns {mat2d}
  */
 Camera.prototype.getRootMatrix = function (g) {
-    return this.getMatrix(g.tag(), this.root);
+    return this.getMatrix(g, this.root);
 }
 Camera.prototype.getMatrix = function (from, to) {
     var svgM = from.getTransformToElement(to);
@@ -121,8 +121,13 @@ Camera.prototype.transform = function (matrix, p) {
     vec2.transformMat2d(p, p, matrix);
     return [p[0], p[1]];
 }
+/**
+ * @param g
+ * @param p
+ * @returns {*}
+ */
 Camera.prototype.toWorld = function (g, p) {
-    return this.transform(this.getWorldMatrix(g), p);
+    return this.transform(this.getWorldMatrix(g.tag()), p);
 }
 Camera.prototype.toLocal = function (x, y) {
     return [
@@ -130,8 +135,13 @@ Camera.prototype.toLocal = function (x, y) {
         (y - this.area.y) / this.scalef + this.starty
     ];
 }
+/**
+ * @param g
+ * @param p
+ * @returns {*}
+ */
 Camera.prototype.getLocal = function (g, p) {
-    return this.transform(this.getRootMatrix(g), p);
+    return this.transform(this.getRootMatrix(g.tag()), p);
 }
 /**
  * camera with a background

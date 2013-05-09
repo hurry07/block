@@ -91,11 +91,12 @@ Field.prototype.runMenuAction = function (action) {
     console.log(action);
 }
 Field.prototype.getFeature = function (id) {
+    var p = Table.prototype.prefer;
     switch (id) {
         case 'link.start':
-            return new LinkTerminal(this.table, this).setTarget(this.view.tag(), [p.width, p.header.height / 2]);
+            return new LinkTerminal(this.table, this).setTarget(this.view, [p.width, p.header.height / 2]);
         case 'link.end':
-            return new LinkTerminal(this.table, this).setTarget(this.view.tag(), [0, p.header.height / 2]);
+            return new LinkTerminal(this.table, this).setTarget(this.view, [0, p.header.height / 2]);
     }
     console.error('Unsupported feature found:' + f);
     return null;

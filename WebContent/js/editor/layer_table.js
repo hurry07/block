@@ -45,7 +45,7 @@ TableLayer.prototype.bind = function (data) {
     for (var i = 0, ls = data.links, len = ls.length; i < len; i++) {
         link = ls[i];
         var p1, p2;
-        if ((p1 = tables.getLinkNode(link.start)) && (p2 = tables.getLinkNode(link.end))) {
+        if ((p1 = tables.getLinkNode(link.start, 'link.start')) && (p2 = tables.getLinkNode(link.end, 'link.end'))) {
             link = links.bindChild({from: p1, to: p2});
             p1.table().addLinkOut(link);
             p2.table().addLinkIn(link);

@@ -215,9 +215,9 @@ Table.prototype.getFeature = function (f) {
         case 'move':
             return this.getMoveFeature();
         case 'link.start':
-            return new LinkTerminal(this).setTarget(this.view.tag(), [p.width, p.header.height / 2]);
+            return new LinkTerminal(this).setTarget(this.view, [p.width, p.header.height / 2]);
         case 'link.end':
-            return new LinkTerminal(this).setTarget(this.view.tag(), [0, p.header.height / 2]);
+            return new LinkTerminal(this).setTarget(this.view, [0, p.header.height / 2]);
     }
     console.error('Unsupported feature found:' + f);
     return null;
@@ -247,9 +247,10 @@ TableCollection.prototype.updateEnd = function (children) {
  * find link end point
  *
  * @param nodeid
+ * @param type link.start
  * @returns {*}
  */
-TableCollection.prototype.getLinkNode = function (nodeid) {
+TableCollection.prototype.getLinkNode = function (nodeid, type) {
     var tables = this.tables;
     var parts = (nodeid || '').split('.');
     if (parts.length == 0) {
@@ -263,10 +264,10 @@ TableCollection.prototype.getLinkNode = function (nodeid) {
     if (parts.length == 2) {
         var field = table.getField(parts[1]);
         if (field) {
-            return new LinkTerminal(table, field);
+            return field.getFeature(type);
         }
     }
-    return new LinkTerminal(table);
+    return table.getFeature(type);
 }
 /**
  * sort links and tables
