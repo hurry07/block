@@ -8,8 +8,12 @@
 // ==========================
 // LinkAction
 // ==========================
-function LinkAction(view, camera) {
-    Action.call(this, view, camera);
+function LinkAction(view, camera, tables) {
+    Action.call(this);
+
+    this.view = view;
+    this.camera = camera;
+    this.tables = tables;
 
     this.link = Link.create(Node.wrap(view));
     this.link.disablePointer();
@@ -55,7 +59,7 @@ LinkAction.prototype.addLink = function () {
     var start = this.startnode;
     var end = this.endnode;
     if (this.active && end) {
-        this.dispatchEvent({id: 'link.setup', data: {from: start, to: end}});
+        this.tables.addLink({from: start, to: end});
     }
     this.inactive();
 }

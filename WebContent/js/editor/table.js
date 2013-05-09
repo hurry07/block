@@ -260,19 +260,13 @@ TableCollection.prototype.getLinkNode = function (nodeid) {
         return null;
     }
 
-    var p = new LinkTerminal();
-    p.table(table);
-
     if (parts.length == 2) {
         var field = table.getField(parts[1]);
-        if (!field) {
-            return null;
-        } else {
-            p.field(field);
+        if (field) {
+            return new LinkTerminal(table, field);
         }
     }
-    p.updatetype();
-    return p;
+    return new LinkTerminal(table);
 }
 /**
  * sort links and tables

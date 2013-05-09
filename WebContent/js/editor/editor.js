@@ -40,22 +40,7 @@ EditArea.prototype.onRegister = function (manager) {
 // ==========================
 // data binding function
 EditArea.prototype.bind = function (data) {
-    var ts = data.tables;
-    var tables = this.graphic.tables;
-    tables.bind(data.tables);
-
-    // create link
-    var link;
-    var links = this.graphic.links;
-    for (var i = 0, ls = data.links, len = ls.length; i < len; i++) {
-        link = ls[i];
-        var p1, p2;
-        if ((p1 = tables.getLinkNode(link.start)) && (p2 = tables.getLinkNode(link.end))) {
-            link = links.bindChild({from: p1, to: p2});
-            p1.table().addLinkOut(link);
-            p2.table().addLinkIn(link);
-        }
-    }
+    this.tables.bind(data);
 }
 // ==========================
 // setup functions
@@ -79,18 +64,18 @@ EditArea.prototype.initTables = function () {
     Field.prototype.handleDown = this.listen('field.down');
     Field.prototype.handleOver = this.listen('field.over');
 
+    Link.prototype.camera = camera;
     Link.prototype.handleDown = this.listen('link.down');
-    this.addLayer(new TableLayer(root, camera));
 
-    DragAction.prototype.camera = camera;
-    this.addAction(new DragAction());
+    this.addLayer(this.tables = new TableLayer(root, camera));
+    this.addAction(new DragAction(camera));
 }
 EditArea.prototype.initLayers = function () {
     var viewbox = this.view.append('svg');
     var root = viewbox.append('g').classed('tools', true);
     var camera = new Camera(this.area, viewbox, root);
 
-    this.addAction(new LinkAction(root.append('svg:g').classed('pAssistant', true), camera));
+    this.addAction(new LinkAction(root.append('svg:g').classed('pAssistant', true), camera, this.tables));
     this.addAction(new MenuAction(root.append('svg:g').classed('pMenu', true), camera));
 }
 // ==========================

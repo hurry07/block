@@ -54,6 +54,9 @@ LinkTerminal.prototype.node = function () {
     }
     return null;
 }
+LinkTerminal.prototype.table = function () {
+    return this._table;
+}
 LinkTerminal.prototype.getId = function () {
     switch (this.type) {
         case this.Types.FIELD:

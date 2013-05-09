@@ -9,7 +9,10 @@
 // show right click menu
 // ==========================
 function MenuAction(view, camera) {
-    Action.call(this, view, camera);
+    Action.call(this);
+
+    this.view = view;
+    this.camera = camera;
 
     this.focus = false;
     this.target = null;

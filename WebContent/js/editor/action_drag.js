@@ -8,8 +8,9 @@
 // ==========================
 // DragControl
 // ==========================
-function DragAction() {
+function DragAction(camera) {
     Action.call(this);
+    this.camera = camera;
 }
 _extends(DragAction, Action);
 DragAction.prototype.onRegister = function (manager) {

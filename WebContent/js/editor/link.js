@@ -59,14 +59,13 @@ Link.prototype.getId = function () {
 }
 Link.prototype.update = function (d) {
     var n1, n2;
-    if ((n1 = d.from.node()) && (n2 = d.to.node())) {
+    if (!d.from.isNull() && !d.to.node()) {
         this.show();
 
-        var p1 = n1.getLinkStart();
-        var p2 = n2.getLinkEnd();
+        var p1 = d.from.transform(this.camera);
+        var p2 = d.to.transform(tihs.camera);
         this.start.attr('cx', p1[0]).attr('cy', p1[1]);
         this.end.transform().translate(p2[0], p2[1]).end();
-
         this.updateCurve(p1, p2);
     } else {
         this.hide();
