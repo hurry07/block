@@ -7,10 +7,10 @@
  */
 function TableLayer(view, camera) {
     Layer.call(this, view, camera);
-    // tables
+
     var node = Node.wrap(view);
-    this.tables = new TableCollection(node, view);
-    this.links = new LinkCollection(node, view);
+    this.links = new LinkCollection(node, view.select('.links'));
+    this.tables = new TableCollection(node, view.select('.tables'));
 }
 _extends(TableLayer, Layer);
 TableLayer.prototype.applyEvent = function (event) {

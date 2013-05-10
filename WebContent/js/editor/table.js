@@ -193,6 +193,9 @@ Table.prototype.getMoveFeature = function () {
     }, MoveAdapter, {
         onMoveStart: function () {
             table.view.classed('focus', true);
+            for (var i = 0, l = links.length; i < l; i++) {
+                links[i].view.classed('focus', true);
+            }
         },
         // update link terminate when moving the table
         onMoving: function () {
@@ -202,6 +205,9 @@ Table.prototype.getMoveFeature = function () {
         },
         onMoveStop: function () {
             table.view.classed('focus', false);
+            for (var i = 0, l = links.length; i < l; i++) {
+                links[i].view.classed('focus', false);
+            }
         }
     }))();
 }

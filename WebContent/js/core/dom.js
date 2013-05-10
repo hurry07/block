@@ -164,11 +164,9 @@ var block = {};
     }
 
     /**
-     * Created with JetBrains WebStorm.
-     * User: jie
-     * Date: 13-4-23
-     * Time: 上午11:02
-     * To change this template use File | Settings | File Templates.
+     * wrap svg dom operation
+     * @param tag
+     * @constructor
      */
     function SvgSelect(tag) {
         this.htmltag = tag;
@@ -455,6 +453,23 @@ var block = {};
         if (count == 0) {
             delete this.htmltag.__events__;
         }
+    }
+    SvgSelect.prototype.parent = function () {
+        var p = this.tag().parentNode
+        return p ? new SvgSelect(p) : null;
+    }
+    /**
+     * run function within current element
+     * @param fn function
+     * @param bind context
+     */
+    SvgSelect.prototype.call = function (fn, bind) {
+        if (bind) {
+            fn.call(bind, this);
+        } else {
+            fn.call(this, this);
+        }
+        return this;
     }
 
     function removeTag(tag) {
