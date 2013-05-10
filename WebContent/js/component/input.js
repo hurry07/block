@@ -8,34 +8,32 @@
 // ==========================
 // TextInput
 // ==========================
-function TextInput(div) {
+function TextInput(div, area) {
+    this.area = area;
     this.div = block.select(div);
-    this.focus = false;
     this.input = block.select(div.getElementsByTagName('input')[0])
         .on('change', this.submit, this)
         .on('input', this.submit, this)
-        .on('blur', this.onBlur, this)
-        .on('focus', this.onFocus, this);
+        .on('blur', this.onblur, this)
 }
 TextInput.prototype.submit = function () {
-    console.log('TextInput.prototype.submit');
     var a = this.adapter;
     if (a) {
         a.setText(this.input.tag().value);
     }
 }
-TextInput.prototype.onBlur = function () {
-    console.log('TextInput.prototype.hide');
+TextInput.prototype.onblur = function () {
     this.submit();
     var a = this.adapter;
     if (a) {
         a.endEdit(this.input);
     }
-    this.div.style('visibility', 'hidden');
-}
-TextInput.prototype.onFocus = function () {
-    console.log('TextInput.prototype.focus');
-    this.div.style('visibility', 'visible');
+    this.div.style({
+        'left': '-100px',
+        'top': '-100px',
+        'width': '50px',
+        'height': '50px'});
+    this.input.off('blur');
 }
 /**
  * @param adapter will interact with html text input tag
@@ -53,13 +51,18 @@ TextInput.prototype.show = function (adapter) {
     // reset editor
     this.adapter = adapter;
     var target = adapter.getTarget();
-
     this.div.style({
         'left': target[0] + 'px',
         'top': target[1] + 'px',
         'width': target[2] + 'px',
         'height': target[3] + 'px'});
-    this.div.style('visibility', 'visible');
-    //this.input.tag().focus();
     adapter.startEdit(this.input);
+
+    // delay focus
+    var _this = this;
+    var thread = setInterval(function () {
+        _this.input.tag().focus();
+        _this.input.on('blur', _this.onblur, _this);
+        clearInterval(thread);
+    }, 0);
 }

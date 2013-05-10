@@ -208,7 +208,9 @@ var block = {};
         function add(declare) {
             for (var i = 0; i < fns.length; i++) {
                 var f = fns[i];
+                // replace older listener
                 if (f.name == declare.name) {
+                    fns[i] = declare;
                     return;
                 }
             }
@@ -403,6 +405,7 @@ var block = {};
             }
         }
 
+        // if event is not registered ever, new it
         var key = type + (capture ? '_c' : '');
         var pool;
         if (!(pool = events[key])) {

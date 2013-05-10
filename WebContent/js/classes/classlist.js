@@ -312,7 +312,7 @@ ClassManage.prototype.component = function (pkg) {
 }
 ClassManage.prototype.showSearch = function () {
     // TODO send customer event to svg root element is better
-    uiMgr.getGlobal('inputSearch').show(this);
+    this.manager.findWidget('inputSearch').show(this);
 }
 ClassManage.prototype.showHistory = function () {
     console.log('showHistory');

@@ -91,6 +91,7 @@ WindowComponent.prototype.onResize = function () {
  * @param manager
  */
 WindowComponent.prototype.onRegister = function (manager) {
+    this.manager = manager;
 }
 WindowComponent.prototype.getArea = function () {
     return this.area;
