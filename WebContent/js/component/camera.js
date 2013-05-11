@@ -44,28 +44,67 @@ Camera.prototype.apply = function () {
  * @param screenx
  * @param screeny
  */
-Camera.prototype.move = function (x, y, screenx, screeny) {
+Camera.prototype.moveToScreen = function (x, y, screenx, screeny) {
     if (arguments.length == 2) {
-        screenx = x, screeny = y;
-        x = 0, y = 0;
+        // move startx,starty relative to current position
+        this.startx -= x / this.scalef;
+        this.starty -= y / this.scalef;
+    } else {
+        this.startx = x - (screenx - this.area.x) / this.scalef;
+        this.starty = y - (screeny - this.area.y) / this.scalef;
     }
-    this.startx = x - screenx / this.scalef;
-    this.starty = y - screeny / this.scalef;
+    this.apply();
+}
+/**
+ * move in local coordinate
+ * @param x
+ * @param y
+ * @param tox
+ * @param toy
+ */
+Camera.prototype.move = function (x, y, tox, toy) {
+    if (arguments.length == 2) {
+        // move startx,starty relative to current position
+        this.startx -= x;
+        this.starty -= y;
+    } else {
+        this.startx += x - tox;
+        this.starty += y - toy;
+    }
     this.apply();
 }
 /**
  * 对屏幕上指定的点缩放
  *
  * @param scalef
- * @param centerx scale center
+ * @param centerx scale center in screen coordinate
+ * @param centery
+ */
+Camera.prototype.scaleToScreen = function (scalef, centerx, centery) {
+    if (arguments.length == 3) {
+        var local = this.toLocal(centerx, centery);
+        this.scalef = scalef;
+        this.moveToScreen(local[0], local[1], centerx, centery);
+    } else {
+        this.scalef = scalef;
+        this.apply();
+    }
+}
+/**
+ * scale in local coordinate
+ * @param scalef
+ * @param centerx
  * @param centery
  */
 Camera.prototype.scale = function (scalef, centerx, centery) {
-    this.scalef = scalef;
-    // TODO
     if (arguments.length == 3) {
+        var p = this.scalef / scalef;
+        this.scalef = scalef;
+        this.move(centerx, centery, centerx * p, centery * p);
+    } else {
+        this.scalef = scalef;
+        this.apply();
     }
-    this.apply();
 }
 /**
  * when user resize the browser

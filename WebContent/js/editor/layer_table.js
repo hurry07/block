@@ -52,3 +52,26 @@ TableLayer.prototype.bind = function (data) {
         }
     }
 }
+TableLayer.prototype.getFeature = function (f) {
+    switch (f) {
+        case 'move':
+            return this.getMoveFeature();
+    }
+    console.error('TableLayer:unsupported feature found:' + f);
+    return null;
+}
+TableLayer.prototype.getMoveFeature = function () {
+    var camera = this.camera;
+    var startx, starty;
+    return {
+        startMove: function (x, y) {
+            startx = x;
+            starty = y;
+        },
+        moveTo: function (x, y) {
+            camera.move(startx, starty, x, y);
+        },
+        stopMove: function (x, y) {
+        }
+    }
+}

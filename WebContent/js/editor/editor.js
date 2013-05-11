@@ -20,7 +20,6 @@ function EditArea(root) {
         // collect background event
         .on('mousemove', this.listenId('root.move'))
         .on('mousedown.start', this.listenId('root.downstart'), true)
-        .on('mousedown.end', this.listenId('root.downend'))
         .on('mouseup', this.listenId('root.up'), true)
         .call(function (view) {
             view.append('svg').call(function (svg) {
@@ -46,18 +45,16 @@ function EditArea(root) {
             }, this);
         }, this);
 
-    var exports = this.view.selectAll('g > svg');
+    var exports = this.view.selectAll('svg');
     this.initTables(exports.nodes()[0]);
     this.initMenus(exports.nodes()[1]);
 
-//    //TODO test
-//    this.tables.camera.move(-50, -40);
-//    this.tables.camera.scale(0.8);
+    // move tables by click tables background
+    this.view.on('mousedown.end', this.listen('root.downend'), this.tables)
 }
 _extends(EditArea, WindowComponent);
-EditArea.prototype.initMenus = function (svg) {
-    var camera = new Camera(this.area, svg, svg.select('svg > g'));
-    this.addAction(new MenuAction(svg.select('.pMenu'), camera));
+EditArea.prototype.getFeature = function (id) {
+    console.log('EditArea', id);
 }
 EditArea.prototype.initTables = function (svg) {
     var root = svg.select('svg > g');
@@ -78,16 +75,22 @@ EditArea.prototype.initTables = function (svg) {
     this.addAction(new DragAction(camera));
     this.addAction(new LinkAction(root.select('.pAssistant'), camera, this.tables));
 }
-// ==========================
-// global managed methods
+EditArea.prototype.initMenus = function (svg) {
+    var camera = new Camera(this.area, svg, svg.select('svg > g'));
+    this.addAction(new MenuAction(svg.select('.pMenu'), camera));
+}
 EditArea.prototype.onRegister = function (manager) {
 }
-// ==========================
 // data binding function
 EditArea.prototype.bind = function (data) {
     this.tables.bind(data);
 }
-// ==========================
+//EditArea.prototype.onResize = function () {
+//    WindowComponent.prototype.onResize.call(this);
+//    this.tables.camera.scale(0.5, 0, 0);
+//    this.tables.camera.moveToScreen(100, 100, 380, 200);
+//    this.tables.camera.scaleToScreen(2, 100 + 180, 50);
+//}
 // handle event
 EditArea.prototype.handleEvent = function (event) {
     switch (event.id) {

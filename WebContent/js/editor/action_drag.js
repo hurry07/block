@@ -39,8 +39,14 @@ DragAction.prototype.onEvent = function (event) {
 
             var target = this.getParam('mousedown.table');
             if (target) {
-                this.node = target.getFeature('move');
                 var p = this.camera.toLocal(block.event.x, block.event.y);
+                this.node = target.getFeature('move');
+                this.node.startMove(p[0], p[1]);
+                this.active = true;
+                this.dispatchEvent({id: 'drag.begin'});
+            } else {
+                var p = this.camera.toLocal(block.event.x, block.event.y);
+                this.node = event.target.getFeature('move');
                 this.node.startMove(p[0], p[1]);
                 this.active = true;
                 this.dispatchEvent({id: 'drag.begin'});
