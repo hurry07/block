@@ -43,6 +43,8 @@
     <script type="text/javascript" src="js/classes/entrygroup.js"></script>
     <script type="text/javascript" src="js/classes/searchbox.js"></script>
     <script type="text/javascript" src="js/classes/classlist.js"></script>
+    <!-- ui manager -->
+    <script type="text/javascript" src="js/uimanager.js"></script>
 </head>
 <body>
 <div class='chart'>
@@ -60,155 +62,52 @@
     function join() {
         return Array.prototype.slice.call(arguments, 0).join('.');
     }
-    // ==========================
-    // UI Manager
-    // ==========================
-    function UIManager(svg) {
-        this.svg = svg;
+    function initSvg() {
+        return block.select('.chart')
+                .append('svg')
+                .attr({
+                    width: window.innerHeight,
+                    height: window.innerHeight,
+                    id: 'svg'
+                })
+                .call(function (svg) {
+                    svg.append('svg:defs').call(function (defs) {
+                        // bg fill
+                        defs.append('svg:pattern')
+                                .attr('id', 'gridPattern')
+                                .attr({'x': 0, 'y': 0, 'width': 15, 'height': 15})
+                                .attr('patternUnits', 'userSpaceOnUse')
+                                .append('svg:path')
+                                .attr('d', 'M 15 0 L 0 0 0 15')
+                                .attr('fill', 'none')
+                                .attr('stroke', '#6DA0A1')
+                                .attr('stroke-width', '0.25');
 
-        // ui drawing layers
-        this.layers = {
-            panels: svg.append('svg:g').classed('pPanel', true),
-            editor: svg.append('svg:g').classed('pEditor', true),
-            message: svg.append('svg:g').classed('pMessage', true)
-        };
-
-        // hold the whole ui layout
-        this.areas = new LinerLayout();
-        // all registered actions
-        this.actions = {};
-        // all parts
-        this.components = {};
-        // event dispatcher config
-        this.eventbus = new EventBus();
-
-        // hold html adapter
-        this.global = {
-            inputSearch: new TextInput(document.getElementById('search'))
-        };
-
-        this.init();
+                        // shadow
+                        defs.append('svg:filter')
+                                .attr('id', 'dropshadow')
+                                .attr('height', '130%').call(function (shadow) {
+                                    shadow.append('svg:feGaussianBlur')
+                                            .attr('in', 'SourceAlpha')
+                                            .attr('stdDeviation', '2');
+                                    shadow.append('svg:feOffset')
+                                            .attr('dx', '2')
+                                            .attr('dy', '2')
+                                            .attr('result', 'offsetblur');
+                                    shadow.append('svg:feMerge').call(function (feMerge) {
+                                        feMerge.append('svg:feMergeNode');
+                                        feMerge.append('svg:feMergeNode').attr('in', 'SourceGraphic');
+                                    });
+                                });
+                    })
+                });
     }
-    UIManager.prototype.findComponent = function (name) {
-        return this.components[name];
-    }
-    /**
-     * return an temp event listener which will send event to WindowComponent
-     * @param id
-     * @returns {Function}
-     */
-    UIManager.prototype.listenEvent = function (id) {
-        var comp = this;
-        return function (event, target) {
-            comp.handleEvent({id: id, target: this});
-        }
-    }
-    UIManager.prototype.getEventBus = function (key) {
-        return this.eventbus;
-    }
-    UIManager.prototype.findWidget = function (key) {
-        return this.global[key];
-    }
-    UIManager.prototype.init = function () {
-        // add tool components
-        this.addComponent('classes', new ClassManage(this.layers.panels));
-        this.addComponent('editor', new EditArea(this.layers.editor));
-
-        // manage components's size and position
-        this.areas.add(this.components['classes'].getArea(), 0);
-        this.areas.add(this.components['editor'].getArea(), 1);
-    }
-    UIManager.prototype.bindDatas = function (data) {
-        this.components['editor'].bind(data.entities);
-    }
-    UIManager.prototype.addComponent = function (name, comp) {
-        this.components[name] = comp;
-        comp.onRegister(this);
-    }
-    UIManager.prototype.loseFocus = function () {
-        block.selectAll('.focus')
-                .classed('focus', false);
-    }
-    UIManager.prototype.onFocus = function (param) {
-//    this.input.close();
-//    var d = param.target.data;
-//    if (Table.prototype.isTable(d.type) != -1) {
-//        tables.order();
-//    }
-    }
-    UIManager.prototype.export = function () {
-        var save = {};
-        save.entities = this.exportEntity();
-        return save;
-    }
-    UIManager.prototype.exportEntity = function () {
-        var data = {};
-        data.tables = this.tables.export();
-        data.links = this.links.export();
-        return data;
-    }
-    UIManager.prototype.onResize = function (w, h) {
-        // the whole export of svg visiable area
-        this.svg.attr('viewBox', '0 0 ' + w + ' ' + h)
-                .attr('width', w)
-                .attr('height', h);
-        // separated panel resize
-        this.areas.size(w, h);
-    }
-    // ======================
-    // global
-    // ======================
-    /**
-     * declear svg defs
-     * @param svg
-     */
-    function initDefs(svg) {
-        // bg fill
-        var defs = svg.append('svg:defs');
-        defs.append('svg:pattern')
-                .attr('id', 'gridPattern')
-                .attr({'x': 0, 'y': 0, 'width': 15, 'height': 15})
-                .attr('patternUnits', 'userSpaceOnUse')
-                .append('svg:path')
-                .attr('d', 'M 15 0 L 0 0 0 15')
-                .attr('fill', 'none')
-                .attr('stroke', '#6DA0A1')
-                .attr('stroke-width', '0.25');
-        // shadow
-        var dropshadow = defs.append('svg:filter')
-                .attr('id', 'dropshadow')
-                .attr('height', '130%');
-        dropshadow.append('svg:feGaussianBlur')
-                .attr('in', 'SourceAlpha')
-                .attr('stdDeviation', '2');
-        dropshadow.append('svg:feOffset')
-                .attr('dx', '2')
-                .attr('dy', '2')
-                .attr('result', 'offsetblur');
-        var feMerge = dropshadow.append('svg:feMerge')
-        feMerge.append('svg:feMergeNode');
-        feMerge.append('svg:feMergeNode').attr('in', 'SourceGraphic');
-    }
-
-    var svg = block.select('.chart')
-            .append('svg')
-            .attr({
-                width: window.innerHeight,
-                height: window.innerHeight,
-                id: 'svg'
-            });
-    initDefs(svg);
-
-    //var camera = new Camera(svg);
-    var uiMgr = new UIManager(svg);
+    var uiMgr = new UIManager(initSvg());
 
     // global listeners register
     window.addEventListener('resize', function () {
         var width = window.innerWidth;
         var height = window.innerHeight;
-//    camera.setStart(-100, 50);
-//    camera.scale(1.2, 0, 0);
-//    camera.apply();
         uiMgr.onResize(width, height);
     });
     uiMgr.onResize(window.innerWidth, window.innerHeight);

@@ -1,0 +1,72 @@
+[
+    {
+        "type": "map",
+        "name": "first",
+        "fields": [
+            {
+                "name": "name",
+                "type": "s"
+            },
+            {
+                "name": "width",
+                "type": "i"
+            },
+            {
+                "name": "percent",
+                "type": "f"
+            },
+            {
+                "name": "price",
+                "type": "f"
+            },
+            {
+                "name": "second",
+                "type": "r"
+            }
+        ]
+    },
+    {
+        "type": "map",
+        "name": "second",
+        "fields": [
+            {
+                "name": "name",
+                "type": "s"
+            },
+            {
+                "name": "width",
+                "type": "i"
+            },
+            {
+                "name": "percent",
+                "type": "f"
+            },
+            {
+                "name": "price",
+                "type": "f"
+            }
+        ]
+    },
+    {
+        "type": "map",
+        "name": "third",
+        "fields": [
+            {
+                "name": "aadd",
+                "type": "s"
+            },
+            {
+                "name": "width",
+                "type": "i"
+            },
+            {
+                "name": "percent",
+                "type": "f"
+            },
+            {
+                "name": "price",
+                "type": "f"
+            }
+        ]
+    }
+]
