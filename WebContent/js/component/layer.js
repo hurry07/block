@@ -17,6 +17,6 @@ function Layer(view, camera) {
     this.camera = camera;
 }
 _extends(Layer, Module);
-Layer.prototype.onSizeChange = function (width, height) {
-    this.camera.resize(width, height);
+Layer.prototype.onSizeChange = function (area) {
+    this.camera.resize(area);
 }

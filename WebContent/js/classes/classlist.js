@@ -69,7 +69,7 @@ ClassManage.prototype.createArea = function () {
     return new Area(this).init(this.prefer.width, 0);
 }
 ClassManage.prototype.onResize = function () {
-    this.view.attr('transform', sprintf('translate(%f,%f)', this.area.x, this.area.y));
+    this.view.$t().translate(this.area.x, this.area.y).end();
 
     var w = this.area.width();
     this.bg.attr({width: w, height: this.area.height()});

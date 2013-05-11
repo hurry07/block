@@ -81,9 +81,8 @@ WindowComponent.prototype.onResize = function () {
     // put component to new position
     this.view.$t().translate(this.area.x, this.area.y).end();
     // resize all layers
-    var w = this.area.width(), h = this.area.height();
     for (var i = -1, L = this.layers, len = L.length; ++i < len;) {
-        L[i].onSizeChange(w, h);
+        L[i].onSizeChange(this.area);
     }
 }
 /**

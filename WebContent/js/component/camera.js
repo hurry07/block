@@ -9,78 +9,69 @@
 // camera
 // ======================
 /**
+ * matrix transform util class
  *
- * @param area is outer of viewbox
- * @param viewbox
- * @param root element of viewbox
+ * @param area belong to a component
+ * @param viewbox svg element
+ * @param root svg's g child
  * @constructor
  */
 function Camera(area, viewbox, root) {
-    this.viewbox = viewbox;
-    this.root = root.tag();
     this.area = area;
+    this.viewbox = viewbox
+    this.root = root.tag();
 
-    // window size
-    this.width = 0;
-    this.height = 0;
     // coordinate scale
     this.scalef = 1;
     // coordinate start
     this.startx = 0;
     this.starty = 0;
 }
-Camera.prototype.apply = function (sx, sy) {
-    if (arguments.length == 0) {
-        sx = this.startx;
-        sy = this.starty;
-    }
-    var w = this.width / this.scalef;
-    var h = this.height / this.scalef;
+/**
+ * apply the latest size to svg element
+ */
+Camera.prototype.apply = function () {
+    var sx = this.startx;
+    var sy = this.starty;
+    var w = this.area.width() / this.scalef;
+    var h = this.area.height() / this.scalef;
     this.viewbox.attr('viewBox', sprintf('%f %f %f %f', sx, sy, w, h));
 }
 /**
- * drag end
- * @param mx
- * @param my
+ * make local x,y shows on screenx,screeny
+ * @param x
+ * @param y
+ * @param screenx
+ * @param screeny
  */
-Camera.prototype.move = function (mx, my) {
-    this.startx -= mx / this.scalef;
-    this.starty -= my / this.scalef;
-    this.apply();
-}
-/**
- * during the drag movment
- * @param mx
- * @param my
- */
-Camera.prototype.moving = function (mx, my) {
-    var sx = this.startx - mx / this.scalef;
-    var sy = this.starty - my / this.scalef;
-    this.apply(sx, sy);
-}
-/**
- * when user resize the browser
- *
- * @param width
- * @param height
- */
-Camera.prototype.resize = function (width, height) {
-    this.width = width;
-    this.height = height;
-    this.viewbox.attr({width: this.width, height: this.height});
+Camera.prototype.move = function (x, y, screenx, screeny) {
+    if (arguments.length == 2) {
+        screenx = x, screeny = y;
+        x = 0, y = 0;
+    }
+    this.startx = x - screenx / this.scalef;
+    this.starty = y - screeny / this.scalef;
     this.apply();
 }
 /**
  * 对屏幕上指定的点缩放
  *
  * @param scalef
- * @param currentx
- * @param currenty
+ * @param centerx scale center
+ * @param centery
  */
-Camera.prototype.scale = function (scalef, currentx, currenty) {
+Camera.prototype.scale = function (scalef, centerx, centery) {
     this.scalef = scalef;
+    // TODO
     if (arguments.length == 3) {
     }
+    this.apply();
+}
+/**
+ * when user resize the browser
+ */
+Camera.prototype.resize = function (area) {
+    this.viewbox.attr({width: this.area.width(), height: this.area.height()});
     this.apply();
 }
 // matrix transform util methods
@@ -157,13 +148,11 @@ function BgCamera(area, viewbox, root, bg) {
     this.bg = bg;
 }
 _extends(BgCamera, Camera);
-BgCamera.prototype.apply = function (sx, sy) {
-    if (arguments.length == 0) {
-        sx = this.startx;
-        sy = this.starty;
-    }
-    var w = this.width / this.scalef;
-    var h = this.height / this.scalef;
+BgCamera.prototype.apply = function () {
+    var sx = this.startx;
+    var sy = this.starty;
+    var w = this.area.width() / this.scalef;
+    var h = this.area.height() / this.scalef;
     this.viewbox.attr('viewBox', sprintf('%f %f %f %f', sx, sy, w, h));
     this.bg.attr({x: sx, y: sy, width: w, height: h});
 }

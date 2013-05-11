@@ -17,6 +17,7 @@ function LinkAction(view, camera, tables) {
 
     this.link = Link.create(Node.wrap(view));
     this.link.disablePointer();
+    this.link.view.classed('focus', true);
     this.link.bind({from: new LinkTerminal(), to: new LinkTerminal()});
 }
 _extends(LinkAction, Action);
@@ -89,7 +90,8 @@ LinkAction.prototype.start = function (event) {
     }
     this.startnode = node.getFeature('link.start');
     this.startpoint = this.startnode.transform(this.camera);
-    this.active = true;
+    this.link.updateCurve(this.startpoint, this.camera.toLocal(block.event.x, block.event.y));
     this.link.show();
+    this.active = true;
     this.dispatchEvent({id: 'link.begin'});
 }
