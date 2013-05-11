@@ -81,10 +81,6 @@ EditArea.prototype.initMenus = function (svg) {
 }
 EditArea.prototype.onRegister = function (manager) {
 }
-// data binding function
-EditArea.prototype.bind = function (data) {
-    this.tables.bind(data);
-}
 //EditArea.prototype.onResize = function () {
 //    WindowComponent.prototype.onResize.call(this);
 //    this.tables.camera.scale(0.5, 0, 0);
@@ -140,4 +136,8 @@ EditArea.prototype.handleEvent = function (event) {
 //            'mouseover.table']);
 //        //console.log(event, this.compdata);
 //    }
+}
+// data binding function
+EditArea.prototype.bind = function (data) {
+    this.tables.bind(data);
 }

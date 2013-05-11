@@ -79,7 +79,7 @@ WindowComponent.prototype.createArea = function () {
  */
 WindowComponent.prototype.onResize = function () {
     // put component to new position
-    this.view.$t().translate(this.area.x, this.area.y).end();
+    this.view.$t().translate(this.area.absx, this.area.absy).end();
     // resize all layers
     for (var i = -1, L = this.layers, len = L.length; ++i < len;) {
         L[i].onSizeChange(this.area);

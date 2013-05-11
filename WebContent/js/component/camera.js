@@ -50,8 +50,8 @@ Camera.prototype.moveToScreen = function (x, y, screenx, screeny) {
         this.startx -= x / this.scalef;
         this.starty -= y / this.scalef;
     } else {
-        this.startx = x - (screenx - this.area.x) / this.scalef;
-        this.starty = y - (screeny - this.area.y) / this.scalef;
+        this.startx = x - (screenx - this.area.absx) / this.scalef;
+        this.starty = y - (screeny - this.area.absy) / this.scalef;
     }
     this.apply();
 }
@@ -161,8 +161,8 @@ Camera.prototype.toWorld = function (g, p) {
 }
 Camera.prototype.toLocal = function (x, y) {
     return [
-        (x - this.area.x) / this.scalef + this.startx,
-        (y - this.area.y) / this.scalef + this.starty
+        (x - this.area.absx) / this.scalef + this.startx,
+        (y - this.area.absy) / this.scalef + this.starty
     ];
 }
 /**

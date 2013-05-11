@@ -69,7 +69,7 @@ ClassManage.prototype.createArea = function () {
     return new Area(this).init(this.prefer.width, 0);
 }
 ClassManage.prototype.onResize = function () {
-    this.view.$t().translate(this.area.x, this.area.y).end();
+    this.view.$t().translate(this.area.absx, this.area.absy).end();
 
     var w = this.area.width();
     this.bg.attr({width: w, height: this.area.height()});
@@ -130,11 +130,13 @@ ClassManage.prototype.setText = function (t) {
  */
 ClassManage.prototype.endEdit = function (input) {
     this.search.text.style('visibility', 'visible');
+    //this.search.text.style('fill', 'inherit');
 }
 ClassManage.prototype.startEdit = function (input) {
     input.style({'font-size': '22px', 'text-indent': '4px'});
     input.tag().value = this.key;
     this.search.text.style('visibility', 'hidden');
+    //this.search.text.style('fill', 'transparent');
 }
 ClassManage.prototype.getTarget = function () {
     var node = this.search.inputBg;

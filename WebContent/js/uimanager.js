@@ -13,8 +13,9 @@ function UIManager(svg) {
 
     // ui drawing layers
     this.layers = {
-        panels: svg.append('svg:g').classed('pPanel', true),
         editor: svg.append('svg:g').classed('pEditor', true),
+        values: svg.append('svg:g').classed('pValues', true),
+        panels: svg.append('svg:g').classed('pPanel', true),
         message: svg.append('svg:g').classed('pMessage', true)
     };
 
@@ -37,17 +38,6 @@ function UIManager(svg) {
 UIManager.prototype.findComponent = function (name) {
     return this.components[name];
 }
-/**
- * return an temp event listener which will send event to WindowComponent
- * @param id
- * @returns {Function}
- */
-UIManager.prototype.listenEvent = function (id) {
-    var comp = this;
-    return function (event, target) {
-        comp.handleEvent({id: id, target: this});
-    }
-}
 UIManager.prototype.getEventBus = function (key) {
     return this.eventbus;
 }
@@ -56,12 +46,16 @@ UIManager.prototype.findWidget = function (key) {
 }
 UIManager.prototype.init = function () {
     // add tool components
-    this.addComponent('classes', new ClassManage(this.layers.panels));
     this.addComponent('editor', new EditArea(this.layers.editor));
+    this.addComponent('classes', new ClassManage(this.layers.panels));
+    this.addComponent('values', new ValueComp(this.layers.values));
 
     // manage components's size and position
     this.areas.add(this.components['classes'].getArea(), 0);
-    this.areas.add(this.components['editor'].getArea(), 1);
+    this.areas.add(new LinerLayout('v')
+        .add(this.components['editor'].getArea(), 1)
+        .add(this.components['values'].getArea().init(0, 0, 0, 200), 0)
+    );
 }
 UIManager.prototype.bindDatas = function (data) {
     this.components['editor'].bind(data.entities);
@@ -69,17 +63,6 @@ UIManager.prototype.bindDatas = function (data) {
 UIManager.prototype.addComponent = function (name, comp) {
     this.components[name] = comp;
     comp.onRegister(this);
-}
-UIManager.prototype.loseFocus = function () {
-    block.selectAll('.focus')
-        .classed('focus', false);
-}
-UIManager.prototype.onFocus = function (param) {
-//    this.input.close();
-//    var d = param.target.data;
-//    if (Table.prototype.isTable(d.type) != -1) {
-//        tables.order();
-//    }
 }
 UIManager.prototype.export = function () {
     var save = {};
