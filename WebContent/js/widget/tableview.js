@@ -15,7 +15,7 @@ _extends(TableView, ListNode);
  * @returns {Row}
  */
 TableView.prototype.createChild = function () {
-    return new Row(this, null, null);
+    return new Row(this);
 }
 TableView.prototype.updateEnd = function (children) {
     var y = 0;

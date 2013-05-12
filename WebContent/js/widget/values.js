@@ -13,53 +13,26 @@
 function ValueComp(root) {
     WindowComponent.call(this, root);
 
-    // @param columns [{type:string,name:name,width:150,height:18}]
-    this.prefer = {
-        columns: [
-            {type: 'string', name: 'name', width: 150, height: 18},
-            {type: 'string', name: 'age', width: 80, height: 18}
-        ],
-        init: {height: 18}
+    var prefer = {
+        row: {height: 18}
     };
-
-    var _this = this;
-    this.table = new TableView(Node.wrap(this.view), this.view.append('g').classed('tabledata', true));
-    this.table.createChild = function () {
-        return Row.create(_this.table, _this.prefer, _this);
-    }
-    this.celldown = this.listen('cell.down');
-
-    this.bind([
+    var columns = [
+        {type: 'string', name: 'name', width: 150, height: 18},
+        {type: 'string', name: 'age', width: 80, height: 18}
+    ];
+    this.sheet1 = this.createSheet('sheet1', prefer, columns);
+    this.sheet1.bind([
         {name: 'test1', age: 23},
         {name: 'test2', age: 22},
         {name: 'test3', age: 21}
     ]);
 }
 _extends(ValueComp, WindowComponent);
-/**
- *
- * @param data
- */
-ValueComp.prototype.bind = function (data) {
-    this.table.bind(data);
+ValueComp.prototype.createSheet = function (id, prefer, columns) {
+    return new Sheet(this, id, prefer, columns);
 }
 ValueComp.prototype.handleEvent = function (event) {
     console.log(event);
-}
-/**
- * used as cell create adapter
- *
- * @param row
- * @param name
- * @param type
- * @returns {Cell}
- */
-ValueComp.prototype.createCell = function (row, name, type) {
-    if (type) {
-    }
-    var cell = Cell.create(row, name);
-    cell.view.on('mousedown', this.celldown, cell);
-    return cell;
 }
 /**
  * react to window resize event
