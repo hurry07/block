@@ -143,9 +143,6 @@ ClassManage.prototype.startEdit = function (input) {
 ClassManage.prototype.getTarget = function () {
     var node = this.search.inputBg;
     var p = this.camera.toWorld(node, [0,0]);
-    // console.log(p);
-//    var matrix = Camera.prototype.getMatrix(node.tag(), this.view.tag());
-//    var p = Camera.prototype.transform(matrix, [0, 0]);
     p.push(node.attr('width'), node.attr('height'));
     return p;
 }
