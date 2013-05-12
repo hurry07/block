@@ -49,16 +49,15 @@ Area.prototype.position = function (x, y) {
     }
     this.x = x;
     this.y = y;
+    this.absx = this.parentx + x;
+    this.absy = this.parenty + y;
 }
 Area.prototype.parentPos = function (x, y) {
+    //console.log('Area.parentPos:', x, y);
     this.parentx = x;
     this.parenty = y;
     this.absx = this.x + x;
     this.absy = this.y + y;
-}
-Area.prototype.setAbsPosition = function (parentx, parenty) {
-    this.absx = parentx + this.x;
-    this.absy = parentx + this.y;
 }
 Area.prototype.width = function (w) {
     if (arguments.length == 0) {

@@ -5,10 +5,22 @@
  * Time: 下午5:03
  * To change this template use File | Settings | File Templates.
  */
-function TableView() {
-
+function TableView(p, view) {
+    ListNode.call(this, p);
+    this.view = view;
 }
 _extends(TableView, ListNode);
-TableView.prototype.bind = function (data) {
-
+/**
+ * should supply by ValueComp
+ * @returns {Row}
+ */
+TableView.prototype.createChild = function () {
+    return new Row(this, null, null);
+}
+TableView.prototype.updateEnd = function (children) {
+    var y = 0;
+    children.each(function (row) {
+        row.position(0, y);
+        y += row.height;
+    })
 }

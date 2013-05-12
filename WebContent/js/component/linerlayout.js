@@ -31,6 +31,7 @@ LinerLayout.prototype.remove = function (child) {
     return this;
 }
 LinerLayout.prototype.position = function (x, y) {
+    //console.log('LinerLayout.position:', x, y);
     if (arguments.length == 0) {
         return [this.x , this.y];
     }
@@ -39,6 +40,7 @@ LinerLayout.prototype.position = function (x, y) {
     this.parentPos(this.parentx, this.parenty);
 }
 LinerLayout.prototype.parentPos = function (x, y) {
+    //console.log('LinerLayout.parentPos:', x, y);
     this.parentx = x;
     this.parenty = y;
     var absx = this.absx = this.x + x;
