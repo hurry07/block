@@ -16,6 +16,7 @@ function UIManager(svg) {
         editor: svg.append('svg:g').classed('pEditor', true),
         values: svg.append('svg:g').classed('pValues', true),
         panels: svg.append('svg:g').classed('pPanel', true),
+        //panels1: svg.append('svg:g').classed('pPanel', true),
         message: svg.append('svg:g').classed('pMessage', true)
     };
 
@@ -49,10 +50,12 @@ UIManager.prototype.init = function () {
     // add tool components
     this.addComponent('editor', new EditArea(this.layers.editor));
     this.addComponent('classes', new ClassManage(this.layers.panels));
+    //this.addComponent('classes1', new ClassManage(this.layers.panels1));
     this.addComponent('values', new ValueComp(this.layers.values));
 
     // manage components's size and position
     this.areas.add(this.components['classes'].getArea(), 0);
+    //this.areas.add(this.components['classes1'].getArea(), 0);
     this.areas.add(new LinerLayout('v')
         .add(this.components['editor'].getArea(), 1)
         .add(this.components['values'].getArea().init(0, 0, 0, 200), 0)

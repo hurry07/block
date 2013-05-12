@@ -123,8 +123,8 @@ Camera.prototype.getWorldMatrix = function (g) {
     var matrix = this.getRootMatrix(g);
 
     mat2d.translate(matrix, matrix, vec2.clone([
-        -this.startx + area.x * this.scalef,
-        -this.starty + area.y * this.scalef]));
+        -this.startx + this.area.absx * this.scalef,
+        -this.starty + this.area.absy * this.scalef]));
     mat2d.scale(matrix, matrix, vec2.clone([1 / this.scalef, 1 / this.scalef]));
     return matrix;
 }

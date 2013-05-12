@@ -17,12 +17,14 @@ function TextInput(div, area) {
         .on('blur', this.onblur, this)
 }
 TextInput.prototype.submit = function () {
+    console.log('TextInput.prototype.submit');
     var a = this.adapter;
     if (a) {
         a.setText(this.input.tag().value);
     }
 }
 TextInput.prototype.onblur = function () {
+    console.log('TextInput.prototype.onblur');
     this.submit();
     var a = this.adapter;
     if (a) {
@@ -40,6 +42,7 @@ TextInput.prototype.onblur = function () {
  *     {getNode, getText, setText}
  */
 TextInput.prototype.show = function (adapter) {
+    console.log('TextInput.prototype.show');
     if (!adapter) {
         return;
     }
@@ -47,6 +50,7 @@ TextInput.prototype.show = function (adapter) {
     // end previous edit
     var _adapter = this.adapter;
     _adapter && _adapter.endEdit(this.input);
+    this.input.off('blur');
 
     // reset editor
     this.adapter = adapter;
