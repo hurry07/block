@@ -14,7 +14,7 @@ Row.prototype.enter = function (data) {
     var x = 0;
     for (var i = -1, columns = this.columns, len = columns.length; ++i < len;) {
         var col = columns[i];
-        cell = this.createCell(col.name, col.type);
+        cell = this.createCell(col);
         cell.bind(data[col.name]);
         cell.resize(col.width, this.height);
         cell.position(x, 0);
@@ -34,12 +34,12 @@ Row.prototype.position = function (x, y) {
 }
 /**
  * should be supplied by sheet
- * @param name
- * @param type
+ *
+ * @param column
  * @returns {Cell}
  */
-Row.prototype.createCell = function (name, type) {
-    return new Cell(this, name);
+Row.prototype.createCell = function (column) {
+    return new Cell(this, column);
 }
 Row.prototype.createView = function () {
     return this.rootView().append('g').classed('row', true);

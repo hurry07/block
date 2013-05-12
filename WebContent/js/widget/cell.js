@@ -5,9 +5,9 @@
  * Time: 下午9:55
  * To change this template use File | Settings | File Templates.
  */
-function Cell(p, name) {
+function Cell(p, column) {
     Node.call(this, p);
-    this.name = name;
+    this.column = column;
 }
 _extends(Cell, Node);
 Cell.prototype.createView = function () {

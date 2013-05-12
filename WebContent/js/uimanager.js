@@ -30,7 +30,8 @@ function UIManager(svg) {
 
     // hold html adapter
     this.global = {
-        inputSearch: new TextInput(document.getElementById('search'))
+        inputSearch: new TextInput(document.getElementById('search')),
+        'table.edit': document.getElementById('table.edit')
     };
 
     this.init();
