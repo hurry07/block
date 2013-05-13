@@ -95,10 +95,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="values.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="values.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/widget/values.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="29" column="19" selection-start="788" selection-end="788" vertical-scroll-proportion="0.5049505">
+            <state line="53" column="0" selection-start="1617" selection-end="1617" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -124,10 +124,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="input.js" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="input.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/component/input.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="51" column="50" selection-start="1323" selection-end="1364" vertical-scroll-proportion="0.0">
+            <state line="19" column="6" selection-start="554" selection-end="554" vertical-scroll-proportion="0.10891089">
               <folding />
             </state>
           </provider>
@@ -150,7 +150,6 @@
         <option value="$PROJECT_DIR$/js/widget/column.js" />
         <option value="$PROJECT_DIR$/js/component/camera.js" />
         <option value="$PROJECT_DIR$/index.html" />
-        <option value="$PROJECT_DIR$/js/component/input.js" />
         <option value="$PROJECT_DIR$/js/uimanager.js" />
         <option value="$PROJECT_DIR$/js/classes/classlist.js" />
         <option value="$PROJECT_DIR$/js/widget/row.js" />
@@ -159,6 +158,7 @@
         <option value="$PROJECT_DIR$/js/widget/sheet.js" />
         <option value="$PROJECT_DIR$/js/widget/cell.js" />
         <option value="$PROJECT_DIR$/js/widget/values.js" />
+        <option value="$PROJECT_DIR$/js/component/input.js" />
       </list>
     </option>
   </component>
@@ -617,13 +617,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/component/input.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="51" column="50" selection-start="1323" selection-end="1364" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/gl-matrix.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
@@ -665,7 +658,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/widget/values.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="19" selection-start="788" selection-end="788" vertical-scroll-proportion="0.5049505">
+        <state line="53" column="0" selection-start="1617" selection-end="1617" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/component/input.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="6" selection-start="554" selection-end="554" vertical-scroll-proportion="0.10891089">
           <folding />
         </state>
       </provider>

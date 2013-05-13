@@ -51,7 +51,6 @@ ValueComp.prototype.onRegister = function (manager) {
     this.input = new TextInput(manager.findWidget('table.edit'));
 }
 ValueComp.prototype.handleEvent = function (event) {
-    console.log(event);
     switch (event.id) {
         case 'cell.down':
             this.editCell(event);
@@ -59,7 +58,6 @@ ValueComp.prototype.handleEvent = function (event) {
     }
 }
 ValueComp.prototype.editCell = function (event) {
-    console.log(event);
     this.input.show(event.target.getFeature('edit'));
 }
 /**
