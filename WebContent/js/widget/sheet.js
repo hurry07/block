@@ -6,6 +6,10 @@
  * To change this template use File | Settings | File Templates.
  */
 function Sheet(manager, id, prefer, columns) {
+    columns.each(function (column) {
+        column.height = prefer.row.height;
+    })
+
     this.manager = manager;
     this.id = id;
     this.prefer = prefer;
@@ -17,7 +21,7 @@ function Sheet(manager, id, prefer, columns) {
 Sheet.prototype.createTable = function () {
     var prefer = this.prefer;
     var columns = this.columns;
-    var sheet = this;
+    var camera = this.manager.camera;
 
     // define subclasses that contain closure config data
     var handledown = this.listener('cell.down');
@@ -28,35 +32,30 @@ Sheet.prototype.createTable = function () {
         getFeature: function (f) {
             switch (f) {
                 case 'edit':
-                    return new EditFeature(this, sheet.view);
+                    return new CellEdit(camera, this);
             }
-        }
+        },
+        prefer: prefer.cell
     });
-    cell.create = function (p, name) {
-        var c = new cell(p, name);
-        c.create();
-        return c;
-    }
 
     // define row class that contains column config in it
     var row = _defineClass(Row, {
         columns: columns,
         createCell: function (column) {
-            return cell.create(this, column);
+            var c = new cell(this, column);
+            c.create();
+            return c;
         }
     });
-    row.create = function (p) {
-        var r = new row(p);
-        r.height = prefer.row.height;
-        r.create();
-        return r;
-    }
 
     // instance closure
     var table = new TableView(Node.wrap(this.view), this.view);
     table.createChild = function () {
-        return row.create(this);
+        var r = new row(this);
+        r.create();
+        return r;
     }
+    table.prefer = prefer;
     return table;
 }
 Sheet.prototype.bind = function (data) {
@@ -70,31 +69,28 @@ Sheet.prototype.listener = function (id) {
         manager.handleEvent({id: 'cell.down', sheet: sheet.id, target: this});
     }
 }
-/**
- * the adapter between cell and a text input
- *
- * @param cell
- * @param view
- * @constructor
- */
-function EditFeature(cell, view) {
+function CellEdit(camera, cell) {
+    this.camera = camera;
+
     this.cell = cell;
-    this.view = view;
+    this.column = cell.column;
+    this.data = cell.parentNode.data;
+    this.text = this.data[this.column.name];
 }
-EditFeature.prototype.endEdit = function (input) {
-    this.search.cell.style('visibility', 'visible');
-    //this.search.text.style('fill', 'inherit');
+CellEdit.prototype.endEdit = function (input) {
+    this.cell.text.style('visibility', 'visible');
+    this.cell.bind(this.data[this.column.name] = this.text);
 }
-EditFeature.prototype.startEdit = function (input) {
-    input.style({'font-size': '22px', 'text-indent': '4px'});
-    input.tag().value = this.key;
+CellEdit.prototype.startEdit = function (input) {
+    input.style({'font-size': '17px', 'text-indent': '4px'});
+    input.tag().value = this.text;
     this.cell.text.style('visibility', 'hidden');
-    //this.search.text.style('fill', 'transparent');
 }
-EditFeature.prototype.getTarget = function () {
-    var node = this.cell.view;
-    var matrix = Camera.prototype.getMatrix(node.tag(), this.view.tag());
-    var p = Camera.prototype.transform(matrix, [0, 0]);
-    p.push(node.attr('width'), node.attr('height'));
+CellEdit.prototype.setText = function (t) {
+    this.text = t;
+}
+CellEdit.prototype.getTarget = function () {
+    var p = this.camera.getLocal(this.cell.view, [0, 0]);
+    p.push(this.column.width, this.column.height);
     return p;
 }

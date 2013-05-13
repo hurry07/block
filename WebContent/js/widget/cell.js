@@ -15,14 +15,14 @@ Cell.prototype.createView = function () {
 }
 Cell.prototype.enter = function (data) {
     this.rect = this.view.append('rect');
-    this.text = this.view.append('text').text('' + data);
+    this.text = this.view.append('text').attr({x: this.prefer.x, 'dy': this.prefer.dy}).text('' + data);
 }
-Cell.prototype.update = function (data) {
-    this.text.text(data);
+Cell.prototype.update = function (dold, data) {
+    this.text.text('' + data);
 }
 Cell.prototype.resize = function (w, h) {
     this.rect.attr({width: w, height: h});
-    this.text.attr({x: 0, y: h});
+    this.text.attr({x: this.prefer.x, y: h});
 }
 Cell.prototype.position = function (x, y) {
     this.view.$t().translate(x, y).end();

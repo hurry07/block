@@ -16,7 +16,7 @@ Row.prototype.enter = function (data) {
         var col = columns[i];
         cell = this.createCell(col);
         cell.bind(data[col.name]);
-        cell.resize(col.width, this.height);
+        cell.resize(col.width, col.height);
         cell.position(x, 0);
         x += col.width;
     }

@@ -35,18 +35,18 @@
     <file path="/input.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368375825114" ignored="false" />
     <file path="/entry.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368198201452" ignored="false" />
     <file path="/camera1.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368240523567" ignored="false" />
-    <file path="/transform.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368374934871" ignored="false" />
+    <file path="/transform.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368459395111" ignored="false" />
     <file path="/classes.json" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368258000614" ignored="false" />
-    <file path="/tableview.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368366147261" ignored="false" />
+    <file path="/tableview.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368462129280" ignored="false" />
     <file path="/column.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368365629271" ignored="false" />
     <file path="/tables.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368282521150" ignored="false" />
     <file path="/uimanager.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368369553439" ignored="false" />
     <file path="/layout.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368356995683" ignored="false" />
     <file path="/linerlayout.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368356154556" ignored="false" />
-    <file path="/values.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368370901932" ignored="false" />
-    <file path="/sheet.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368372714277" ignored="false" />
-    <file path="/row.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368370357806" ignored="false" />
-    <file path="/cell.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368370452384" ignored="false" />
+    <file path="/values.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368462610978" ignored="false" />
+    <file path="/sheet.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368462342897" ignored="false" />
+    <file path="/row.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368457193878" ignored="false" />
+    <file path="/cell.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368462424299" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,10 +66,68 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="classlist.js" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/js/classes/classlist.js">
+      <file leaf-file-name="sheet.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/widget/sheet.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="42" selection-start="365" selection-end="365" vertical-scroll-proportion="-2.5247524">
+            <state line="9" column="41" selection-start="274" selection-end="280" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cell.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/widget/cell.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="22" column="21" selection-start="648" selection-end="654" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="n#!!doc;n#Cell#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="row.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/widget/row.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="18" column="34" selection-start="503" selection-end="506" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="values.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/js/widget/values.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="29" column="19" selection-start="788" selection-end="788" vertical-scroll-proportion="0.5049505">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gl-matrix.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/gl-matrix.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tableview.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/widget/tableview.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="24" column="13" selection-start="586" selection-end="586" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="input.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/component/input.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="51" column="50" selection-start="1323" selection-end="1364" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -89,18 +147,18 @@
         <option value="$PROJECT_DIR$/js/component/linerlayout.js" />
         <option value="$PROJECT_DIR$/js/component/layout.js" />
         <option value="$PROJECT_DIR$/css/theme.css" />
-        <option value="$PROJECT_DIR$/js/widget/tableview.js" />
         <option value="$PROJECT_DIR$/js/widget/column.js" />
-        <option value="$PROJECT_DIR$/js/widget/row.js" />
-        <option value="$PROJECT_DIR$/js/widget/cell.js" />
-        <option value="$PROJECT_DIR$/js/widget/values.js" />
-        <option value="$PROJECT_DIR$/js/widget/sheet.js" />
         <option value="$PROJECT_DIR$/js/component/camera.js" />
-        <option value="$PROJECT_DIR$/js/component/transform.js" />
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/js/component/input.js" />
         <option value="$PROJECT_DIR$/js/uimanager.js" />
         <option value="$PROJECT_DIR$/js/classes/classlist.js" />
+        <option value="$PROJECT_DIR$/js/widget/row.js" />
+        <option value="$PROJECT_DIR$/js/component/transform.js" />
+        <option value="$PROJECT_DIR$/js/widget/tableview.js" />
+        <option value="$PROJECT_DIR$/js/widget/sheet.js" />
+        <option value="$PROJECT_DIR$/js/widget/cell.js" />
+        <option value="$PROJECT_DIR$/js/widget/values.js" />
       </list>
     </option>
   </component>
@@ -220,6 +278,96 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="widget" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="editor" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="core" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="component" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="classes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="css" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -231,14 +379,14 @@
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="recentsLimit" value="5" />
     <property name="options.lastSelected" value="editor.preferences.appearance" />
+    <property name="recentsLimit" value="5" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="FullScreen" value="true" />
     <property name="DefaultHtmlFileTemplate" value="Html5" />
-    <property name="GoToClass.includeJavaFiles" value="false" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
+    <property name="GoToClass.includeJavaFiles" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -400,70 +548,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/js/classes/searchbox.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/widget/row.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="0" selection-start="965" selection-end="965" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/widget/cell.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="24" selection-start="224" selection-end="230" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc;n#Cell#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/widget/values.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="53" column="50" selection-start="1429" selection-end="1429" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/widget/sheet.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="3" selection-start="2015" selection-end="2015" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc;n#Sheet#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/component/camera.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="125" column="28" selection-start="3122" selection-end="3122" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/component/transform.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="87" selection-start="348" selection-end="348" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/layer_table.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="13" selection-start="579" selection-end="579" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/editor/editor.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="16" column="14" selection-start="361" selection-end="361" vertical-scroll-proportion="0.0">
@@ -480,23 +564,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/component/layer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="28" selection-start="380" selection-end="392" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state line="27" column="65" selection-start="1542" selection-end="1542" vertical-scroll-proportion="-6.875">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/component/input.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="52" column="16" selection-start="1381" selection-end="1381" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -517,7 +587,85 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/classes/classlist.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="42" selection-start="365" selection-end="365" vertical-scroll-proportion="-2.5247524">
+        <state line="121" column="29" selection-start="3216" selection-end="3223" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/component/camera.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="127" column="0" selection-start="3045" selection-end="3203" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/component/transform.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="38" column="50" selection-start="996" selection-end="996" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/component/layer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="28" selection-start="380" selection-end="392" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/component/input.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="51" column="50" selection-start="1323" selection-end="1364" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/gl-matrix.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/widget/tableview.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="24" column="13" selection-start="586" selection-end="586" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/widget/cell.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="21" selection-start="648" selection-end="654" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="n#!!doc;n#Cell#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/widget/row.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="34" selection-start="503" selection-end="506" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/widget/sheet.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="41" selection-start="274" selection-end="280" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/widget/values.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="19" selection-start="788" selection-end="788" vertical-scroll-proportion="0.5049505">
           <folding />
         </state>
       </provider>

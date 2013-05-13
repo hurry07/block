@@ -19,8 +19,9 @@ TableView.prototype.createChild = function () {
 }
 TableView.prototype.updateEnd = function (children) {
     var y = 0;
+    var height = this.prefer.row.height;
     children.each(function (row) {
         row.position(0, y);
-        y += row.height;
+        y += height;
     })
 }

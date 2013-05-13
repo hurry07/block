@@ -15,22 +15,29 @@ function ValueComp(root) {
 
     this.sheets = {};
     this.input = null;
+    this.camera = new Transform(this.area, this.view);
 
     var sheet1 = this.testSheet();
     sheet1.bind([
-        {name: 'test1', age: 23},
-        {name: 'test2', age: 22},
-        {name: 'test3', age: 21}
+        {name: 'jack1', age: 23, city: 'hangzhou'},
+        {name: 'frank', age: 23, city: 'hangzhou'},
+        {name: 'panda', age: 23, city: 'hangzhou'},
+        {name: '=_=', age: 23, city: 'hangzhou'},
+        {name: ':D', age: 23, city: 'hangzhou'},
+        {name: 'test 1', age: 23, city: 'hangzhou'},
+        {name: 'test 2', age: 23, city: 'hangzhou'},
     ]);
 }
 _extends(ValueComp, WindowComponent);
 ValueComp.prototype.testSheet = function () {
     var prefer = {
-        row: {height: 18}
+        row: {height: 18},
+        cell: {dy: -4, x: 4}
     };
     var columns = [
-        {type: 'string', name: 'name', width: 150, height: 18},
-        {type: 'string', name: 'age', width: 80, height: 18}
+        {type: 'string', name: 'name', width: 70},
+        {type: 'string', name: 'age', width: 40},
+        {type: 'string', name: 'city', width: 100}
     ];
     return this.addSheet('sheet1', prefer, columns);
 }
@@ -53,8 +60,7 @@ ValueComp.prototype.handleEvent = function (event) {
 }
 ValueComp.prototype.editCell = function (event) {
     console.log(event);
-//    var adapter = event.target.getFeature('edit');
-//    this.input.show(adapter);
+    this.input.show(event.target.getFeature('edit'));
 }
 /**
  * react to window resize event

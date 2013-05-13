@@ -37,7 +37,9 @@ Transform.prototype.getWorldMatrix = function (g) {
  * @returns {mat2d}
  */
 Transform.prototype.getRootMatrix = function (g) {
-    return this.getMatrix(g, this.root);
+    var matrix = this.getMatrix(g, this.root);
+    mat2d.translate(matrix, matrix, vec2.clone([this.area.absx, this.area.absy]));
+    return matrix;
 }
 Transform.prototype.getMatrix = function (from, to) {
     var svgM = from.getTransformToElement(to);
