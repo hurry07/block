@@ -41,64 +41,60 @@ Sheet.prototype.createTable = function () {
 
     // ====================== row
     // define subclasses that contain closure config data
-    var handledown = this.listener('cell.down');
     var cell = _defineClass(Cell, {
-        createView: function () {
-            return this.rootView().append('g').classed('cell', true).on('mousedown', handledown, this);
-        },
+        prefer: prefer.cell,
         getFeature: function (f) {
             switch (f) {
                 case 'edit':
                     return new CellEdit(camera, this);
             }
-        },
-        prefer: prefer.cell
+        }
     });
     // define row class that contains column config in it
+    var handledown = this.listener('cell.down');
     var row = _defineClass(Row, {
         columns: columns,
         createCell: function (column) {
             var c = new cell(this, column);
             c.create();
+            c.view.on('mousedown', handledown, this);
             return c;
-        },
-        createView: function () {
-            return this.rootView().append('g').classed('row', true);
         }
     });
 
     // ======================
-    var headclick = this.listener('head.click');
     var headcell = _defineClass(Cell, {
-        createView: function () {
-            return this.rootView().append('g').classed('cell', true).on('click', headclick, this);
-        },
         prefer: prefer.cell
     });
+    var headclick = this.listener('head.click');
     var headrow = _defineClass(Row, {
         columns: hColumns,
         createCell: function (column) {
             var c = new headcell(this, column);
             c.create();
+            c.view.on('click', headclick, this);
             return c;
-        },
-        createView: function () {
-            return this.rootView().append('g').classed('header', true);
         }
     });
 
     // instance closure
     var table = _defineClass(TableView, {
         createChild: function () {
-            var r = new row(this);
+            var r = new row(this.rowsroot);
             r.create();
+            r.view.classed('row', true);
             return r;
         },
         createHead: function () {
             var r = new headrow(this);
             r.create();
+            r.view.classed('header', true);
             return r;
         },
+        onSplitCreate: function (split) {
+            split.rect.on('mousedown', this);
+        },
+        columns: columns,
         prefer: prefer
     })
     return new table(Node.wrap(this.view), this.view);

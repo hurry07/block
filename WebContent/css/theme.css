@@ -31,6 +31,7 @@ path {
 /* ======================= */
 /* table view              */
 /* ======================= */
+/* row */
 .tabledata .row:nth-child(odd) {
     fill: #A7B6C7;
 }
@@ -39,15 +40,25 @@ path {
     fill: #F3F6FA;
 }
 
-.tabledata .header {
-    fill: #809bc8;
-}
-
 .cell text {
     font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     fill: black;
     text-anchor: start;
     font-size: 17px;
+}
+
+/* header */
+.tabledata .header {
+    fill: #809bc8;
+}
+
+.split path {
+    stroke: black;
+    stroke-width: .5px;
+}
+
+.split rect {
+    fill: #FC9C9C;
 }
 
 /* ======================= */

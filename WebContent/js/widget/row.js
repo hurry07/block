@@ -22,7 +22,7 @@ Row.prototype.enter = function (data) {
     }
 }
 Row.prototype.update = function (data) {
-    var columns = this.prefer.columns;
+    var columns = this.columns;
     for (var i = -1, cells = this.view.childNodes, len = cells.length; ++i < len;) {
         cells[i].update(data[columns[i].name]);
     }
@@ -42,5 +42,5 @@ Row.prototype.createCell = function (column) {
     return new Cell(this, column);
 }
 Row.prototype.createView = function () {
-    return this.rootView().append('g').classed('row', true);
+    return this.rootView().append('g');
 }
