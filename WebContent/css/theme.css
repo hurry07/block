@@ -39,12 +39,17 @@ path {
     fill: #F3F6FA;
 }
 
+.tabledata .header {
+    fill: #809bc8;
+}
+
 .cell text {
     font-family: "Myriad Pro", Helvetica, Arial, sans-serif;
     fill: black;
     text-anchor: start;
     font-size: 17px;
 }
+
 /* ======================= */
 /* link styles             */
 /* ======================= */

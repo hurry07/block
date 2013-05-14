@@ -1,0 +1,1 @@
+http://stackoverflow.com/questions/9111315/changing-intellij-to-have-eclipse-key-map-on-mac-i-e-cmd-alt-r-to-refactor

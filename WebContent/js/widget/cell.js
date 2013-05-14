@@ -5,6 +5,12 @@
  * Time: 下午9:55
  * To change this template use File | Settings | File Templates.
  */
+/**
+ * is render of text
+ * @param p
+ * @param column
+ * @constructor
+ */
 function Cell(p, column) {
     Node.call(this, p);
     this.column = column;
@@ -15,7 +21,7 @@ Cell.prototype.createView = function () {
 }
 Cell.prototype.enter = function (data) {
     this.rect = this.view.append('rect');
-    this.text = this.view.append('text').attr({x: this.prefer.x, 'dy': this.prefer.dy}).text('' + data);
+    this.text = this.view.append('text').attr({x: this.prefer.x, 'dy': this.prefer.dy, 'xml:space': 'preserve'}).text('' + data);
 }
 Cell.prototype.update = function (dold, data) {
     this.text.text('' + data);

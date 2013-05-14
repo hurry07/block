@@ -17,12 +17,29 @@ function Sheet(manager, id, prefer, columns) {
 
     this.view = manager.view.append('g').classed('tabledata', true);
     this.table = this.createTable();
+    this.table.bindHeader(this.createHeader());
+}
+Sheet.prototype.createHeader = function () {
+    var header = {};
+    this.columns.each(function (c) {
+        header[c.name] = c.name;
+    });
+    return header;
+}
+Sheet.prototype.headerColumn = function () {
+    var header = [];
+    this.columns.each(function (c) {
+        header.push({name: c.name, type: 'string', width: c.width, height: c.height});
+    });
+    return header;
 }
 Sheet.prototype.createTable = function () {
     var prefer = this.prefer;
     var columns = this.columns;
+    var hColumns = this.headerColumn();
     var camera = this.manager.camera;
 
+    // ====================== row
     // define subclasses that contain closure config data
     var handledown = this.listener('cell.down');
     var cell = _defineClass(Cell, {
@@ -37,7 +54,6 @@ Sheet.prototype.createTable = function () {
         },
         prefer: prefer.cell
     });
-
     // define row class that contains column config in it
     var row = _defineClass(Row, {
         columns: columns,
@@ -45,18 +61,47 @@ Sheet.prototype.createTable = function () {
             var c = new cell(this, column);
             c.create();
             return c;
+        },
+        createView: function () {
+            return this.rootView().append('g').classed('row', true);
+        }
+    });
+
+    // ======================
+    var headclick = this.listener('head.click');
+    var headcell = _defineClass(Cell, {
+        createView: function () {
+            return this.rootView().append('g').classed('cell', true).on('click', headclick, this);
+        },
+        prefer: prefer.cell
+    });
+    var headrow = _defineClass(Row, {
+        columns: hColumns,
+        createCell: function (column) {
+            var c = new headcell(this, column);
+            c.create();
+            return c;
+        },
+        createView: function () {
+            return this.rootView().append('g').classed('header', true);
         }
     });
 
     // instance closure
-    var table = new TableView(Node.wrap(this.view), this.view);
-    table.createChild = function () {
-        var r = new row(this);
-        r.create();
-        return r;
-    }
-    table.prefer = prefer;
-    return table;
+    var table = _defineClass(TableView, {
+        createChild: function () {
+            var r = new row(this);
+            r.create();
+            return r;
+        },
+        createHead: function () {
+            var r = new headrow(this);
+            r.create();
+            return r;
+        },
+        prefer: prefer
+    })
+    return new table(Node.wrap(this.view), this.view);
 }
 Sheet.prototype.bind = function (data) {
     this.table.bind(data);
