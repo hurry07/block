@@ -57,7 +57,7 @@ Sheet.prototype.createTable = function () {
         createCell: function (column) {
             var c = new cell(this, column);
             c.create();
-            c.view.on('mousedown', handledown, this);
+            c.view.on('mousedown', handledown, c);
             return c;
         }
     });
@@ -72,7 +72,7 @@ Sheet.prototype.createTable = function () {
         createCell: function (column) {
             var c = new headcell(this, column);
             c.create();
-            c.view.on('click', headclick, this);
+            c.view.on('click', headclick, c);
             return c;
         }
     });

@@ -52,9 +52,8 @@ path {
     fill: #809bc8;
 }
 
-.split path {
+.split line {
     stroke: black;
-    stroke-width: .5px;
 }
 
 .split rect {

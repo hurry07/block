@@ -1,15 +1,17 @@
 function Split(root, x, h) {
     this.x = x;
     this.h = h;
-    this.line = root.append('path').$d().M(x, 0).v(h).end();
+    this.line = root.append('line').attr({x1: x, y1: 0, x2: x, y2: h});
     this.rect = root.append('rect').attr({width: this.prefer.width, height: h, x: x - this.prefer.width / 2});
 }
 Split.prototype.position = function (x) {
-    this.line.$d().M(this.x = x, 0).h(this.h).z().end();
+    this.x = x;
+    this.line.attr({x1: x, y1: 0, x2: x, y2: this.h});
     this.rect.attr('x', x - this.prefer.width / 2);
 }
 Split.prototype.height = function (h) {
-    this.line.$d().M(this.x, 0).v(this.h = h).z().end();
+    this.h = h;
+    this.line.attr({x1: this.x, y1: 0, x2: this.x, y2: h});
 }
 Split.prototype.prefer = {
     width: 6
