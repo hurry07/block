@@ -74,6 +74,8 @@ function WindowComponent(view) {
 WindowComponent.prototype.createArea = function () {
     return new Area(this);
 }
+WindowComponent.prototype.close = function () {
+}
 /**
  * react to window resize event
  */

@@ -31,10 +31,10 @@ Cell.prototype.resize = function (w, h) {
     this.text.attr({x: this.prefer.x, y: h});
 }
 Cell.prototype.height = function (h) {
-    this.text.attr({x: this.prefer.x, y: h});
+    this.text.attr('height', h);
 }
 Cell.prototype.width = function (w) {
-    this.rect.attr({width: w, height: h});
+    this.rect.attr('width', w);
 }
 Cell.prototype.position = function (x, y) {
     this.view.$t().translate(x, y).end();

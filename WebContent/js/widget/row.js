@@ -23,8 +23,8 @@ Row.prototype.enter = function (data) {
 }
 Row.prototype.update = function (data) {
     var columns = this.columns;
-    for (var i = -1, cells = this.view.childNodes, len = cells.length; ++i < len;) {
-        cells[i].update(data[columns[i].name]);
+    for (var i = -1, cells = this.view.childNodes().nodes(), len = cells.length; ++i < len;) {
+        cells[i].node().bind(data[columns[i].name]);
     }
 }
 Row.prototype.order = function (prefer) {
@@ -47,9 +47,10 @@ Row.prototype.createView = function () {
 Row.prototype.resize = function () {
     var w = 0;
     var columns = this.columns;
-    for (var i = -1, cells = this.view.childNodes, len = cells.length; ++i < len;) {
-        cells[i].position(w, 0);
-        cells[i].width(columns[i].width);
+    for (var i = -1, cells = this.view.childNodes().nodes(), len = cells.length; ++i < len;) {
+        var cell = cells[i].node();
+        cell.position(w, 0);
+        cell.width(columns[i].width);
         w += columns[i].width;
     }
 }

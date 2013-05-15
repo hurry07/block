@@ -17,21 +17,30 @@ Split.prototype.prefer = {
     width: 6,
     linewidth: 0.5
 }
+/**
+ * drag adapter
+ *
+ * @param table
+ * @param split
+ * @param camera
+ * @constructor
+ */
 function SplitDrag(table, split, camera) {
     this.table = table;
     this.split = split;
-    this.camera = camera;
     this.startx = split.x;
 }
 SplitDrag.prototype.startMove = function (x, y) {
-    var p = this.camera.toLocal(x, y);
     this.startx = x;
 }
 SplitDrag.prototype.moveTo = function (x, y) {
-    var p = this.camera.toLocal(x, y);
     this.split.position(x);
 }
 SplitDrag.prototype.stopMove = function (x, y) {
-    this.split.position(x);
-    this.table.adjust(this.split.id, x - this.startx);
+    if (arguments.length > 0) {
+        this.split.position(x);
+        this.table.adjust(this.split.id, x - this.startx);
+    } else {
+        this.table.adjust(this.split.id, 0);
+    }
 }

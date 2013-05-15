@@ -2,20 +2,29 @@ function TableView(p, view) {
     ListNode.call(this, p);
     this.view = view;
     this.header = this.createHead();
+    this.header.bind(this.createHeader());
     this.rowsroot = Node.wrap(view.append('g').classed('data', true));
     this.splitroot = view.append('g').classed('split', true);
     this.splits = this.createSplitAll();
 }
 _extends(TableView, ListNode);
+TableView.prototype.createHeader = function () {
+    var header = {};
+    this.columns.each(function (c) {
+        header[c.name] = c.name;
+    });
+    return header;
+}
 TableView.prototype.createSplitAll = function () {
     var splits = [];
     var columns = this.columns;
     var h = this.prefer.row.height;
     var width = 0;
-    var s;
     for (var i = 0, length = this.columns.length; i < length; i++) {
         width += columns[i].width;
-        splits.push(this.createSplit(this.splitroot, width, h));
+        var split = this.createSplit(this.splitroot, width, h);
+        split.id = i;
+        splits.push(split);
     }
     return splits;
 }
@@ -49,13 +58,15 @@ TableView.prototype.exit = function () {
 TableView.prototype.getChildren = function () {
     return this.view.selectAll('.row');
 }
-TableView.prototype.bindHeader = function (data) {
-    this.header.bind(data);
-}
 TableView.prototype.adjust = function (col, offset) {
     this.columns[col].width += offset;
     this.header.resize();
     this.getChildren().each(function (row) {
-        row.resize();
+        row.node().resize();
     });
+    var width = 0;
+    for (var i = 0, length = this.columns.length; i < length; i++) {
+        width += this.columns[i].width;
+        this.splits[i].position(width, 0);
+    }
 }

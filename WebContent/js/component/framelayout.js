@@ -46,6 +46,3 @@ FrameLayout.prototype.setWidth = function (w) {
         }
     })
 }
-FrameLayout.prototype.layoutRelative = function (area, param) {
-    // TODO not needed currently
-}

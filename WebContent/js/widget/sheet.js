@@ -17,26 +17,17 @@ function Sheet(manager, id, prefer, columns) {
 
     this.view = manager.view.append('g').classed('tabledata', true);
     this.table = this.createTable();
-    this.table.bindHeader(this.createHeader());
 }
-Sheet.prototype.createHeader = function () {
-    var header = {};
-    this.columns.each(function (c) {
-        header[c.name] = c.name;
-    });
-    return header;
-}
-Sheet.prototype.headerColumn = function () {
-    var header = [];
-    this.columns.each(function (c) {
-        header.push({name: c.name, type: 'string', width: c.width, height: c.height});
-    });
-    return header;
-}
+//Sheet.prototype.headerColumn = function () {
+//    var header = [];
+//    this.columns.each(function (c) {
+//        header.push({name: c.name, type: 'string', width: c.width, height: c.height});
+//    });
+//    return header;
+//}
 Sheet.prototype.createTable = function () {
     var prefer = this.prefer;
     var columns = this.columns;
-    var hColumns = this.headerColumn();
     var camera = this.manager.camera;
 
     // ====================== row
@@ -68,7 +59,7 @@ Sheet.prototype.createTable = function () {
     });
     var headclick = this.listener('head.click');
     var headrow = _defineClass(Row, {
-        columns: hColumns,
+        columns: columns,
         createCell: function (column) {
             var c = new headcell(this, column);
             c.create();
@@ -77,7 +68,15 @@ Sheet.prototype.createTable = function () {
         }
     });
 
-    var splitclass = _defineClass(Split);
+    var sheet = this;
+    var splitclass = _defineClass(Split, {
+        getFeature: function (f) {
+            switch (f) {
+                case 'adjust':
+                    return new SplitDrag(sheet.table, this, camera);
+            }
+        }
+    });
 
     // instance closure
     var splicdown = this.listener('split.down');// event
@@ -102,14 +101,7 @@ Sheet.prototype.createTable = function () {
         columns: columns,
         prefer: prefer
     })
-    var sheet = new table(Node.wrap(this.view), this.view);
-    splitclass.prototype.getFeature = function (f) {
-        switch (f) {
-            case 'adjust':
-                return new SplitDrag(sheet, this, camera);
-        }
-    }
-    return sheet;
+    return new table(Node.wrap(this.view), this.view);
 }
 Sheet.prototype.bind = function (data) {
     this.table.bind(data);
@@ -119,6 +111,7 @@ Sheet.prototype.listener = function (id) {
     var sheet = this;
 
     return function () {
-        manager.handleEvent({id: id, sheet: sheet.id, target: this});
+        console.log(this);
+        manager.handleEvent({id: id, sheet: sheet, target: this});
     }
 }

@@ -13,9 +13,14 @@
 function ValueComp(root) {
     WindowComponent.call(this, root);
 
+    this.view.on('mousemove', this.listen('root.move'), this);
+    this.view.on('mouseup', this.listen('root.up'), this);
+
     this.sheets = {};
     this.input = null;
     this.camera = new Transform(this.area, this.view);
+
+    this.addAction(new AdjustAction(this.camera));
 
     var sheet1 = this.testSheet();
     sheet1.bind([
@@ -59,6 +64,7 @@ ValueComp.prototype.handleEvent = function (event) {
             this.moveColumn(event);
             break;
     }
+    this.eventbus.fireEvent(event);
 }
 ValueComp.prototype.editCell = function (event) {
     this.input.show(event.target.getFeature('edit'));
@@ -76,4 +82,49 @@ ValueComp.prototype.onResize = function () {
     for (var i = -1, L = this.layers, len = L.length; ++i < len;) {
         L[i].onSizeChange(this.area);
     }
+}
+function AdjustAction(camera) {
+    Action.call(this);
+    this.camera = camera;
+    this.target = null;
+}
+_extends(AdjustAction, Action);
+AdjustAction.prototype.onRegister = function (manager) {
+    this.onInit('split.down');
+    this.on('root.move');
+    this.on('root.up');
+}
+AdjustAction.prototype.onEvent = function (event) {
+    switch (event.id) {
+        case 'split.down':
+            this.start(event);
+            break;
+        case 'root.move':
+            this.move(event);
+            break;
+        case 'root.up':
+            this.stop(event);
+            break;
+    }
+}
+AdjustAction.prototype.stop = function (event) {
+    var p = this.camera.toLocal(block.event.x, block.event.y);
+    this.target.stopMove(p[0], p[1]);
+    this.target = null;
+    this.active = false;
+}
+AdjustAction.prototype.move = function (event) {
+    var p = this.camera.toLocal(block.event.x, block.event.y);
+    this.target.moveTo(p[0], p[1]);
+}
+AdjustAction.prototype.start = function (event) {
+    var t = this.target;
+    if (t) {
+        t.stopMove();
+    }
+
+    var p = this.camera.toLocal(block.event.x, block.event.y);
+    this.target = event.target.getFeature('adjust');
+    this.target.startMove(p[0], p[1]);
+    this.active = true;
 }
