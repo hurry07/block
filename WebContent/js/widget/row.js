@@ -44,3 +44,12 @@ Row.prototype.createCell = function (column) {
 Row.prototype.createView = function () {
     return this.rootView().append('g');
 }
+Row.prototype.resize = function () {
+    var w = 0;
+    var columns = this.columns;
+    for (var i = -1, cells = this.view.childNodes, len = cells.length; ++i < len;) {
+        cells[i].position(w, 0);
+        cells[i].width(columns[i].width);
+        w += columns[i].width;
+    }
+}

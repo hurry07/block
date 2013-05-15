@@ -1,21 +1,3 @@
-function Split(root, x, h) {
-    this.x = x;
-    this.h = h;
-    this.line = root.append('line').attr({x1: x, y1: 0, x2: x, y2: h});
-    this.rect = root.append('rect').attr({width: this.prefer.width, height: h, x: x - this.prefer.width / 2});
-}
-Split.prototype.position = function (x) {
-    this.x = x;
-    this.line.attr({x1: x, y1: 0, x2: x, y2: this.h});
-    this.rect.attr('x', x - this.prefer.width / 2);
-}
-Split.prototype.height = function (h) {
-    this.h = h;
-    this.line.attr({x1: this.x, y1: 0, x2: this.x, y2: h});
-}
-Split.prototype.prefer = {
-    width: 6
-}
 function TableView(p, view) {
     ListNode.call(this, p);
     this.view = view;
@@ -31,10 +13,9 @@ TableView.prototype.createSplitAll = function () {
     var h = this.prefer.row.height;
     var width = 0;
     var s;
-    for (var i = 0, length = this.columns.length - 1; i < length; i++) {
+    for (var i = 0, length = this.columns.length; i < length; i++) {
         width += columns[i].width;
-        splits.push(s = new Split(this.splitroot, width, h));
-        this.onSplitCreate(s);
+        splits.push(this.createSplit(this.splitroot, width, h));
     }
     return splits;
 }
@@ -70,4 +51,11 @@ TableView.prototype.getChildren = function () {
 }
 TableView.prototype.bindHeader = function (data) {
     this.header.bind(data);
+}
+TableView.prototype.adjust = function (col, offset) {
+    this.columns[col].width += offset;
+    this.header.resize();
+    this.getChildren().each(function (row) {
+        row.resize();
+    });
 }

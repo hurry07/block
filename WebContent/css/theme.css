@@ -52,11 +52,12 @@ path {
     fill: #809bc8;
 }
 
-.split line {
-    stroke: black;
+.split .line {
+    fill: black;
+    stroke: transparent;
 }
 
-.split rect {
+.split .block {
     fill: #FC9C9C;
 }
 

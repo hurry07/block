@@ -32,7 +32,7 @@ _extends(ValueComp, WindowComponent);
 ValueComp.prototype.testSheet = function () {
     var prefer = {
         row: {height: 18},
-        cell: {dy: -4, x: 4}
+        cell: {dy: -2, x: 4}
     };
     var columns = [
         {type: 'string', name: 'name', width: 70},
@@ -55,10 +55,16 @@ ValueComp.prototype.handleEvent = function (event) {
         case 'cell.down':
             this.editCell(event);
             break;
+        case 'split.down':
+            this.moveColumn(event);
+            break;
     }
 }
 ValueComp.prototype.editCell = function (event) {
     this.input.show(event.target.getFeature('edit'));
+}
+ValueComp.prototype.moveColumn = function (event) {
+    console.log(event.target.getFeature('adjust'));
 }
 /**
  * react to window resize event

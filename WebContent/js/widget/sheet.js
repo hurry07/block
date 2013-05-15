@@ -77,7 +77,10 @@ Sheet.prototype.createTable = function () {
         }
     });
 
+    var splitclass = _defineClass(Split);
+
     // instance closure
+    var splicdown = this.listener('split.down');// event
     var table = _defineClass(TableView, {
         createChild: function () {
             var r = new row(this.rowsroot);
@@ -91,13 +94,22 @@ Sheet.prototype.createTable = function () {
             r.view.classed('header', true);
             return r;
         },
-        onSplitCreate: function (split) {
-            split.rect.on('mousedown', this);
+        createSplit: function (root, w, h) {
+            var split = new splitclass(root, w, h);
+            split.rect.on('mousedown', splicdown, split);
+            return split;
         },
         columns: columns,
         prefer: prefer
     })
-    return new table(Node.wrap(this.view), this.view);
+    var sheet = new table(Node.wrap(this.view), this.view);
+    splitclass.prototype.getFeature = function (f) {
+        switch (f) {
+            case 'adjust':
+                return new SplitDrag(sheet, this, camera);
+        }
+    }
+    return sheet;
 }
 Sheet.prototype.bind = function (data) {
     this.table.bind(data);
@@ -107,31 +119,6 @@ Sheet.prototype.listener = function (id) {
     var sheet = this;
 
     return function () {
-        manager.handleEvent({id: 'cell.down', sheet: sheet.id, target: this});
+        manager.handleEvent({id: id, sheet: sheet.id, target: this});
     }
-}
-function CellEdit(camera, cell) {
-    this.camera = camera;
-
-    this.cell = cell;
-    this.column = cell.column;
-    this.data = cell.parentNode.data;
-    this.text = this.data[this.column.name];
-}
-CellEdit.prototype.endEdit = function (input) {
-    this.cell.text.style('visibility', 'visible');
-    this.cell.bind(this.data[this.column.name] = this.text);
-}
-CellEdit.prototype.startEdit = function (input) {
-    input.style({'font-size': '17px', 'text-indent': '4px'});
-    input.tag().value = this.text;
-    this.cell.text.style('visibility', 'hidden');
-}
-CellEdit.prototype.setText = function (t) {
-    this.text = t;
-}
-CellEdit.prototype.getTarget = function () {
-    var p = this.camera.getLocal(this.cell.view, [0, 0]);
-    p.push(this.column.width, this.column.height);
-    return p;
 }
