@@ -9,9 +9,11 @@
 // Action is an status machine, it listen to eventbus
 // and can dispatch its own event to the bus
 // ==========================
-function Action() {
+function Action(name) {
     Layer.call(this);
     this.active = false;
+    this.interrupt = [];
+    this.name = name;
 }
 _extends(Action, Module);
 Action.prototype.isActive = function () {
@@ -24,7 +26,23 @@ Action.prototype.isActive = function () {
 Action.prototype.onEvent = function (event) {
 }
 Action.prototype.applyEvent = function (event) {
-    (this.initEvent == event.id || this.active) && this.onEvent(event);
+    (this.initEvent == event.id || this.active) && !this.checkInterrupt(event) && this.onEvent(event);
+}
+/**
+ * return current action is interrupted by other action
+ * @param event
+ * @returns {boolean}
+ */
+Action.prototype.checkInterrupt = function (event) {
+    for (var i = 0, itrup = this.interrupt, len = itrup.length; i < len; i++) {
+        if (event.id == itrup[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+Action.prototype.addInterrupt = function (id) {
+    this.interrupt.push(id);
 }
 /**
  * get data from manager
@@ -53,6 +71,11 @@ Action.prototype.dispatchEvent = function (event) {
 Action.prototype.onInit = function (id) {
     this.initEvent = id;
     this.on(id);
+}
+/**
+ * action is stopped by manager
+ */
+Action.prototype.stop = function () {
 }
 /**
  * add and remove event listing wiring

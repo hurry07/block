@@ -20,8 +20,6 @@ function ValueComp(root) {
     this.input = null;
     this.camera = new Transform(this.area, this.view);
 
-    this.addAction(new AdjustAction(this.camera));
-
     var sheet1 = this.testSheet();
     sheet1.bind([
         {name: 'jack1', age: 23, city: 'hangzhou'},
@@ -32,6 +30,8 @@ function ValueComp(root) {
         {name: 'test 1', age: 23, city: 'hangzhou'},
         {name: 'test 2', age: 23, city: 'hangzhou'},
     ]);
+
+    //this.addAction(new AdjustAction(this.camera));
 }
 _extends(ValueComp, WindowComponent);
 ValueComp.prototype.testSheet = function () {
@@ -82,50 +82,4 @@ ValueComp.prototype.onResize = function () {
     for (var i = -1, L = this.layers, len = L.length; ++i < len;) {
         L[i].onSizeChange(this.area);
     }
-}
-function AdjustAction(camera) {
-    Action.call(this);
-    this.camera = camera;
-    this.target = null;
-}
-_extends(AdjustAction, Action);
-AdjustAction.prototype.onRegister = function (manager) {
-    this.onInit('split.down');
-    this.on('root.move');
-    this.on('root.up');
-}
-AdjustAction.prototype.onEvent = function (event) {
-    switch (event.id) {
-        case 'split.down':
-            this.start(event);
-            break;
-        case 'root.move':
-            console.log(block.event.clientX, block.event.clientY);
-            this.move(event);
-            break;
-        case 'root.up':
-            this.stop(event);
-            break;
-    }
-}
-AdjustAction.prototype.stop = function (event) {
-    var p = this.camera.toLocal(block.event.x, block.event.y);
-    this.target.stopMove(p[0], p[1]);
-    this.target = null;
-    this.active = false;
-}
-AdjustAction.prototype.move = function (event) {
-    var p = this.camera.toLocal(block.event.x, block.event.y);
-    this.target.moveTo(p[0], p[1]);
-}
-AdjustAction.prototype.start = function (event) {
-    var t = this.target;
-    if (t) {
-        t.stopMove();
-    }
-
-    var p = this.camera.toLocal(block.event.x, block.event.y);
-    this.target = event.target.getFeature('adjust');
-    this.target.startMove(p[0], p[1]);
-    this.active = true;
 }
