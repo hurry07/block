@@ -679,4 +679,41 @@ var block = {};
     }
 
     block.isHtmlTag = isHtmlTag;
+
+    /**
+     * screen point to local
+     *
+     * @param g svg element
+     * @param x
+     * @param y
+     */
+    block.toLocal = function (g, x, y) {
+        var svgM = block.event.target.getScreenCTM();
+        var m = mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]);
+        var out = mat2d.invert(mat2d.create(), m);
+
+        var p;
+        if(arguments.length == 3) {
+            p = vec2.clone([x, y]);
+        } else {
+            p = vec2.clone(x);
+        }
+        vec2.transformMat2d(p, p, out);
+        return p;
+    }
+    block.toWorld = function(g, x, y) {
+        var svgM = block.event.target.getScreenCTM();
+        var m = mat2d.clone([svgM.a, svgM.b, svgM.c, svgM.d, svgM.e, svgM.f]);
+        var p;
+        if(arguments.length == 3) {
+            p = vec2.clone([x, y]);
+        } else {
+            p = vec2.clone(x);
+        }
+        vec2.transformMat2d(p, p, m);
+        return p;
+    }
+    block.eventToLocal = function(g) {
+        return block.toLocal(g, block.event.x, block.event.y);
+    }
 })();

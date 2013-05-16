@@ -22,10 +22,9 @@ Split.prototype.prefer = {
  *
  * @param table
  * @param split
- * @param camera
  * @constructor
  */
-function SplitDrag(table, split, camera) {
+function SplitDrag(table, split) {
     this.table = table;
     this.split = split;
     this.startx = split.x;

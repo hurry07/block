@@ -100,6 +100,7 @@ AdjustAction.prototype.onEvent = function (event) {
             this.start(event);
             break;
         case 'root.move':
+            console.log(block.event.clientX, block.event.clientY);
             this.move(event);
             break;
         case 'root.up':

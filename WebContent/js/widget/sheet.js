@@ -73,7 +73,7 @@ Sheet.prototype.createTable = function () {
         getFeature: function (f) {
             switch (f) {
                 case 'adjust':
-                    return new SplitDrag(sheet.table, this, camera);
+                    return new SplitDrag(sheet.table, this);
             }
         }
     });

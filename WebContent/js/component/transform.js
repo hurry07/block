@@ -75,3 +75,4 @@ Transform.prototype.toLocal = function (x, y) {
 Transform.prototype.getLocal = function (g, p) {
     return this.transform(this.getRootMatrix(g.tag()), p);
 }
+

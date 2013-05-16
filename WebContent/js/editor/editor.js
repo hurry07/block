@@ -125,6 +125,9 @@ EditArea.prototype.handleEvent = function (event) {
     }
 
     this.eventbus.fireEvent(event);
+    if (event.id == 'root.move') {
+        console.log(block.eventToLocal(event.target));
+    }
 //    if (event.id != 'root.move') {
 //        console.log('---------------------');
 //        console.log(event);
