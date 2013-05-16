@@ -150,9 +150,36 @@
         clearInterval(tt);
     }, 2000);
 
-    function tolocal(g, point) {
-        var matrix = g.getScreenCTM();
+    function B() {
+        console.log('new B');
     }
+    B.prototype.impl = function () {
+        this.a = new A();
+    }
+    A = function () {
+        console.log('call A');
+        this.name = 'A'
+        this.id1 = '1';
+    }
+
+    var b11 = B;
+    var a11 = A;
+    function test1() {
+
+        function test(A) {
+            var b1 = new B();
+            b1.impl.call();
+            console.log(b1.a);
+        }
+
+        test(a11);
+        test(function () {
+            console.log('call A2');
+            this.name = 'c'
+            this.id2 = '2';
+        });
+    }
+    test1();
 </script>
 </body>
 </html>
