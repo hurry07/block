@@ -157,29 +157,27 @@
         this.a = new A();
     }
     A = function () {
-        console.log('call A');
-        this.name = 'A'
+        console.log('call A1');
+        this.name = 'A1'
         this.id1 = '1';
     }
 
-    var b11 = B;
-    var a11 = A;
-    function test1() {
-
-        function test(A) {
-            var b1 = new B();
-            b1.impl.call();
-            console.log(b1.a);
-        }
-
-        test(a11);
-        test(function () {
+    var b1 = new B();
+    var b2;
+    function change() {
+        var tempA = A;
+        A = function () {
             console.log('call A2');
-            this.name = 'c'
+            this.name = 'A2'
             this.id2 = '2';
-        });
+        }
+        b2 = new B();
+        A = tempA;
     }
-    test1();
+    b2.impl();
+    console.log(b2.a);
+    b1.impl();
+    console.log(b1.a);
 </script>
 </body>
 </html>
