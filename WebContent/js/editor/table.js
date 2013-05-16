@@ -159,10 +159,6 @@ Table.prototype.hasField = function (f) {
 Table.prototype.getField = function (name) {
     return this.fields.getField(name);
 };
-Table.prototype.getLinkEnd = function () {
-    var p = this.prefer;
-    return  this.camera.getLocal(this.view, [0, p.header.height / 2]);
-};
 // interact with menu
 Table.prototype.getMenu = function () {
     return [

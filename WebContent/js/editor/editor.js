@@ -16,41 +16,38 @@ function EditArea(root) {
     // root container of table area
     WindowComponent.call(this, root);
 
-    this.view
-        // collect background event
-        .on('mousemove', this.listenId('root.move'))
-        .on('mousedown.start', this.listenId('root.downstart'), true)
-        .on('mouseup', this.listenId('root.up'), true)
-        .call(function (view) {
-            view.append('svg').call(function (svg) {
-                svg.append('g').call(function (g) {
-                    g.append('rect')
-                        // background is not parent Tag od tables area, so mouseover from tables will not propagate to it
-                        .on('mouseover', this.listenId('bg.over'))
-                        .on('mouseout', this.listenId('bg.out'))
-                        .attr('fill', 'url(#gridPattern)')
-                    g.append('g')
-                        .classed('entity', true)
-                        .call(function (entity) {
-                            entity.append('g').classed('links', true);
-                            entity.append('g').classed('tables', true);
-                        });
-                    g.append('g')
-                        .classed('pAssistant', true);
-                }, this);
-            }, this);
-            view.append('svg').call(function (svg) {
-                svg.append('g')
-                    .classed('pMenu', true);
-            }, this);
-        }, this);
+    this.view.call(function (view) {
+        view.append('svg').call(function (svg) {
+            svg.append('g').call(function (g) {
+                g.append('rect').attr({'fill': 'url(#gridPattern)'}).classed('background', true)
+                g.append('g').classed('entity', true)
+                    .call(function (entity) {
+                        entity.append('g').classed('links', true);
+                        entity.append('g').classed('tables', true);
+                    });
+                g.append('g').classed('pAssistant', true);
+            });
+        });
+        view.append('svg').call(function (svg) {
+            svg.append('g').classed('pMenu', true);
+        });
+    });
 
     var exports = this.view.selectAll('svg');
     this.initTables(exports.nodes()[0]);
     this.initMenus(exports.nodes()[1]);
 
-    // move tables by click tables background
-    this.view.on('mousedown.end', this.listen('root.downend'), this.tables)
+    // collect background event
+    this.view
+        .on('mousemove', this.listenId('root.move'))
+        .on('mousedown.start', this.listenId('root.downstart'), true)
+        .on('mouseup', this.listenId('root.up'), true)
+        .on('mousedown.end', this.listen('root.downend'), this.tables)// move background
+
+    // background is not parent Tag od tables area, so mouseover from tables will not propagate to it
+    this.view.select('.background')
+        .on('mouseover', this.listenId('bg.over'))
+        .on('mouseout', this.listenId('bg.out'));
 }
 _extends(EditArea, WindowComponent);
 EditArea.prototype.getFeature = function (id) {
@@ -60,11 +57,10 @@ EditArea.prototype.initTables = function (svg) {
     var root = svg.select('svg > g');
     var camera = new BgCamera(this.area, svg, root, root.select('g > rect'));
 
-    Table.prototype.camera = camera;
+    // need to run in a closure
     Table.prototype.handleDown = this.listen('table.down');
     Table.prototype.handleOver = this.listen('table.over');
 
-    Field.prototype.camera = camera;
     Field.prototype.handleDown = this.listen('field.down');
     Field.prototype.handleOver = this.listen('field.over');
 

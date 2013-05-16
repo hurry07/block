@@ -17,9 +17,6 @@ Link.prototype.targetType = 'link';
 Link.prototype.identifier = function (d) {
     return d.from.getId() + '->' + d.to.getId();
 }
-Link.prototype.cloneData = function (d) {
-    return {from: d.from.clone(), to: d.to.clone()};
-}
 Link.prototype.createView = function () {
     return this.rootView().append('svg:g').classed('link', true);
 }
@@ -55,7 +52,6 @@ Link.prototype.getId = function () {
     return this.id;
 }
 Link.prototype.update = function (d) {
-    var n1, n2;
     if (!d.from.isNull() && !d.to.isNull()) {
         this.show();
 

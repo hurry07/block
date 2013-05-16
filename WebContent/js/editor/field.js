@@ -51,26 +51,6 @@ Field.prototype.identifier = function (d) {
 Field.prototype.getName = function () {
     return this.table.getName() + '.' + this.data.name;
 }
-// ----------------------
-// interact with text input.
-Field.prototype.beginInput = function (id, text) {
-    text.value = this.data.name;
-    this.view.classed('edit', true);
-}
-Field.prototype.endInput = function (id, text) {
-    this.data.name = text.value;
-    this.refresh();
-    this.view.classed('edit', false);
-}
-Field.prototype.getSize = function (id) {
-    var p = Table.prototype.prefer;
-    var fw = p.width;
-    var fh = p.field.height;
-    return [0, 0, fw, fh];
-}
-Field.prototype.getNode = function () {
-    return this.view.node();
-}
 /**
  * interact with right click
  * @returns {Array}
