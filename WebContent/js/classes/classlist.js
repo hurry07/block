@@ -31,8 +31,6 @@ function ClassManage(root) {
     // init as window component
     WindowComponent.call(this, root.append('g').classed('classes', true), {width: this.prefer.width});
 
-    this.camera = new Transform(this.area, this.view);
-
     this.bg = this.view.append('rect')
         .classed('bg', true)
         .attr({width: this.prefer.width, height: 0});
@@ -140,9 +138,9 @@ ClassManage.prototype.startEdit = function (input) {
     this.search.text.style('visibility', 'hidden');
     //this.search.text.style('fill', 'transparent');
 }
-ClassManage.prototype.getTarget = function () {
+ClassManage.prototype.getRect = function () {
     var node = this.search.inputBg;
-    var p = this.camera.toWorld(node, [0,0]);
+    var p = node.toWorld(0, 0);
     p.push(node.attr('width'), node.attr('height'));
     return p;
 }

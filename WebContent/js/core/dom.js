@@ -20,7 +20,7 @@ var block = {};
             p = vec2.clone(x);
         }
         vec2.transformMat2d(p, p, out);
-        return p;
+        return [p[0], p[1]];
     }
 
     function __toWorld(g, x, y) {
@@ -33,7 +33,7 @@ var block = {};
             p = vec2.clone(x);
         }
         vec2.transformMat2d(p, p, m);
-        return p;
+        return [p[0], p[1]];
     }
 
     /**
@@ -724,7 +724,7 @@ var block = {};
 
     block.toLocal = __toWorld;
     block.toWorld = __toWorld;
-    block.eventToLocal = function(g) {
+    block.eventToLocal = function (g) {
         return __toLocal(g, block.event.x, block.event.y);
     }
 })();

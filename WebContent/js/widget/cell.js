@@ -39,9 +39,7 @@ Cell.prototype.width = function (w) {
 Cell.prototype.position = function (x, y) {
     this.view.$t().translate(x, y).end();
 }
-function CellEdit(camera, cell) {
-    this.camera = camera;
-
+function CellEdit(cell) {
     this.cell = cell;
     this.column = cell.column;
     this.data = cell.parentNode.data;
@@ -59,8 +57,6 @@ CellEdit.prototype.startEdit = function (input) {
 CellEdit.prototype.setText = function (t) {
     this.text = t;
 }
-CellEdit.prototype.getTarget = function () {
-    var p = this.camera.getLocal(this.cell.view, [0, 0]);
-    p.push(this.column.width, this.column.height);
-    return p;
+CellEdit.prototype.getRect = function () {
+    return this.cell.view.toWorld(0, 0).concat([this.column.width, this.column.height]);
 }

@@ -54,7 +54,7 @@ TextInput.prototype.show = function (adapter) {
 
     // reset editor
     this.adapter = adapter;
-    var target = adapter.getTarget();
+    var target = adapter.getRect();
     this.div.style({
         'left': target[0] + 'px',
         'top': target[1] + 'px',

@@ -18,13 +18,6 @@ function Sheet(manager, id, prefer, columns) {
     this.view = manager.view.append('g').classed('tabledata', true);
     this.table = this.createTable();
 }
-//Sheet.prototype.headerColumn = function () {
-//    var header = [];
-//    this.columns.each(function (c) {
-//        header.push({name: c.name, type: 'string', width: c.width, height: c.height});
-//    });
-//    return header;
-//}
 Sheet.prototype.createTable = function () {
     var prefer = this.prefer;
     var columns = this.columns;
@@ -37,7 +30,7 @@ Sheet.prototype.createTable = function () {
         getFeature: function (f) {
             switch (f) {
                 case 'edit':
-                    return new CellEdit(camera, this);
+                    return new CellEdit(this);
             }
         }
     });
@@ -111,7 +104,6 @@ Sheet.prototype.listener = function (id) {
     var sheet = this;
 
     return function () {
-        console.log(this);
         manager.handleEvent({id: id, sheet: sheet, target: this});
     }
 }
