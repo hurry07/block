@@ -71,3 +71,47 @@ WindowComponent.prototype.worldTransform = function (root, g, p, camera) {
 WindowComponent.prototype.localTransform = function (root, g, p, camera) {
     return this.transform(this.getLocalMatrix(root, g, camera), p);
 }
+function context() {
+    var namespace = {};
+
+    function define(name) {
+        Object.defineProperty(this, name, {
+            get: function () {
+                console.log('getter ' + name);
+                return namespace[name];
+            },
+            set: function (name) {
+                console.log('setter ' + name);
+            }
+        });
+    }
+
+    var bridge = {};
+    bridge.create = function (name) {
+        var _class = namespace[name];
+        return new _class();
+    }
+    bridge.load = function (name, impl) {
+        namespace[name] = impl;
+        define.call(this, name);
+    }
+    return bridge;
+}
+
+function B() {
+    console.log('super B');
+}
+function A() {
+    console.log('super A');
+    this.b = new B();
+}
+new A();
+
+var _context = context.call({});
+_context.load('subA', A);
+_context.load('B', function () {
+    console.log('sub B');
+});
+_context.create('subA');
+
+new A();

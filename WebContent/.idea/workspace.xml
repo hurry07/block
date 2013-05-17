@@ -4,10 +4,10 @@
     <list default="true" id="7a3697c1-7c9e-4a57-b30d-56269c08632a" name="Default" comment="" />
     <ignored path="block.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/index.html" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368722683332" ignored="false" />
+    <file path="/index.html" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368777063401" ignored="false" />
     <file path="/dom.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368709444239" ignored="false" />
     <file path="/node.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368022815555" ignored="false" />
-    <file path="/a.dummy" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368719123579" ignored="false" />
+    <file path="/a.dummy" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368780873251" ignored="false" />
     <file path="/menus.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1367593743400" ignored="false" />
     <file path="$PROJECT_DIR$/../d3/tools/index.html" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1366793395349" ignored="false" />
     <file path="/utils.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368019716359" ignored="false" />
@@ -40,17 +40,17 @@
     <file path="/tableview.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368531418047" ignored="false" />
     <file path="/column.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368365629271" ignored="false" />
     <file path="/tables.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368282521150" ignored="false" />
-    <file path="/uimanager.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368369553439" ignored="false" />
+    <file path="/uimanager.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368781433280" ignored="false" />
     <file path="/layout.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368356995683" ignored="false" />
     <file path="/linerlayout.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368356154556" ignored="false" />
     <file path="/values.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368690415412" ignored="false" />
-    <file path="/sheet.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368634131917" ignored="false" />
+    <file path="/sheet.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368781023460" ignored="false" />
     <file path="/row.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368634160701" ignored="false" />
     <file path="/cell.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368709134435" ignored="false" />
     <file path="/cell_edit.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368606174605" ignored="false" />
     <file path="/split.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368632185924" ignored="false" />
     <file path="/action_resize.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368620661571" ignored="false" />
-    <file path="/type.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368625718955" ignored="false" />
+    <file path="/type.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368781593121" ignored="false" />
     <file path="/tablayout.js" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368680290109" ignored="false" />
     <file path="/test.svg" changelist="7a3697c1-7c9e-4a57-b30d-56269c08632a" time="1368691102092" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -72,19 +72,73 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="test.html" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test.html">
+      <file leaf-file-name="sheet.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/sheet/sheet.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="14" selection-start="616" selection-end="616" vertical-scroll-proportion="0.73846155">
+            <state line="7" column="11" selection-start="164" selection-end="169" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/index.html">
+      <file leaf-file-name="values.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/sheet/values.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="181" column="0" selection-start="3830" selection-end="7740" vertical-scroll-proportion="-22.166666">
+            <state line="23" column="34" selection-start="540" selection-end="540" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="uimanager.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/uimanager.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="25" column="53" selection-start="773" selection-end="773" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="type.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/js/data/type.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="2" column="21" selection-start="48" selection-end="56" vertical-scroll-proportion="0.045801528">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dom.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/core/dom.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="4" selection-start="4" selection-end="4" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="editor.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/editor/editor.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="80" column="21" selection-start="2926" selection-end="2941" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="window.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/component/window.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="83" column="5" selection-start="2064" selection-end="2064" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="table.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/sheet/table.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="54" column="28" selection-start="1533" selection-end="1533" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -100,11 +154,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/js/gl-matrix.js" />
-        <option value="$PROJECT_DIR$/js/widget/values.js" />
-        <option value="$PROJECT_DIR$/js/widget/action_adjust.js" />
-        <option value="$PROJECT_DIR$/js/component/window.js" />
-        <option value="$PROJECT_DIR$/js/component/action.js" />
         <option value="$PROJECT_DIR$/js/editor/table.js" />
         <option value="$PROJECT_DIR$/js/editor/field.js" />
         <option value="$PROJECT_DIR$/js/editor/link.js" />
@@ -113,15 +162,20 @@
         <option value="$PROJECT_DIR$/js/classes/classlist.js" />
         <option value="$PROJECT_DIR$/js/widget/cell.js" />
         <option value="$PROJECT_DIR$/js/core/dom.js" />
-        <option value="$PROJECT_DIR$/js/widget/sheet.js" />
-        <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/test.html" />
+        <option value="$PROJECT_DIR$/index.html" />
+        <option value="$PROJECT_DIR$/js/history_codes.js" />
+        <option value="$PROJECT_DIR$/test.svg" />
+        <option value="$PROJECT_DIR$/js/widget/sheet.js" />
+        <option value="$PROJECT_DIR$/js/sheet/sheet.js" />
+        <option value="$PROJECT_DIR$/js/uimanager.js" />
+        <option value="$PROJECT_DIR$/js/data/type.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="width" value="1280" />
-    <option name="height" value="800" />
+    <option name="width" value="1920" />
+    <option name="height" value="1080" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -210,6 +264,56 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="data" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="block" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebContent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="core" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
       <pane id="Scope" />
@@ -218,14 +322,14 @@
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="options.lastSelected" value="preferences.keymap" />
     <property name="recentsLimit" value="5" />
+    <property name="options.lastSelected" value="preferences.keymap" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="FullScreen" value="true" />
     <property name="DefaultHtmlFileTemplate" value="Html5" />
-    <property name="options.splitter.details.proportions" value="0.2" />
-    <property name="options.searchVisible" value="true" />
     <property name="GoToClass.includeJavaFiles" value="false" />
+    <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -303,13 +407,14 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30448064" sideWeight="0.9927942" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.20445505" sideWeight="0.69450104" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1805887" sideWeight="0.6951567" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14391144" sideWeight="0.6955193" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39908257" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32683185" sideWeight="0.69450104" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -318,7 +423,6 @@
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3048433" sideWeight="0.9927942" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -387,94 +491,114 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/js/component/camera.js">
+    <entry file="file://$PROJECT_DIR$/test.svg">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="173" column="58" selection-start="4374" selection-end="4374" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/field.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="8" selection-start="1645" selection-end="1645" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/action_link.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="39" selection-start="531" selection-end="531" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/linkend.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="16" selection-start="242" selection-end="254" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/table.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="221" column="32" selection-start="5910" selection-end="5910" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/link.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="18" selection-start="1346" selection-end="1346" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/editor/editor.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="61" column="59" selection-start="2205" selection-end="2205" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/component/input.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="56" column="32" selection-start="1473" selection-end="1480" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/classes/classlist.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="33" column="0" selection-start="825" selection-end="825" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/widget/cell.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="42" column="0" selection-start="1125" selection-end="1125" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/widget/sheet.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="106" column="27" selection-start="2992" selection-end="3003" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/core/dom.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="267" column="29" selection-start="7964" selection-end="7968" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/core/node.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/core/utils.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="28" selection-start="832" selection-end="832" vertical-scroll-proportion="0.0">
+        <state line="33" column="0" selection-start="1521" selection-end="1521" vertical-scroll-proportion="-20.625">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="181" column="0" selection-start="3830" selection-end="7740" vertical-scroll-proportion="-22.166666">
+        <state line="149" column="0" selection-start="7068" selection-end="7068" vertical-scroll-proportion="-83.125">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test.html">
+    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavascriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript5.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="14" selection-start="616" selection-end="616" vertical-scroll-proportion="0.73846155">
+        <state line="64" column="19" selection-start="1052" selection-end="1052" vertical-scroll-proportion="-3.6">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/editor/link.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="5" selection-start="275" selection-end="280" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/core/utils.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="118" selection-start="1451" selection-end="1451" vertical-scroll-proportion="-9.8">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/editor/action_link.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="91" column="61" selection-start="2646" selection-end="2646" vertical-scroll-proportion="-18.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/editor/action_drag.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="49" selection-start="747" selection-end="747" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/sheet/action_adjust.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="31" selection-start="728" selection-end="735" vertical-scroll-proportion="-15.6">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/component/window.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="5" selection-start="2064" selection-end="2064" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/editor/editor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="80" column="21" selection-start="2926" selection-end="2941" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/sheet/table.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="54" column="28" selection-start="1533" selection-end="1533" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/sheet/sheet.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="11" selection-start="164" selection-end="169" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/sheet/values.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="34" selection-start="540" selection-end="540" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/uimanager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="53" selection-start="773" selection-end="773" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/core/dom.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="4" selection-start="4" selection-end="4" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/data/type.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="21" selection-start="48" selection-end="56" vertical-scroll-proportion="0.045801528">
           <folding />
         </state>
       </provider>

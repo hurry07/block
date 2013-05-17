@@ -47,13 +47,13 @@
     <script type="text/javascript" src="js/classes/searchbox.js"></script>
     <script type="text/javascript" src="js/classes/classlist.js"></script>
     <!-- classes search area -->
-    <script type="text/javascript" src="js/widget/cell.js"></script>
-    <script type="text/javascript" src="js/widget/row.js"></script>
-    <script type="text/javascript" src="js/widget/action_adjust.js"></script>
-    <script type="text/javascript" src="js/widget/sheet.js"></script>
-    <script type="text/javascript" src="js/widget/split.js"></script>
-    <script type="text/javascript" src="js/widget/table.js"></script>
-    <script type="text/javascript" src="js/widget/values.js"></script>
+    <script type="text/javascript" src="js/sheet/cell.js"></script>
+    <script type="text/javascript" src="js/sheet/row.js"></script>
+    <script type="text/javascript" src="js/sheet/action_adjust.js"></script>
+    <script type="text/javascript" src="js/sheet/sheet.js"></script>
+    <script type="text/javascript" src="js/sheet/split.js"></script>
+    <script type="text/javascript" src="js/sheet/table.js"></script>
+    <script type="text/javascript" src="js/sheet/values.js"></script>
     <!-- ui manager -->
     <script type="text/javascript" src="js/uimanager.js"></script>
 </head>
@@ -73,9 +73,6 @@
     // ==========================
     // function
     // ==========================
-    function join() {
-        return Array.prototype.slice.call(arguments, 0).join('.');
-    }
     function initSvg() {
         return block.select('.chart')
                 .append('svg')
@@ -150,34 +147,6 @@
         clearInterval(tt);
     }, 2000);
 
-    function B() {
-        console.log('new B');
-    }
-    B.prototype.impl = function () {
-        this.a = new A();
-    }
-    A = function () {
-        console.log('call A1');
-        this.name = 'A1'
-        this.id1 = '1';
-    }
-
-    var b1 = new B();
-    var b2;
-    function change() {
-        var tempA = A;
-        A = function () {
-            console.log('call A2');
-            this.name = 'A2'
-            this.id2 = '2';
-        }
-        b2 = new B();
-        A = tempA;
-    }
-    b2.impl();
-    console.log(b2.a);
-    b1.impl();
-    console.log(b1.a);
 </script>
 </body>
 </html>

@@ -35,6 +35,8 @@ function UIManager(svg) {
         'table.edit': document.getElementById('table.edit')
     };
 
+    this.templates = new Template();
+
     this.init();
 }
 UIManager.prototype.findComponent = function (name) {
@@ -45,6 +47,9 @@ UIManager.prototype.getEventBus = function (key) {
 }
 UIManager.prototype.findWidget = function (key) {
     return this.global[key];
+}
+UIManager.prototype.getTemplate = function (id) {
+
 }
 UIManager.prototype.init = function () {
     // add tool components
